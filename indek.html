@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulir Inspeksi Digital</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>INSPECTION REPORT / CONDITION REPORT</h1>
+            <div class="header-info">
+                <div class="info-group">
+                    <div class="info-item">
+                        <label>Site:</label>
+                        <input type="text" id="site" value="" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)">
+                    </div>
+                    <div class="info-item">
+                        <label>Report Date:</label>
+                        <input type="text" id="report-date" value="" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)">
+                    </div>
+                    <div class="info-item">
+                        <label>Kode unit:</label>
+                        <input type="text" id="kode-unit" value="" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)">
+                    </div>
+                    <div class="info-item">
+                        <label>Hour meter:</label>
+                        <input type="text" id="hour-meter" value="" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)">
+                    </div>
+                    <div class="info-item">
+                        <label>Reported by:</label>
+                        <input type="text" id="reported-by" value="" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)">
+                    </div>
+                    <div class="info-item">
+                        <label>Insp by:</label>
+                        <input type="text" id="insp-by" value="" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)">
+                    </div>
+                    <div class="info-item">
+                        <label>Priority:</label>
+                        <input type="text" id="priority" value="" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)">
+                    </div>
+                </div>
+                <div class="priority-legend">
+                    <div class="priority-box red">
+                        <label>Priority A</label>
+                        <span>Stop machine and repair</span>
+                    </div>
+                    <div class="priority-box orange">
+                        <label>Priority B1</label>
+                        <span>Safety issue ( stop machine if possible )</span>
+                    </div>
+                    <div class="priority-box yellow">
+                        <label>Priority B2</label>
+                        <span>mach opp with condition(act at opportunity fim</span>
+                    </div>
+                    <div class="priority-box grey">
+                        <label>Priority C</label>
+                        <span>Repair when service or shut down plan</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main>
+            <table id="inspection-table">
+                <thead>
+                    <tr>
+                        <th>NO</th>
+                        <th>DESCREPTION</th>
+                        <th>CONDITION</th>
+                        <th>PHOTO</th>
+                    </tr>
+                </thead>
+                <tbody id="inspection-body">
+                    <tr>
+                        <td>1</td>
+                        <td><input type="text" placeholder="Description / Failure" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)"></td>
+                        <td><input type="text" placeholder="Condition" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)"></td>
+                        <td><input type="file" accept="image/*" onchange="previewImage(this)"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+        <footer>
+            <button id="add-row">Tambah Baris</button>
+            <button id="save-pdf">Simpan sebagai PDF</button>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
