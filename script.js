@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // URL WEB APP YANG SUDAH DIPERBARUI
-    const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqom1sVW_QlqMBY93g1E37B9PovVC2XNLD2ec30yhrDV6EZG-6fImBxFhz9n0cRYY/exec";
-
+    const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyizof07U8gniVotOGonHdtcRUKMw_ixI5TdmUMQvRucmijAlNdLRn1ZGJfKICunyiPGg/exec";
+    
     const inspectionBody = document.getElementById('inspection-body');
     const addRowBtn = document.getElementById('add-row');
     const savePdfBtn = document.getElementById('save-pdf');
