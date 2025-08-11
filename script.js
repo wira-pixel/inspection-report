@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // URL WEB APP YANG SUDAH DIPERBARUI
     const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4hFB5yUe2oaJoP4YW30bkmiGY7_Ut_x9LLTOT90MhExQiZZD_Mr3j1v0F8hDiQGS4/exec";
-
+    
     const inspectionBody = document.getElementById('inspection-body');
     const addRowBtn = document.getElementById('add-row');
     const savePdfBtn = document.getElementById('save-pdf');
@@ -148,4 +148,5 @@ function previewImage(input) {
         }
         reader.readAsDataURL(input.files[0]);
     }
+
 }
