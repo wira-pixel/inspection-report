@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // URL WEB APP YANG SUDAH DIPERBARUI
-    const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhGM3b72Lm0-NF-iCcSbJRHIhAz8Nu2YYjU1k2zC9IuFX3z_-_2cwXMvgv6aSEqiYgbA/exec";
+    const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRzBIxvxN6ViuYHj4WC45bi4Bc_3W51F7lB3GHNPp9CWTYWH45ICGWAunoGBvRRYdmKQ/exec";
     
     const inspectionBody = document.getElementById('inspection-body');
     const addRowBtn = document.getElementById('add-row');
@@ -149,3 +149,4 @@ function previewImage(input) {
         reader.readAsDataURL(input.files[0]);
     }
 }
+
