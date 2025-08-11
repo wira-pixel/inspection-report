@@ -1,13 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Ganti dengan URL Web App Apps Script kamu
-    const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyFFMcTR3-g5nq6jsH2YlUg8CrnCbab1JMQ5PAMhdVMzZw7WRf8akYsHHLhkB3M6rfJ4g/exec";
-    
     const inspectionBody = document.getElementById('inspection-body');
     const addRowBtn = document.getElementById('add-row');
     const savePdfBtn = document.getElementById('save-pdf');
+
     let rowCount = 1;
 
-    // Tambah baris baru di tabel
+    // Fungsi untuk menambah baris baru
     addRowBtn.addEventListener('click', () => {
         rowCount++;
         const newRow = document.createElement('tr');
@@ -20,48 +18,32 @@ document.addEventListener('DOMContentLoaded', () => {
         inspectionBody.appendChild(newRow);
     });
 
-    // Simpan ke Google Sheets & buat PDF
+    // Fungsi untuk membuat PDF saja
     savePdfBtn.addEventListener('click', () => {
-        // Ambil data header
-        const formData = {};
-        document.querySelectorAll('.info-group input[type="text"]').forEach(input => {
-            formData[input.id] = input.value;
-        });
+        document.getElementById('add-row').style.display = 'none';
+        document.getElementById('save-pdf').style.display = 'none';
 
-        // Ambil data tabel
-        const tableData = [];
-        document.querySelectorAll('#inspection-body tr').forEach(row => {
-            const descriptionInput = row.querySelector('td:nth-child(2) input');
-            const conditionInput = row.querySelector('td:nth-child(3) input');
-            if (descriptionInput && conditionInput) {
-                tableData.push({
-                    description: descriptionInput.value,
-                    condition: conditionInput.value
-                });
+        const imagePromises = [];
+        const fileInputs = document.querySelectorAll('#inspection-body input[type="file"]');
+        fileInputs.forEach(input => {
+            if (input.files.length > 0) {
+                imagePromises.push(new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const cell = input.parentElement;
+                        cell.innerHTML = '';
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'photo-preview-pdf';
+                        cell.appendChild(img);
+                        resolve();
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }));
             }
         });
 
-        // Gabungkan
-        const combinedData = {
-            ...formData,
-            table: JSON.stringify(tableData)
-        };
-
-        // Kirim ke Apps Script
-        fetch(GOOGLE_APP_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(combinedData)
-        })
-        .then(res => res.json())
-        .then(data => {
-            console.log('Response:', data);
-            alert('Data berhasil disimpan!');
-
-            // (Opsional) Lanjut buat PDF
-            document.getElementById('add-row').style.display = 'none';
-            document.getElementById('save-pdf').style.display = 'none';
-
+        Promise.all(imagePromises).then(() => {
             const element = document.querySelector('.container');
             const options = {
                 margin: 1,
@@ -75,22 +57,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('save-pdf').style.display = 'inline-block';
                 location.reload();
             });
-        })
-        .catch(err => {
-            console.error('Error:', err);
-            alert('Gagal menyimpan data.');
         });
     });
 
-    // Navigasi antar input
     const headerInputs = document.querySelectorAll('.info-group input[type="text"]');
     headerInputs.forEach(input => {
         input.addEventListener('keydown', handleNavigation);
     });
+
     inspectionBody.addEventListener('keydown', handleNavigation);
 });
 
-// Navigasi dengan Enter/Arrow
+// Fungsi untuk menangani navigasi dengan tombol panah dan enter
 function handleNavigation(e) {
     const inputs = Array.from(document.querySelectorAll('input[type="text"], input[type="file"]'));
     const currentIndex = inputs.indexOf(e.target);
@@ -108,7 +86,7 @@ function handleNavigation(e) {
     }
 }
 
-// Preview gambar
+// Fungsi untuk menampilkan preview gambar
 function previewImage(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
