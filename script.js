@@ -8,9 +8,10 @@ function setToday() {
 }
 setToday();
 
-const itemsTableBody = document.querySelector('#itemsTable tbody');
 const form = document.getElementById('myForm');
+const itemsTableBody = document.querySelector('#itemsTable tbody');
 const output = document.getElementById('output');
+const overlay = document.getElementById('overlay');
 let currentMainRow = null;
 
 // URL Cloudflare Worker → ganti dengan URL Worker kamu
@@ -129,18 +130,24 @@ document.getElementById('addSubRowBtn').addEventListener('click', addSubRow);
 addRow();
 
 // Submit form ke Cloudflare Worker
-form.addEventListener('submit', async e=>{
+form.addEventListener('submit', async e => {
   e.preventDefault();
-  output.classList.add('d-none');
-  const items = [];
 
+  // tampilkan overlay & disable form
+  overlay.classList.remove('d-none');
+  const allInputs = form.querySelectorAll('input, button, select, textarea');
+  allInputs.forEach(el => el.disabled = true);
+
+  const items = [];
   const rows = Array.from(itemsTableBody.querySelectorAll('tr'));
+
   for(let row of rows){
     const description = row.querySelector('input[name="description[]"]')?.value || '';
     const condition = row.querySelector('input[name="condition[]"]')?.value || '';
     const partNumber = row.querySelector('input[name="partNumber[]"]')?.value || '';
     const namaBarang = row.querySelector('input[name="namaBarang[]"]')?.value || '';
     const qty = row.querySelector('input[name="qty[]"]')?.value || 0;
+    const satuan = row.querySelector('input[name="satuan[]"]')?.value || '';
     const masukFPB = row.querySelector('input[name="masukFPB[]"]')?.checked || false;
 
     const fileInput = row.querySelector('input[type="file"]');
@@ -154,11 +161,7 @@ form.addEventListener('submit', async e=>{
     }
 
     items.push({ 
-      description, 
-      condition, 
-      partNumber, 
-      namaBarang, 
-      qty, 
+      description, condition, partNumber, namaBarang, qty, satuan,
       masukFPB, 
       file: fileData, 
       fileName: fileInput?.files[0]?.name,
@@ -183,9 +186,11 @@ form.addEventListener('submit', async e=>{
       body: JSON.stringify(formData)
     });
     const result = await res.json();
-    
-    output.innerHTML = result.message + (result.pdfUrl ? ` <a href="${result.pdfUrl}" target="_blank">Lihat PDF</a>` : '');
+
+    output.innerHTML = result.message + 
+      (result.pdfUrl ? ` <a href="${result.pdfUrl}" target="_blank">Lihat PDF</a>` : '');
     output.classList.remove('d-none');
+
     form.reset();
     itemsTableBody.innerHTML = '';
     addRow();
@@ -194,6 +199,14 @@ form.addEventListener('submit', async e=>{
     console.error("Error submit:", err);
     output.innerHTML = "❌ Gagal mengirim data.";
     output.classList.remove('d-none');
+  } finally {
+    // sembunyikan overlay & aktifkan form lagi
+    overlay.classList.add('d-none');
+    allInputs.forEach(el => el.disabled = false);
   }
 });
+
+  }
+});
+
 
