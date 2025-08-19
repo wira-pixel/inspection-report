@@ -1,7 +1,3 @@
-google.script.run.withSuccessHandler(data=>{
-  document.getElementById('formLogo').src = "data:image/png;base64," + data;
-}).getLogo();
-
 function setToday() {
   const el = document.getElementById('Date');
   const today = new Date();
@@ -16,6 +12,9 @@ const itemsTableBody = document.querySelector('#itemsTable tbody');
 const form = document.getElementById('myForm');
 const output = document.getElementById('output');
 let currentMainRow = null;
+
+// URL Cloudflare Worker → ganti dengan URL Worker kamu
+const CLOUD_FLARE_URL = "https://forminspek.saya.workers.dev";
 
 // Fungsi tambah item utama (semua kolom)
 function addRow() {
@@ -97,14 +96,12 @@ function setupRow(row, isSub=false) {
   }
   
   row.querySelector('.removeRowBtn').addEventListener('click', () => {
-    // If removing main row, also remove all its sub-rows
     if (row.classList.contains('main-row')) {
       const rowIndex = Array.from(itemsTableBody.children).indexOf(row);
-      // Remove all consecutive sub-rows after this main row
       for (let i = rowIndex + 1; i < itemsTableBody.children.length; i++) {
         if (itemsTableBody.children[i].classList.contains('sub-row')) {
           itemsTableBody.children[i].remove();
-          i--; // Adjust index after removal
+          i--;
         } else {
           break;
         }
@@ -114,12 +111,10 @@ function setupRow(row, isSub=false) {
     if(itemsTableBody.children.length === 0) addRow();
   });
   
-  // Set currentMainRow when clicking on any row
   row.addEventListener('click', () => {
     if (row.classList.contains('main-row')) {
       currentMainRow = row;
     } else {
-      // Find the parent main-row for this sub-row
       let mainRow = row.previousElementSibling;
       while (mainRow && !mainRow.classList.contains('main-row')) {
         mainRow = mainRow.previousElementSibling;
@@ -133,7 +128,7 @@ document.getElementById('addRowBtn').addEventListener('click', addRow);
 document.getElementById('addSubRowBtn').addEventListener('click', addSubRow);
 addRow();
 
-// Submit form ke Apps Script
+// Submit form ke Cloudflare Worker
 form.addEventListener('submit', async e=>{
   e.preventDefault();
   output.classList.add('d-none');
@@ -181,13 +176,23 @@ form.addEventListener('submit', async e=>{
     items
   };
 
-  google.script.run.withSuccessHandler(res=>{
-    output.innerHTML = res.message + (res.pdfUrl ? ` <a href="${res.pdfUrl}" target="_blank">Lihat PDF</a>` : '');
+  try {
+    const res = await fetch(CLOUD_FLARE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData)
+    });
+    const result = await res.json();
+    
+    output.innerHTML = result.message + (result.pdfUrl ? ` <a href="${result.pdfUrl}" target="_blank">Lihat PDF</a>` : '');
     output.classList.remove('d-none');
     form.reset();
     itemsTableBody.innerHTML = '';
     addRow();
     setToday();
-  }).simpanDataDinamis(formData);
+  } catch (err) {
+    console.error("Error submit:", err);
+    output.innerHTML = "❌ Gagal mengirim data.";
+    output.classList.remove('d-none');
+  }
 });
-
