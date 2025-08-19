@@ -5,6 +5,8 @@ function setToday() {
   const mm = String(today.getMonth()+1).padStart(2,'0');
   const dd = String(today.getDate()).padStart(2,'0');
   el.value = `${yyyy}-${mm}-${dd}`;
+  const loading = document.getElementById('loading');
+
 }
 setToday();
 
@@ -131,19 +133,22 @@ document.getElementById('addSubRowBtn').addEventListener('click', addSubRow);
 addRow();
 
 // Submit form ke Cloudflare Worker
-form.addEventListener('submit', async e=>{
+form.addEventListener('submit', async e => {
   e.preventDefault();
-  output.classList.add('d-none');
-  const items = [];
+  
+  output.classList.add('d-none');      // sembunyikan hasil lama
+  loading.classList.remove('d-none'); // tampilkan spinner
 
+  const items = [];
   const rows = Array.from(itemsTableBody.querySelectorAll('tr'));
+
   for(let row of rows){
     const description = row.querySelector('input[name="description[]"]')?.value || '';
     const condition = row.querySelector('input[name="condition[]"]')?.value || '';
     const partNumber = row.querySelector('input[name="partNumber[]"]')?.value || '';
     const namaBarang = row.querySelector('input[name="namaBarang[]"]')?.value || '';
-    const satuan = row.querySelector('input[name="satuan[]"]')?.value || '';
     const qty = row.querySelector('input[name="qty[]"]')?.value || 0;
+    const satuan = row.querySelector('input[name="satuan[]"]')?.value || '';
     const masukFPB = row.querySelector('input[name="masukFPB[]"]')?.checked || false;
 
     const fileInput = row.querySelector('input[type="file"]');
@@ -161,8 +166,8 @@ form.addEventListener('submit', async e=>{
       condition, 
       partNumber, 
       namaBarang, 
-      satuan,
       qty, 
+      satuan,
       masukFPB, 
       file: fileData, 
       fileName: fileInput?.files[0]?.name,
@@ -188,18 +193,24 @@ form.addEventListener('submit', async e=>{
     });
     const result = await res.json();
     
-    output.innerHTML = result.message + (result.pdfUrl ? ` <a href="${result.pdfUrl}" target="_blank">Lihat PDF</a>` : '');
+    loading.classList.add('d-none');   // sembunyikan spinner
+    output.innerHTML = result.message + 
+      (result.pdfUrl ? ` <a href="${result.pdfUrl}" target="_blank">Lihat PDF</a>` : '');
     output.classList.remove('d-none');
+
     form.reset();
     itemsTableBody.innerHTML = '';
     addRow();
     setToday();
   } catch (err) {
+    loading.classList.add('d-none');   // sembunyikan spinner
     console.error("Error submit:", err);
     output.innerHTML = "❌ Gagal mengirim data.";
     output.classList.remove('d-none');
   }
 });
+
+
 
 
 
