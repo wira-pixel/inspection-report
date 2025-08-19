@@ -1,93 +1,84 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulir Inspeksi Digital</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Inspeksi Dinamis</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>INSPECTION REPORT / CONDITION REPORT</h1>
-            <div class="header-info">
-                <div class="info-group">
-                    <div class="info-item">
-                        <label>Site:</label>
-                        <input type="text" id="site" value="" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)">
-                    </div>
-                    <div class="info-item">
-                        <label>Report Date:</label>
-                        <input type="text" id="report-date" value="" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)">
-                    </div>
-                    <div class="info-item">
-                        <label>Kode unit:</label>
-                        <input type="text" id="kode-unit" value="" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)">
-                    </div>
-                    <div class="info-item">
-                        <label>Hour meter:</label>
-                        <input type="text" id="hour-meter" value="" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)">
-                    </div>
-                    <div class="info-item">
-                        <label>Reported by:</label>
-                        <input type="text" id="reported-by" value="" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)">
-                    </div>
-                    <div class="info-item">
-                        <label>Insp by:</label>
-                        <input type="text" id="insp-by" value="" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)">
-                    </div>
-                    <div class="info-item">
-                        <label>Priority:</label>
-                        <input type="text" id="priority" value="" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)">
-                    </div>
-                </div>
-                <div class="priority-legend">
-                    <div class="priority-box red">
-                        <label>Priority A</label>
-                        <span>Stop machine and repair</span>
-                    </div>
-                    <div class="priority-box orange">
-                        <label>Priority B1</label>
-                        <span>Safety issue ( stop machine if possible )</span>
-                    </div>
-                    <div class="priority-box yellow">
-                        <label>Priority B2</label>
-                        <span>mach opp with condition(act at opportunity fim</span>
-                    </div>
-                    <div class="priority-box grey">
-                        <label>Priority C</label>
-                        <span>Repair when service or shut down plan</span>
-                    </div>
-                </div>
-            </div>
-        </header>
-        <main>
-            <table id="inspection-table">
-                <thead>
-                    <tr>
-                        <th>NO</th>
-                        <th>DESCREPTION</th>
-                        <th>CONDITION</th>
-                        <th>PHOTO</th>
-                    </tr>
-                </thead>
-                <tbody id="inspection-body">
-                    <tr>
-                        <td>1</td>
-                        <td><input type="text" placeholder="Description / Failure" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)"></td>
-                        <td><input type="text" placeholder="Condition" oninput="this.value = this.value.toUpperCase()" onkeydown="handleNavigation(event)"></td>
-                        <td><input type="file" accept="image/*" onchange="previewImage(this)"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </main>
-        <footer>
-            <button id="add-row">Tambah Baris</button>
-            <button id="save-pdf">Simpan sebagai PDF</button>
-        </footer>
+  <div class="form-container">
+    <div style="text-align:center; margin-bottom:12px;">
+      <img id="formLogo" src="" alt="Logo" style="width:120px; height:auto; display:block; margin:auto;">
     </div>
-    <script src="script.js"></script>
-</body>
 
+    <h3 class="mb-3">Form Inspection Report</h3>
+    <form id="myForm" novalidate>
+      <div class="row g-3">
+        <div class="col-12 col-sm-6">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-control" name="date" id="Date" required>
+        </div>
+        <div class="col-12 col-sm-6">
+          <label class="form-label">Site</label>
+          <input type="text" class="form-control" name="site" required>
+        </div>
+        <div class="col-12 col-sm-6">
+          <label class="form-label">Code Unit</label>
+          <input type="text" class="form-control" name="codeUnit" required>
+        </div>
+        <div class="col-12 col-sm-6">
+          <label class="form-label">Hour Meter</label>
+          <input type="number" class="form-control" name="hourMeter" required>
+        </div>
+        <div class="col-12 col-sm-6">
+          <label class="form-label">Inspected By</label>
+          <input type="text" class="form-control" name="inspectedBy" required>
+        </div>
+        <div class="col-12 col-sm-6">
+          <label class="form-label">Priority</label>
+          <input type="text" class="form-control" name="priority" required>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <div class="d-flex justify-content-between mb-2">
+        <h5>Detail Inspection</h5>
+        <div>
+          <button type="button" class="btn btn-secondary btn-sm" id="addRowBtn">Tambah Item</button>
+          <button type="button" class="btn btn-dark btn-sm" id="addSubRowBtn">Tambah Baris FPB</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle" id="itemsTable">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Condition</th>
+              <th>Gambar</th>
+              <th>Part Number</th>
+              <th>Nama Barang</th>
+              <th>Qty</th>
+              <th>Masuk FPB</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Tombol Kirim -->
+      <div class="text-end mt-3">
+        <button type="submit" class="btn btn-primary">Kirim</button>
+      </div>
+    </form>
+
+    <div id="output" class="alert alert-success mt-3 d-none"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
 </html>
