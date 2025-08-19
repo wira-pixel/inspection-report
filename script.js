@@ -142,6 +142,7 @@ form.addEventListener('submit', async e=>{
     const condition = row.querySelector('input[name="condition[]"]')?.value || '';
     const partNumber = row.querySelector('input[name="partNumber[]"]')?.value || '';
     const namaBarang = row.querySelector('input[name="namaBarang[]"]')?.value || '';
+    const satuan = row.querySelector('input[name="satuan[]"]')?.value || '';
     const qty = row.querySelector('input[name="qty[]"]')?.value || 0;
     const masukFPB = row.querySelector('input[name="masukFPB[]"]')?.checked || false;
 
@@ -160,6 +161,7 @@ form.addEventListener('submit', async e=>{
       condition, 
       partNumber, 
       namaBarang, 
+      satuan,
       qty, 
       masukFPB, 
       file: fileData, 
@@ -198,5 +200,6 @@ form.addEventListener('submit', async e=>{
     output.classList.remove('d-none');
   }
 });
+
 
 
