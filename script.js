@@ -2,19 +2,16 @@ function setToday() {
   const el = document.getElementById('Date');
   const today = new Date();
   const yyyy = today.getFullYear();
-  const mm = String(today.getMonth()+1).padStart(2,'0');
-  const dd = String(today.getDate()).padStart(2,'0');
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
   el.value = `${yyyy}-${mm}-${dd}`;
-  const loading = document.getElementById('loading');
-  const overlay = document.getElementById('overlay');
-
-
 }
 setToday();
 
 const itemsTableBody = document.querySelector('#itemsTable tbody');
 const form = document.getElementById('myForm');
 const output = document.getElementById('output');
+const overlay = document.getElementById('overlay');
 let currentMainRow = null;
 
 // URL Cloudflare Worker → ganti dengan URL Worker kamu
@@ -49,7 +46,7 @@ function addSubRow() {
     alert('Tambahkan baris utama terlebih dahulu!');
     return;
   }
-  
+
   const row = document.createElement('tr');
   row.className = 'sub-row';
   row.innerHTML = `
@@ -64,12 +61,10 @@ function addSubRow() {
     <td class="text-center"><button type="button" class="btn btn-danger btn-sm removeRowBtn">Hapus</button></td>
   `;
   setupRow(row, true);
-  
-  // Insert after currentMainRow or after last sub-row of currentMainRow
+
+  // Insert setelah currentMainRow / sub-row terakhir
   const mainRowIndex = Array.from(itemsTableBody.children).indexOf(currentMainRow);
   let insertAfter = currentMainRow;
-  
-  // Find the last sub-row of this main row
   for (let i = mainRowIndex + 1; i < itemsTableBody.children.length; i++) {
     if (itemsTableBody.children[i].classList.contains('sub-row')) {
       insertAfter = itemsTableBody.children[i];
@@ -77,17 +72,16 @@ function addSubRow() {
       break;
     }
   }
-  
   insertAfter.after(row);
 }
 
-function setupRow(row, isSub=false) {
+function setupRow(row, isSub = false) {
   const fileInput = row.querySelector('.fileInput');
   const imgPreview = row.querySelector('.img-preview');
-  if(fileInput){
+  if (fileInput) {
     fileInput.addEventListener('change', e => {
       const file = e.target.files[0];
-      if(file){
+      if (file) {
         const reader = new FileReader();
         reader.onload = ev => {
           imgPreview.src = ev.target.result;
@@ -100,7 +94,7 @@ function setupRow(row, isSub=false) {
       }
     });
   }
-  
+
   row.querySelector('.removeRowBtn').addEventListener('click', () => {
     if (row.classList.contains('main-row')) {
       const rowIndex = Array.from(itemsTableBody.children).indexOf(row);
@@ -114,9 +108,9 @@ function setupRow(row, isSub=false) {
       }
     }
     row.remove();
-    if(itemsTableBody.children.length === 0) addRow();
+    if (itemsTableBody.children.length === 0) addRow();
   });
-  
+
   row.addEventListener('click', () => {
     if (row.classList.contains('main-row')) {
       currentMainRow = row;
@@ -134,16 +128,59 @@ document.getElementById('addRowBtn').addEventListener('click', addRow);
 document.getElementById('addSubRowBtn').addEventListener('click', addSubRow);
 addRow();
 
-// Submit form ke Cloudflare Worker
+// 🔹 Submit form ke Cloudflare Worker
 form.addEventListener('submit', async e => {
   e.preventDefault();
-
   output.classList.add('d-none');
-  overlay.classList.remove('d-none'); // tampilkan overlay → semua input terkunci
+  overlay.classList.remove('d-none'); // tampilkan overlay
 
   const items = [];
-  // ... (kode pengumpulan data tetap sama)
-  
+  const rows = Array.from(itemsTableBody.querySelectorAll('tr'));
+
+  for (let row of rows) {
+    const description = row.querySelector('input[name="description[]"]')?.value || '';
+    const condition = row.querySelector('input[name="condition[]"]')?.value || '';
+    const partNumber = row.querySelector('input[name="partNumber[]"]')?.value || '';
+    const namaBarang = row.querySelector('input[name="namaBarang[]"]')?.value || '';
+    const qty = row.querySelector('input[name="qty[]"]')?.value || 0;
+    const satuan = row.querySelector('input[name="satuan[]"]')?.value || '';
+    const masukFPB = row.querySelector('input[name="masukFPB[]"]')?.checked || false;
+
+    const fileInput = row.querySelector('input[type="file"]');
+    let fileData = null;
+    if (fileInput && fileInput.files[0]) {
+      fileData = await new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.readAsDataURL(fileInput.files[0]);
+      });
+    }
+
+    items.push({
+      description,
+      condition,
+      partNumber,
+      namaBarang,
+      qty,
+      satuan,
+      masukFPB,
+      file: fileData,
+      fileName: fileInput?.files[0]?.name,
+      isSubRow: row.classList.contains('sub-row')
+    });
+  }
+
+  // 🔹 Buat formData di sini
+  const formData = {
+    date: form.date.value,
+    site: form.site.value,
+    codeUnit: form.codeUnit.value,
+    hourMeter: form.hourMeter.value,
+    inspectedBy: form.inspectedBy.value,
+    priority: form.priority.value,
+    items
+  };
+
   try {
     const res = await fetch(CLOUD_FLARE_URL, {
       method: "POST",
@@ -151,10 +188,9 @@ form.addEventListener('submit', async e => {
       body: JSON.stringify(formData)
     });
     const result = await res.json();
-    
-    overlay.classList.add('d-none'); // sembunyikan overlay
 
-    output.innerHTML = result.message + 
+    overlay.classList.add('d-none'); // sembunyikan overlay
+    output.innerHTML = result.message +
       (result.pdfUrl ? ` <a href="${result.pdfUrl}" target="_blank">Lihat PDF</a>` : '');
     output.classList.remove('d-none');
 
@@ -163,15 +199,9 @@ form.addEventListener('submit', async e => {
     addRow();
     setToday();
   } catch (err) {
-    overlay.classList.add('d-none'); // sembunyikan overlay
+    overlay.classList.add('d-none');
     console.error("Error submit:", err);
     output.innerHTML = "❌ Gagal mengirim data.";
     output.classList.remove('d-none');
   }
 });
-
-
-
-
-
-
