@@ -14,7 +14,7 @@ const output = document.getElementById('output');
 let currentMainRow = null;
 
 // URL Cloudflare Worker → ganti dengan URL Worker kamu
-const CLOUD_FLARE_URL = "https://forminspek.saya.workers.dev";
+const CLOUD_FLARE_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
 
 // Fungsi tambah item utama (semua kolom)
 function addRow() {
@@ -196,3 +196,4 @@ form.addEventListener('submit', async e=>{
     output.classList.remove('d-none');
   }
 });
+
