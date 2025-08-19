@@ -30,6 +30,7 @@ function addRow() {
     <td><input type="text" name="partNumber[]" class="form-control" placeholder="Part Number"></td>
     <td><input type="text" name="namaBarang[]" class="form-control" placeholder="Nama Barang"></td>
     <td><input type="number" name="qty[]" class="form-control" placeholder="0" min="0"></td>
+    <td><input type="text" name="satuan[]" class="form-control" placeholder="satuan"></td>
     <td class="text-center"><input type="checkbox" name="masukFPB[]"></td>
     <td class="text-center"><button type="button" class="btn btn-danger btn-sm removeRowBtn">Hapus</button></td>
   `;
@@ -196,3 +197,4 @@ form.addEventListener('submit', async e=>{
     output.classList.remove('d-none');
   }
 });
+
