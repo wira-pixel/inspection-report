@@ -1,14 +1,7 @@
 body { 
-  background: linear-gradient(135deg, #ffecd2, #fcb69f); 
+  background: linear-gradient(135deg, #cce0ff, #80bfff); 
   font-family: 'Poppins', sans-serif; 
   color: #333;
-  transition: background 0.5s, color 0.5s;
-}
-
-/* Dark mode */
-body.dark-mode {
-  background: linear-gradient(135deg, #1e1e2f, #3a3a5c);
-  color: #eee;
 }
 
 .glass-card {
@@ -19,14 +12,10 @@ body.dark-mode {
   border-radius: 25px; 
   backdrop-filter: blur(15px); 
   box-shadow: 0 15px 40px rgba(0,0,0,0.2); 
-  transition: background 0.5s;
-}
-body.dark-mode .glass-card {
-  background: rgba(30,30,50,0.3);
 }
 
 .header-gradient {
-  background: linear-gradient(90deg, #6a11cb, #2575fc);
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
 }
 
 .neon-input {
@@ -35,47 +24,40 @@ body.dark-mode .glass-card {
   transition: all 0.3s;
 }
 .neon-input:focus {
-  border-color: #ff6ec7;
-  box-shadow: 0 0 12px #ff6ec7;
-}
-body.dark-mode .neon-input {
-  border-color: #bbb;
+  border-color: #00f2fe;
+  box-shadow: 0 0 12px #00f2fe;
 }
 
 .btn-gradient {
-  background: linear-gradient(90deg, #ff6ec7, #7873f5);
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
   color: #fff;
   border-radius: 50px;
   transition: all 0.3s;
 }
 .btn-gradient:hover {
   transform: scale(1.05);
-  box-shadow: 0 5px 20px rgba(255,110,199,0.6);
+  box-shadow: 0 5px 20px rgba(0,255,255,0.6);
 }
 
 .btn-gradient-dark {
-  background: linear-gradient(90deg, #333, #555);
+  background: linear-gradient(90deg, #1f6aa5, #3795d1);
   color: #fff;
   border-radius: 50px;
   transition: all 0.3s;
 }
 .btn-gradient-dark:hover {
   transform: scale(1.05);
-  box-shadow: 0 5px 20px rgba(0,0,0,0.6);
+  box-shadow: 0 5px 20px rgba(0,123,255,0.6);
 }
 
 .table-card {
   background: rgba(255,255,255,0.25);
   border-radius: 20px;
   overflow: hidden;
-  transition: background 0.5s;
-}
-body.dark-mode .table-card {
-  background: rgba(30,30,50,0.4);
 }
 
 .table-head-gradient {
-  background: linear-gradient(90deg, #ff6ec7, #7873f5);
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
   font-weight: 600;
   text-align: center;
 }
@@ -85,7 +67,7 @@ body.dark-mode .table-card {
 }
 
 .table tbody tr:hover {
-  background: rgba(255,110,199,0.2);
+  background: rgba(0,192,255,0.2);
 }
 
 .img-preview { 
@@ -100,7 +82,7 @@ body.dark-mode .table-card {
 }
 .img-preview:hover {
   transform: scale(1.2) rotate(3deg);
-  box-shadow: 0 8px 25px rgba(255,110,199,0.6);
+  box-shadow: 0 8px 25px rgba(0,192,255,0.6);
 }
 
 input[type="checkbox"] { 
@@ -139,4 +121,8 @@ input[type="checkbox"] {
   align-items: center;
   flex-direction: column;
   z-index: 9999;
- 
+}
+
+.no-border-left {
+  border-left: none !important;
+}
