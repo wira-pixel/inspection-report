@@ -1,5 +1,5 @@
 body { 
-  background: linear-gradient(135deg, #cce0ff, #80bfff); 
+  background: linear-gradient(135deg, #80caff, #0099ff); 
   font-family: 'Poppins', sans-serif; 
   color: #333;
 }
@@ -25,7 +25,7 @@ body {
 }
 .neon-input:focus {
   border-color: #00f2fe;
-  box-shadow: 0 0 12px #00f2fe;
+  box-shadow: 0 0 15px #00f2fe;
 }
 
 .btn-gradient {
@@ -35,8 +35,8 @@ body {
   transition: all 0.3s;
 }
 .btn-gradient:hover {
-  transform: scale(1.05);
-  box-shadow: 0 5px 20px rgba(0,255,255,0.6);
+  box-shadow: 0 0 15px #00f2fe, 0 0 30px #4facfe;
+  transform: scale(1.08);
 }
 
 .btn-gradient-dark {
@@ -46,8 +46,17 @@ body {
   transition: all 0.3s;
 }
 .btn-gradient-dark:hover {
-  transform: scale(1.05);
-  box-shadow: 0 5px 20px rgba(0,123,255,0.6);
+  box-shadow: 0 0 15px #3795d1, 0 0 30px #1f6aa5;
+  transform: scale(1.08);
+}
+
+/* Pop animation */
+.btn-pop {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-pop:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 20px #00f2fe inset;
 }
 
 .table-card {
@@ -60,6 +69,7 @@ body {
   background: linear-gradient(90deg, #4facfe, #00f2fe);
   font-weight: 600;
   text-align: center;
+  box-shadow: 0 0 10px #00f2fe;
 }
 
 .table tbody tr {
@@ -68,6 +78,7 @@ body {
 
 .table tbody tr:hover {
   background: rgba(0,192,255,0.2);
+  box-shadow: 0 0 15px #00f2fe inset;
 }
 
 .img-preview { 
@@ -82,7 +93,7 @@ body {
 }
 .img-preview:hover {
   transform: scale(1.2) rotate(3deg);
-  box-shadow: 0 8px 25px rgba(0,192,255,0.6);
+  box-shadow: 0 0 20px #00f2fe, 0 0 30px #4facfe;
 }
 
 input[type="checkbox"] { 
@@ -125,4 +136,8 @@ input[type="checkbox"] {
 
 .no-border-left {
   border-left: none !important;
+}
+
+.shadow-neon {
+  text-shadow: 0 0 10px #00f2fe, 0 0 20px #4facfe;
 }
