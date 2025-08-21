@@ -10,6 +10,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+  <div class="theme-toggle-container text-end me-4 mt-3">
+    <button id="toggleThemeBtn" class="btn btn-sm btn-light"><i class="bi bi-moon-stars"></i> Toggle Dark Mode</button>
+  </div>
+
   <div class="form-container glass-card p-4">
 
     <div class="text-center mb-4 header-gradient p-3 rounded-3">
@@ -92,5 +96,12 @@
   </div>
 
   <script src="script.js"></script>
+  <script>
+    // Dark mode toggle
+    const toggleBtn = document.getElementById('toggleThemeBtn');
+    toggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+    });
+  </script>
 </body>
 </html>
