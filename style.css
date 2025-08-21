@@ -2,6 +2,13 @@ body {
   background: linear-gradient(135deg, #ffecd2, #fcb69f); 
   font-family: 'Poppins', sans-serif; 
   color: #333;
+  transition: background 0.5s, color 0.5s;
+}
+
+/* Dark mode */
+body.dark-mode {
+  background: linear-gradient(135deg, #1e1e2f, #3a3a5c);
+  color: #eee;
 }
 
 .glass-card {
@@ -12,6 +19,10 @@ body {
   border-radius: 25px; 
   backdrop-filter: blur(15px); 
   box-shadow: 0 15px 40px rgba(0,0,0,0.2); 
+  transition: background 0.5s;
+}
+body.dark-mode .glass-card {
+  background: rgba(30,30,50,0.3);
 }
 
 .header-gradient {
@@ -25,7 +36,10 @@ body {
 }
 .neon-input:focus {
   border-color: #ff6ec7;
-  box-shadow: 0 0 10px #ff6ec7;
+  box-shadow: 0 0 12px #ff6ec7;
+}
+body.dark-mode .neon-input {
+  border-color: #bbb;
 }
 
 .btn-gradient {
@@ -54,6 +68,10 @@ body {
   background: rgba(255,255,255,0.25);
   border-radius: 20px;
   overflow: hidden;
+  transition: background 0.5s;
+}
+body.dark-mode .table-card {
+  background: rgba(30,30,50,0.4);
 }
 
 .table-head-gradient {
@@ -62,9 +80,12 @@ body {
   text-align: center;
 }
 
+.table tbody tr {
+  transition: all 0.3s ease;
+}
+
 .table tbody tr:hover {
   background: rgba(255,110,199,0.2);
-  transition: background 0.3s;
 }
 
 .img-preview { 
@@ -89,10 +110,18 @@ input[type="checkbox"] {
 
 .main-row { 
   background: rgba(255,255,255,0.3); 
+  animation: slideIn 0.5s ease;
 }
 .sub-row { 
   background: rgba(255,255,255,0.1); 
+  animation: slideIn 0.5s ease;
 }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .sub-row td:first-child, 
 .sub-row td:nth-child(2),
 .sub-row td:nth-child(3) {
@@ -110,10 +139,4 @@ input[type="checkbox"] {
   align-items: center;
   flex-direction: column;
   z-index: 9999;
-  transition: opacity 0.3s;
-}
-#overlay.d-none { display: none; }
-
-.no-border-left {
-  border-left: none !important;
-}
+ 
