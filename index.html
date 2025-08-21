@@ -12,7 +12,7 @@
 <body>
   <div class="form-container glass-card p-4">
 
-    <div class="text-center mb-4 header-gradient p-3 rounded-3">
+    <div class="text-center mb-4 header-gradient p-3 rounded-3 shadow-neon">
       <h3 class="fw-bold text-white"><i class="bi bi-card-checklist"></i> Form Inspection Report</h3>
     </div>
 
@@ -49,10 +49,10 @@
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h5 class="fw-semibold"><i class="bi bi-list-check"></i> Detail Inspection</h5>
         <div>
-          <button type="button" class="btn btn-gradient btn-sm me-1" id="addRowBtn">
+          <button type="button" class="btn btn-gradient btn-sm me-1 btn-pop" id="addRowBtn">
             <i class="bi bi-plus-lg"></i> Tambah Item
           </button>
-          <button type="button" class="btn btn-gradient-dark btn-sm" id="addSubRowBtn">
+          <button type="button" class="btn btn-gradient-dark btn-sm btn-pop" id="addSubRowBtn">
             <i class="bi bi-plus-square"></i> Tambah Baris FPB
           </button>
         </div>
@@ -60,7 +60,7 @@
 
       <div class="table-responsive shadow-sm rounded table-card">
         <table class="table align-middle table-hover" id="itemsTable">
-          <thead class="table-head-gradient text-white">
+          <thead class="table-head-gradient text-white shadow-neon">
             <tr>
               <th>Description</th>
               <th>Condition</th>
@@ -78,7 +78,7 @@
       </div>
 
       <div class="text-end mt-3">
-        <button type="submit" class="btn btn-gradient btn-lg fw-semibold"><i class="bi bi-send-fill"></i> Kirim</button>
+        <button type="submit" class="btn btn-gradient btn-lg fw-semibold btn-pop"><i class="bi bi-send-fill"></i> Kirim</button>
       </div>
     </form>
 
