@@ -243,51 +243,46 @@ input[type="checkbox"] {
 }
 
 /* ========================
-   ANIMASI LOGIN DOZER
+   ANIMASI DOZER LOGIN
 ======================== */
+body.lock-scroll {
+  overflow: hidden;
+}
+
 #authContainer {
-  position: relative;
-  transform: translateY(150%);
-  transition: transform 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  pointer-events: none;
+  position: fixed;
+  bottom: -100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  transition: transform 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
   z-index: 1000;
+  pointer-events: none;
 }
 
 #animationContainer {
   position: fixed;
-  bottom: 0;
-  width: 100%;
+  bottom: -150px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 999;
-  pointer-events: none;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-}
-
-/* Contoh Dozer Animasi */
-#animationContainer img.dozer {
   width: 200px;
-  max-width: 25%;
-  animation: dozerMove 2s forwards;
+  height: auto;
+  pointer-events: none;
+  transition: bottom 1.5s ease-out;
 }
 
-/* Keyframes dozer mendorong login */
+#animationContainer img {
+  width: 100%;
+  display: block;
+  animation: dozerMove 1.5s forwards;
+}
+
 @keyframes dozerMove {
-  0% { transform: translateY(100%); opacity: 0; }
-  50% { transform: translateY(0%); opacity: 1; }
-  100% { transform: translateY(-20%); opacity: 0; }
+  0% { bottom: -150px; }
+  50% { bottom: 30%; }
+  100% { bottom: -200px; }
 }
 
-/* Lock scroll selama animasi */
-body.animating {
-  overflow: hidden;
-}
-
-/* Smooth fade in login setelah dozer hilang */
-#authContainer.show {
-  transform: translateY(0);
-  pointer-events: auto;
-}
 
 
 
