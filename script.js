@@ -57,6 +57,22 @@ loginBtn.addEventListener('click', async()=>{
   }
 });
 
+// Switch login ↔ register
+const loginFormDiv = document.getElementById('loginForm');
+const registerFormDiv = document.getElementById('registerForm');
+const toRegister = document.getElementById('toRegister');
+const toLogin = document.getElementById('toLogin');
+
+toRegister.addEventListener('click', () => {
+  loginFormDiv.classList.remove('active');
+  registerFormDiv.classList.add('active');
+});
+
+toLogin.addEventListener('click', () => {
+  registerFormDiv.classList.remove('active');
+  loginFormDiv.classList.add('active');
+});
+
 // Register
 registerBtn.addEventListener('click', async()=>{
   const username = authUsername.value.trim();
@@ -253,3 +269,4 @@ form.addEventListener('submit', async e=>{
   overlay.classList.add('d-none');
   allInputs.forEach(el=>el.disabled=false);
 });
+
