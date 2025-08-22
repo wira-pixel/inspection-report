@@ -10,17 +10,17 @@ const formContainer = document.getElementById('formContainer');
 const authUsername = document.getElementById('authUsername');
 const authPassword = document.getElementById('authPassword');
 
-// URL Apps Script Web App
-const APP_SCRIPT_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
+// URL Cloudflare Worker
+const CLOUD_FLARE_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
 
-// Fungsi fetch ke Apps Script
+// Fungsi fetch ke Worker (payload fleksibel)
 async function postToSheet(payload){
   try{
     const res = await fetch(CLOUD_FLARE_URL,{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body: JSON.stringify({...formData, action:'submitForm'})
-});
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
     if(!res.ok) throw new Error("HTTP "+res.status);
     const data = await res.json();
     console.log("Response:", data);
@@ -82,17 +82,13 @@ registerBtn.addEventListener('click', async()=>{
 });
 
 // ==========================
-// FORM INSPEKSI (ORIGINAL, TIDAK DIUBAH)
+// FORM INSPEKSI
 // ==========================
-
 const form = document.getElementById('myForm');
 const itemsTableBody = document.querySelector('#itemsTable tbody');
 const output = document.getElementById('output');
 const overlay = document.getElementById('overlay');
 let currentMainRow = null;
-
-// URL Cloudflare Worker → ganti dengan URL Worker kamu
-const CLOUD_FLARE_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
 
 // Fungsi set tanggal hari ini
 function setToday() {
@@ -236,6 +232,7 @@ form.addEventListener('submit', async e=>{
   }
 
   const formData = {
+    action:'submitForm',
     date: form.date.value,
     site: form.site.value,
     codeUnit: form.codeUnit.value,
@@ -245,31 +242,14 @@ form.addEventListener('submit', async e=>{
     items
   };
 
-  try{
-    const res = await fetch(CLOUD_FLARE_URL,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(formData)
-    });
-    const result = await res.json();
-    output.innerHTML = result.message + (result.pdfUrl?` <a href="${result.pdfUrl}" target="_blank">Lihat PDF</a>`:'');
-    output.classList.remove('d-none');
-    form.reset();
-    itemsTableBody.innerHTML='';
-    addRow();
-    setToday();
-  } catch(err){
-    console.error("Error submit:",err);
-    output.innerHTML = "❌ Gagal mengirim data.";
-    output.classList.remove('d-none');
-  } finally{
-    overlay.classList.add('d-none');
-    allInputs.forEach(el=>el.disabled=false);
-  }
+  const result = await postToSheet(formData);
+  output.innerHTML = result.message + (result.pdfUrl?` <a href="${result.pdfUrl}" target="_blank">Lihat PDF</a>`:'');
+  output.classList.remove('d-none');
+
+  form.reset();
+  itemsTableBody.innerHTML='';
+  addRow();
+  setToday();
+  overlay.classList.add('d-none');
+  allInputs.forEach(el=>el.disabled=false);
 });
-
-
-
-
-
-
