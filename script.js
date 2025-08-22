@@ -21,9 +21,11 @@ async function postToSheet(payload) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
+    if(!res.ok) throw new Error("HTTP error "+res.status);
     return await res.json();
   } catch(err) {
-    return { success:false, message: '❌ Koneksi gagal' };
+    console.error("Error postToSheet:", err);
+    return { success:false, message: '❌ Koneksi gagal. Pastikan Web App sudah di-deploy dan URL benar.' };
   }
 }
 
@@ -80,7 +82,7 @@ registerBtn.addEventListener('click', async () => {
 });
 
 // ==========================
-// FORM INSPEKSI (ORIGINAL)
+// FORM INSPEKSI (ORIGINAL, TIDAK DIUBAH)
 // ==========================
 
 const form = document.getElementById('myForm');
@@ -185,7 +187,7 @@ function setupRow(row, isSub=false){
     if(itemsTableBody.children.length===0) addRow();
   });
 
-  row.addEventListener('click', ()=>{
+  row.addEventListener('click', ()=>{ 
     if(row.classList.contains('main-row')) currentMainRow = row;
     else{
       let mainRow = row.previousElementSibling;
