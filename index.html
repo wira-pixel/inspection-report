@@ -10,85 +10,119 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="form-container glass-card p-4">
+  <!-- ===========================
+       LOGIN & REGISTER LAYER
+  ============================ -->
+  <div id="authContainer" class="d-flex flex-column justify-content-center align-items-center vh-100">
+    <div class="glass-card p-4" style="max-width:400px; width:100%;">
+      <div class="text-center mb-4 header-gradient p-3 rounded-3 shadow-neon">
+        <h3 class="fw-bold text-white"><i class="bi bi-person-circle"></i> Login / Register</h3>
+      </div>
 
-    <div class="text-center mb-4 header-gradient p-3 rounded-3 shadow-neon">
-      <h3 class="fw-bold text-white"><i class="bi bi-card-checklist"></i> Form Inspection Report</h3>
+      <!-- Form login/register -->
+      <form id="authForm">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Username</label>
+          <input type="text" class="form-control neon-input" id="authUsername" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Password</label>
+          <input type="password" class="form-control neon-input" id="authPassword" required>
+        </div>
+        <div class="d-flex justify-content-between">
+          <button type="button" id="loginBtn" class="btn btn-gradient btn-pop">Login</button>
+          <button type="button" id="registerBtn" class="btn btn-gradient-dark btn-pop">Register</button>
+        </div>
+      </form>
+
+      <div id="authOutput" class="alert mt-3 d-none rounded-3 shadow-sm"></div>
     </div>
-
-    <form id="myForm" novalidate>
-      <div class="row g-3 mb-3">
-        <div class="col-12 col-sm-6">
-          <label class="form-label fw-semibold">Date</label>
-          <input type="date" class="form-control neon-input" name="date" id="Date" required>
-        </div>
-        <div class="col-12 col-sm-6">
-          <label class="form-label fw-semibold">Site</label>
-          <input type="text" class="form-control neon-input" name="site" required>
-        </div>
-        <div class="col-12 col-sm-6">
-          <label class="form-label fw-semibold">Code Unit</label>
-          <input type="text" class="form-control neon-input" name="codeUnit" required>
-        </div>
-        <div class="col-12 col-sm-6">
-          <label class="form-label fw-semibold">Hour Meter</label>
-          <input type="number" class="form-control neon-input" name="hourMeter" required>
-        </div>
-        <div class="col-12 col-sm-6">
-          <label class="form-label fw-semibold">Inspected By</label>
-          <input type="text" class="form-control neon-input" name="inspectedBy" required>
-        </div>
-        <div class="col-12 col-sm-6">
-          <label class="form-label fw-semibold">Priority</label>
-          <input type="text" class="form-control neon-input" name="priority" required>
-        </div>
-      </div>
-
-      <hr class="my-4">
-
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="fw-semibold"><i class="bi bi-list-check"></i> Detail Inspection</h5>
-        <div>
-          <button type="button" class="btn btn-gradient btn-sm me-1 btn-pop" id="addRowBtn">
-            <i class="bi bi-plus-lg"></i> Tambah Item
-          </button>
-          <button type="button" class="btn btn-gradient-dark btn-sm btn-pop" id="addSubRowBtn">
-            <i class="bi bi-plus-square"></i> Tambah Baris FPB
-          </button>
-        </div>
-      </div>
-
-      <div class="table-responsive shadow-sm rounded table-card">
-        <table class="table align-middle table-hover" id="itemsTable">
-          <thead class="table-head-gradient text-white shadow-neon">
-            <tr>
-              <th>Description</th>
-              <th>Condition</th>
-              <th>Gambar</th>
-              <th>Part Number</th>
-              <th>Nama Barang</th>
-              <th>Qty</th>
-              <th>Satuan</th>
-              <th>Masuk FPB</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <div class="text-end mt-3">
-        <button type="submit" class="btn btn-gradient btn-lg fw-semibold btn-pop"><i class="bi bi-send-fill"></i> Kirim</button>
-      </div>
-    </form>
-
-    <div id="output" class="alert alert-success mt-3 d-none rounded-3 shadow-sm"></div>
   </div>
 
-  <!-- Overlay Loading -->
-  <div id="overlay" class="d-none">
-    <div class="spinner-border text-white" role="status"></div>
-    <p class="mt-3 text-white fw-semibold">Mengirim data, mohon tunggu...</p>
+  <!-- ===========================
+       FORM INSPEKSI (AWALNYA HIDDEN)
+  ============================ -->
+  <div id="formContainer" class="d-none">
+    <div class="form-container glass-card p-4">
+
+      <div class="text-center mb-4 header-gradient p-3 rounded-3 shadow-neon">
+        <h3 class="fw-bold text-white"><i class="bi bi-card-checklist"></i> Form Inspection Report</h3>
+      </div>
+
+      <form id="myForm" novalidate>
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">Date</label>
+            <input type="date" class="form-control neon-input" name="date" id="Date" required>
+          </div>
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">Site</label>
+            <input type="text" class="form-control neon-input" name="site" required>
+          </div>
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">Code Unit</label>
+            <input type="text" class="form-control neon-input" name="codeUnit" required>
+          </div>
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">Hour Meter</label>
+            <input type="number" class="form-control neon-input" name="hourMeter" required>
+          </div>
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">Inspected By</label>
+            <input type="text" class="form-control neon-input" name="inspectedBy" required>
+          </div>
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">Priority</label>
+            <input type="text" class="form-control neon-input" name="priority" required>
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="fw-semibold"><i class="bi bi-list-check"></i> Detail Inspection</h5>
+          <div>
+            <button type="button" class="btn btn-gradient btn-sm me-1 btn-pop" id="addRowBtn">
+              <i class="bi bi-plus-lg"></i> Tambah Item
+            </button>
+            <button type="button" class="btn btn-gradient-dark btn-sm btn-pop" id="addSubRowBtn">
+              <i class="bi bi-plus-square"></i> Tambah Baris FPB
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive shadow-sm rounded table-card">
+          <table class="table align-middle table-hover" id="itemsTable">
+            <thead class="table-head-gradient text-white shadow-neon">
+              <tr>
+                <th>Description</th>
+                <th>Condition</th>
+                <th>Gambar</th>
+                <th>Part Number</th>
+                <th>Nama Barang</th>
+                <th>Qty</th>
+                <th>Satuan</th>
+                <th>Masuk FPB</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="text-end mt-3">
+          <button type="submit" class="btn btn-gradient btn-lg fw-semibold btn-pop"><i class="bi bi-send-fill"></i> Kirim</button>
+        </div>
+      </form>
+
+      <div id="output" class="alert alert-success mt-3 d-none rounded-3 shadow-sm"></div>
+    </div>
+
+    <!-- Overlay Loading -->
+    <div id="overlay" class="d-none">
+      <div class="spinner-border text-white" role="status"></div>
+      <p class="mt-3 text-white fw-semibold">Mengirim data, mohon tunggu...</p>
+    </div>
   </div>
 
   <script src="script.js"></script>
