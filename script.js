@@ -272,15 +272,28 @@ function dozerPushLogin() {
   const auth = document.getElementById('authContainer');
   const anim = document.getElementById('animationContainer');
 
-  // Durasi animasi dozer
-  const duration = 2000; // 2 detik
+  if(!anim) return;
 
-  // Setelah durasi, geser login ke tengah dan hilangkan dozer
-  setTimeout(() => {
+  // Lock scroll selama animasi
+  document.body.style.overflow = 'hidden';
+
+  // Mulai dari bawah
+  auth.style.transform = 'translateY(150%)';
+  auth.style.pointerEvents = 'none';
+
+  // Animasi geser login ke tengah
+  auth.style.transition = 'transform 2s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+
+  setTimeout(()=>{
     auth.style.transform = 'translateY(0)';
-    auth.style.pointerEvents = 'auto';
-    anim.style.display = 'none';
-  }, duration);
+  }, 50);
+
+  // Setelah animasi selesai, hilangkan dozer & unlock scroll
+  setTimeout(()=>{
+    if(anim) anim.style.display='none';
+    auth.style.pointerEvents='auto';
+    document.body.style.overflow = 'auto';
+  }, 2050);
 }
 
 // Jalankan animasi saat page load
