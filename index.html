@@ -20,24 +20,22 @@
       </div>
 
       <!-- Form login/register -->
- <div id="authFormContainer">
-  <div id="loginForm" class="auth-card active">
-    <h2>Login</h2>
-    <input type="text" class="neon-input" id="authUsernameLogin" placeholder="Username" required>
-    <input type="password" class="neon-input" id="authPasswordLogin" placeholder="Password" required>
-    <button type="button" id="loginBtn" class="btn btn-gradient btn-pop">Login</button>
-    <p class="mt-3 text-white">Belum punya akun? <span id="toRegister" style="cursor:pointer; text-decoration:underline;">Register</span></p>
-  </div>
+      <form id="authForm">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Username</label>
+          <input type="text" class="form-control neon-input" id="authUsername" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Password</label>
+          <input type="password" class="form-control neon-input" id="authPassword" required>
+        </div>
+        <div class="d-flex justify-content-between">
+          <button type="button" id="loginBtn" class="btn btn-gradient btn-pop">Login</button>
+          <button type="button" id="registerBtn" class="btn btn-gradient-dark btn-pop">Register</button>
+        </div>
+      </form>
 
-  <div id="registerForm" class="auth-card">
-    <h2>Register</h2>
-    <input type="text" class="neon-input" id="authUsernameRegister" placeholder="Username" required>
-    <input type="password" class="neon-input" id="authPasswordRegister" placeholder="Password" required>
-    <button type="button" id="registerBtn" class="btn btn-gradient-dark btn-pop">Register</button>
-    <p class="mt-3 text-white">Sudah punya akun? <span id="toLogin" style="cursor:pointer; text-decoration:underline;">Login</span></p>
-  </div>
-</div>
-<div id="authOutput" class="alert mt-3 d-none rounded-3 shadow-sm"></div>
+      <div id="authOutput" class="alert mt-3 d-none rounded-3 shadow-sm"></div>
     </div>
   </div>
 
@@ -130,4 +128,3 @@
   <script src="script.js"></script>
 </body>
 </html>
-
