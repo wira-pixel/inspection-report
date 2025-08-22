@@ -16,11 +16,11 @@ const APP_SCRIPT_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
 // Fungsi fetch ke Apps Script
 async function postToSheet(payload){
   try{
-    const res = await fetch(APP_SCRIPT_URL,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(payload)
-    });
+    const res = await fetch(CLOUD_FLARE_URL,{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({...formData, action:'submitForm'})
+});
     if(!res.ok) throw new Error("HTTP "+res.status);
     const data = await res.json();
     console.log("Response:", data);
@@ -267,6 +267,7 @@ form.addEventListener('submit', async e=>{
     allInputs.forEach(el=>el.disabled=false);
   }
 });
+
 
 
 
