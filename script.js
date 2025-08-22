@@ -33,9 +33,9 @@ async function postToSheet(payload){
 
 // Login
 loginBtn.addEventListener('click', async()=>{
-  const username = document.getElementById('authUsernameLogin').value.trim();
-  const password = document.getElementById('authPasswordLogin').value.trim();
-  if(!username || !password){
+  const username = authUsername.value.trim();
+  const password = authPassword.value.trim();
+  if(!username||!password){
     authOutput.innerHTML='❌ Username & password harus diisi';
     authOutput.className='alert alert-danger mt-3 rounded-3';
     authOutput.classList.remove('d-none');
@@ -57,27 +57,11 @@ loginBtn.addEventListener('click', async()=>{
   }
 });
 
-// Switch login ↔ register
-const loginFormDiv = document.getElementById('loginForm');
-const registerFormDiv = document.getElementById('registerForm');
-const toRegister = document.getElementById('toRegister');
-const toLogin = document.getElementById('toLogin');
-
-toRegister.addEventListener('click', () => {
-  loginFormDiv.classList.remove('active');
-  registerFormDiv.classList.add('active');
-});
-
-toLogin.addEventListener('click', () => {
-  registerFormDiv.classList.remove('active');
-  loginFormDiv.classList.add('active');
-});
-
 // Register
 registerBtn.addEventListener('click', async()=>{
-  const username = document.getElementById('authUsernameRegister').value.trim();
-  const password = document.getElementById('authPasswordRegister').value.trim();
-  if(!username || !password){
+  const username = authUsername.value.trim();
+  const password = authPassword.value.trim();
+  if(!username||!password){
     authOutput.innerHTML='❌ Username & password harus diisi';
     authOutput.className='alert alert-danger mt-3 rounded-3';
     authOutput.classList.remove('d-none');
@@ -259,15 +243,20 @@ form.addEventListener('submit', async e=>{
   };
 
   const result = await postToSheet(formData);
-  output.innerHTML = result.message + (result.pdfUrl?` <a href="${result.pdfUrl}" target="_blank">Lihat PDF</a>`:'');
-  output.classList.remove('d-none');
-
-  form.reset();
-  itemsTableBody.innerHTML='';
-  addRow();
-  setToday();
   overlay.classList.add('d-none');
   allInputs.forEach(el=>el.disabled=false);
+
+  if(result.success){
+    output.innerHTML='✅ Data berhasil dikirim!';
+    output.className='alert alert-success mt-3 rounded-3';
+    output.classList.remove('d-none');
+    form.reset();
+    itemsTableBody.innerHTML='';
+    addRow();
+    setToday();
+  } else {
+    output.innerHTML='❌ '+result.message;
+    output.className='alert alert-danger mt-3 rounded-3';
+    output.classList.remove('d-none');
+  }
 });
-
-
