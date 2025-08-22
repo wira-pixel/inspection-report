@@ -222,7 +222,16 @@ document.addEventListener('DOMContentLoaded', () => {
       items.push({description,condition,partNumber,namaBarang,qty,satuan,masukFPB,file:fileData,fileName:fileInput?.files[0]?.name,isSubRow:row.classList.contains('sub-row')});
     }
 
-    const formData = {date: form.date.value, site: form.site.value, codeUnit: form.codeUnit.value, hourMeter: form.hourMeter.value, inspectedBy: form.inspectedBy.value, priority: form.priority.value, items};
+    const formData = {
+  action: 'submitForm',  
+  date: form.date.value,
+  site: form.site.value,
+  codeUnit: form.codeUnit.value,
+  hourMeter: form.hourMeter.value,
+  inspectedBy: form.inspectedBy.value,
+  priority: form.priority.value,
+  items
+  };
 
     try{
       const res = await fetch(CLOUD_FLARE_URL,{
@@ -261,3 +270,4 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 });
+
