@@ -264,26 +264,3 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 }); // End DOMContentLoaded
-
-// ==========================
-// ANIMASI DOZER LOGIN
-// ==========================
-window.addEventListener('load', () => {
-  document.body.classList.add('lock-scroll'); // kunci scroll
-
-  const auth = document.getElementById('authContainer');
-  const anim = document.getElementById('animationContainer');
-
-  // delay sedikit supaya dozer muncul
-  setTimeout(() => {
-    auth.style.transform = 'translateX(-50%) translateY(-50%)';
-  }, 500);
-
-  // setelah animasi selesai, hilangkan dozer dan buka interaksi login
-  setTimeout(() => {
-    anim.style.display = 'none';
-    auth.style.pointerEvents = 'auto';
-    document.body.classList.remove('lock-scroll'); // unlock scroll
-  }, 2000); // 2 detik
-});
-
