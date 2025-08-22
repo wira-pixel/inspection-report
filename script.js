@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const authUsername = document.getElementById('authUsername');
   const authPassword = document.getElementById('authPassword');
 
-  // URL Cloudflare Worker
   const CLOUD_FLARE_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
 
   async function postToSheet(payload){
@@ -20,19 +19,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch(CLOUD_FLARE_URL,{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body: JSON.stringify(payload)
+        body:JSON.stringify(payload)
       });
       if(!res.ok) throw new Error("HTTP "+res.status);
-      const data = await res.json();
-      console.log("Response:", data);
-      return data;
+      return await res.json();
     } catch(err){
       console.error("Error postToSheet:", err);
-      return {success:false, message:'❌ Koneksi gagal. Pastikan Web App sudah di-deploy dan URL benar.'};
+      return {success:false, message:'❌ Koneksi gagal.'};
     }
   }
 
-  // Login
   loginBtn.addEventListener('click', async()=>{
     const username = authUsername.value.trim();
     const password = authPassword.value.trim();
@@ -58,7 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Register
   registerBtn.addEventListener('click', async()=>{
     const username = authUsername.value.trim();
     const password = authPassword.value.trim();
@@ -126,10 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function addSubRow() {
-    if (!currentMainRow) {
-      alert('Tambahkan baris utama terlebih dahulu!');
-      return;
-    }
+    if (!currentMainRow) { alert('Tambahkan baris utama terlebih dahulu!'); return; }
     const row = document.createElement('tr');
     row.className = 'sub-row';
     row.innerHTML = `
@@ -143,35 +135,35 @@ document.addEventListener('DOMContentLoaded', () => {
       <td class="text-center"><input type="checkbox" name="masukFPB[]"></td>
       <td class="text-center"><button type="button" class="btn btn-danger btn-sm removeRowBtn">Hapus</button></td>
     `;
-    setupRow(row, true);
-    
+    setupRow(row,true);
+
     const mainRowIndex = Array.from(itemsTableBody.children).indexOf(currentMainRow);
     let insertAfter = currentMainRow;
-    for (let i = mainRowIndex + 1; i < itemsTableBody.children.length; i++) {
-      if (itemsTableBody.children[i].classList.contains('sub-row')) insertAfter = itemsTableBody.children[i];
+    for (let i = mainRowIndex+1; i<itemsTableBody.children.length; i++){
+      if(itemsTableBody.children[i].classList.contains('sub-row')) insertAfter = itemsTableBody.children[i];
       else break;
     }
     insertAfter.after(row);
   }
 
-  function setupRow(row, isSub=false){
+  function setupRow(row,isSub=false){
     const fileInput = row.querySelector('.fileInput');
     const imgPreview = row.querySelector('.img-preview');
     if(fileInput){
-      fileInput.addEventListener('change', e => {
+      fileInput.addEventListener('change', e=>{
         const file = e.target.files[0];
         if(file){
           const reader = new FileReader();
-          reader.onload = ev => {
+          reader.onload = ev=>{
             imgPreview.src = ev.target.result;
-            imgPreview.style.display = 'block';
+            imgPreview.style.display='block';
           };
           reader.readAsDataURL(file);
         } else { imgPreview.src=''; imgPreview.style.display='none'; }
       });
     }
-    
-    row.querySelector('.removeRowBtn').addEventListener('click', () => {
+
+    row.querySelector('.removeRowBtn').addEventListener('click', ()=>{
       if(row.classList.contains('main-row')){
         const rowIndex = Array.from(itemsTableBody.children).indexOf(row);
         for(let i=rowIndex+1;i<itemsTableBody.children.length;i++){
@@ -183,12 +175,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if(itemsTableBody.children.length===0) addRow();
     });
 
-    row.addEventListener('click', ()=>{ 
-      if(row.classList.contains('main-row')) currentMainRow = row;
+    row.addEventListener('click', ()=>{
+      if(row.classList.contains('main-row')) currentMainRow=row;
       else{
         let mainRow = row.previousElementSibling;
         while(mainRow && !mainRow.classList.contains('main-row')) mainRow = mainRow.previousElementSibling;
-        currentMainRow = mainRow;
+        currentMainRow=mainRow;
       }
     });
   }
@@ -198,12 +190,12 @@ document.addEventListener('DOMContentLoaded', () => {
   addRow();
 
   // ==========================
-  // SUBMIT FORM
+  // SUBMIT FORM + PREVIEW PDF
   // ==========================
   form.addEventListener('submit', async e=>{
     e.preventDefault();
     overlay.classList.remove('d-none');
-    const allInputs = form.querySelectorAll('input, button, select, textarea');
+    const allInputs = form.querySelectorAll('input,button,select,textarea');
     allInputs.forEach(el=>el.disabled=true);
 
     const items = [];
@@ -227,47 +219,45 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
 
-      items.push({ description, condition, partNumber, namaBarang, qty, satuan, masukFPB, file:fileData, fileName:fileInput?.files[0]?.name, isSubRow:row.classList.contains('sub-row') });
+      items.push({description,condition,partNumber,namaBarang,qty,satuan,masukFPB,file:fileData,fileName:fileInput?.files[0]?.name,isSubRow:row.classList.contains('sub-row')});
     }
 
-    const formData = {
-      action:'submitForm',
-      date: form.date.value,
-      site: form.site.value,
-      codeUnit: form.codeUnit.value,
-      hourMeter: form.hourMeter.value,
-      inspectedBy: form.inspectedBy.value,
-      priority: form.priority.value,
-      items
-    };
+    const formData = {date: form.date.value, site: form.site.value, codeUnit: form.codeUnit.value, hourMeter: form.hourMeter.value, inspectedBy: form.inspectedBy.value, priority: form.priority.value, items};
 
-    const result = await postToSheet(formData);
-    overlay.classList.add('d-none');
-    allInputs.forEach(el=>el.disabled=false);
-
-    if(result.success){
-      output.innerHTML='✅ Data berhasil dikirim!';
-      output.className='alert alert-success mt-3 rounded-3';
-      output.classList.remove('d-none');
-
-      // ==========================
-      // MODIFIKASI RESET FORM
-      // ==========================
-      form.reset();
-      itemsTableBody.innerHTML=''; // hapus semua row lama
-      addRow(); // buat row baru
-      setToday(); // set tanggal hari ini
-      // reset semua preview image
-      const previews = itemsTableBody.querySelectorAll('.img-preview');
-      previews.forEach(img=>{
-        img.src='';
-        img.style.display='none';
+    try{
+      const res = await fetch(CLOUD_FLARE_URL,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(formData)
       });
-    } else {
-      output.innerHTML='❌ '+result.message;
+      const result = await res.json();
+      if(result.success){
+        // Tampilkan link preview PDF dulu
+        output.innerHTML = `✅ Data berhasil dikirim!` + (result.pdfUrl?` <a href="${result.pdfUrl}" target="_blank">Lihat PDF</a>`:'');
+        output.className='alert alert-success mt-3 rounded-3';
+        output.classList.remove('d-none');
+
+        // Reset form & table **setelah delay sebentar supaya PDF bisa dibuka**
+        setTimeout(()=>{
+          form.reset();
+          itemsTableBody.innerHTML='';
+          addRow();
+          setToday();
+        },500);
+      } else {
+        output.innerHTML='❌ '+result.message;
+        output.className='alert alert-danger mt-3 rounded-3';
+        output.classList.remove('d-none');
+      }
+    } catch(err){
+      console.error(err);
+      output.innerHTML="❌ Gagal mengirim data.";
       output.className='alert alert-danger mt-3 rounded-3';
       output.classList.remove('d-none');
+    } finally{
+      overlay.classList.add('d-none');
+      allInputs.forEach(el=>el.disabled=false);
     }
   });
 
-}); // End DOMContentLoaded
+});
