@@ -243,18 +243,51 @@ input[type="checkbox"] {
 }
 
 /* ========================
-   ANIMASI LOGIN
+   ANIMASI LOGIN DOZER
 ======================== */
-
 #authContainer {
-  transition: transform 1.2s ease-out;
+  position: relative;
+  transform: translateY(150%);
+  transition: transform 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  pointer-events: none;
+  z-index: 1000;
 }
+
 #animationContainer {
   position: fixed;
   bottom: 0;
   width: 100%;
   z-index: 999;
   pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
 }
+
+/* Contoh Dozer Animasi */
+#animationContainer img.dozer {
+  width: 200px;
+  max-width: 25%;
+  animation: dozerMove 2s forwards;
+}
+
+/* Keyframes dozer mendorong login */
+@keyframes dozerMove {
+  0% { transform: translateY(100%); opacity: 0; }
+  50% { transform: translateY(0%); opacity: 1; }
+  100% { transform: translateY(-20%); opacity: 0; }
+}
+
+/* Lock scroll selama animasi */
+body.animating {
+  overflow: hidden;
+}
+
+/* Smooth fade in login setelah dozer hilang */
+#authContainer.show {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
 
 
