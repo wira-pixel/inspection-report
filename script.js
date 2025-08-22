@@ -19,7 +19,7 @@ async function postToSheet(payload){
     const res = await fetch(CLOUD_FLARE_URL,{
   method:"POST",
   headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({...formData, action:'submitForm'})
+  body: JSON.stringify({...formData, action:'submitForm'})
 });
     if(!res.ok) throw new Error("HTTP "+res.status);
     const data = await res.json();
@@ -267,6 +267,7 @@ form.addEventListener('submit', async e=>{
     allInputs.forEach(el=>el.disabled=false);
   }
 });
+
 
 
 
