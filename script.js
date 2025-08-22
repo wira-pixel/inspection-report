@@ -33,9 +33,9 @@ async function postToSheet(payload){
 
 // Login
 loginBtn.addEventListener('click', async()=>{
-  const username = authUsername.value.trim();
-  const password = authPassword.value.trim();
-  if(!username||!password){
+  const username = document.getElementById('authUsernameLogin').value.trim();
+  const password = document.getElementById('authPasswordLogin').value.trim();
+  if(!username || !password){
     authOutput.innerHTML='❌ Username & password harus diisi';
     authOutput.className='alert alert-danger mt-3 rounded-3';
     authOutput.classList.remove('d-none');
@@ -75,9 +75,9 @@ toLogin.addEventListener('click', () => {
 
 // Register
 registerBtn.addEventListener('click', async()=>{
-  const username = authUsername.value.trim();
-  const password = authPassword.value.trim();
-  if(!username||!password){
+  const username = document.getElementById('authUsernameRegister').value.trim();
+  const password = document.getElementById('authPasswordRegister').value.trim();
+  if(!username || !password){
     authOutput.innerHTML='❌ Username & password harus diisi';
     authOutput.className='alert alert-danger mt-3 rounded-3';
     authOutput.classList.remove('d-none');
@@ -269,4 +269,5 @@ form.addEventListener('submit', async e=>{
   overlay.classList.add('d-none');
   allInputs.forEach(el=>el.disabled=false);
 });
+
 
