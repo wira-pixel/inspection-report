@@ -11,7 +11,7 @@ const authUsername = document.getElementById('authUsername');
 const authPassword = document.getElementById('authPassword');
 
 // URL Apps Script Web App
-const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMOYp7ogjRPpGybHEOfa_crJbRmOf9vTn-hDqenQHq3KHDL_-Rw9eT_dvN9NQD38KR/exec";
+const APP_SCRIPT_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
 
 // Fungsi fetch ke Apps Script
 async function postToSheet(payload){
@@ -267,6 +267,7 @@ form.addEventListener('submit', async e=>{
     allInputs.forEach(el=>el.disabled=false);
   }
 });
+
 
 
 
