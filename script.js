@@ -264,3 +264,27 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 }); // End DOMContentLoaded
+
+// ==========================
+// TRUCK ANIMATION SHOW LOGIN
+// ==========================
+const truckHTML = `
+<div id="truckAnimation" class="animation-container">
+  <div class="truck">
+    <div class="body"></div>
+    <div class="wheel front"></div>
+    <div class="wheel back"></div>
+    <div class="material"></div>
+  </div>
+</div>
+`;
+document.body.insertAdjacentHTML('beforeend', truckHTML);
+
+// Tampilkan login setelah truck animation selesai
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
+    document.getElementById('authContainer').classList.add('show');
+    // sembunyikan animasi truck
+    document.getElementById('truckAnimation').style.display='none';
+  }, 3000); // sesuai durasi driveTruck 3s
+});
