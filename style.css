@@ -207,6 +207,22 @@ input[type="checkbox"] {
   animation: fadeIn 0.7s ease;
 }
 
+.auth-card {
+  position: absolute;
+  width: 100%;
+  top: 0; left: 0;
+  opacity: 0;
+  transform: translateX(50px);
+  transition: all 0.5s ease;
+  pointer-events: none;
+}
+
+.auth-card.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
 .auth-card h2 {
   font-size: 1.8rem;
   margin-bottom: 20px;
@@ -241,3 +257,4 @@ input[type="checkbox"] {
   .auth-card { padding: 30px 20px; margin: 40px 15px; }
   .img-preview { width: 60px; height: 60px; }
 }
+
