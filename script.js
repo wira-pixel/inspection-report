@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // URL Cloudflare Worker
   const CLOUD_FLARE_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
 
-  // Fungsi fetch ke Worker (payload fleksibel)
   async function postToSheet(payload){
     try{
       const res = await fetch(CLOUD_FLARE_URL,{
@@ -92,7 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const overlay = document.getElementById('overlay');
   let currentMainRow = null;
 
-  // Fungsi set tanggal hari ini
   function setToday() {
     const el = document.getElementById('Date');
     const today = new Date();
@@ -195,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Event listener tambah row
   document.getElementById('addRowBtn').addEventListener('click', addRow);
   document.getElementById('addSubRowBtn').addEventListener('click', addSubRow);
   addRow();
@@ -252,10 +249,20 @@ document.addEventListener('DOMContentLoaded', () => {
       output.innerHTML='✅ Data berhasil dikirim!';
       output.className='alert alert-success mt-3 rounded-3';
       output.classList.remove('d-none');
+
+      // ==========================
+      // MODIFIKASI RESET FORM
+      // ==========================
       form.reset();
-      itemsTableBody.innerHTML='';
-      addRow();
-      setToday();
+      itemsTableBody.innerHTML=''; // hapus semua row lama
+      addRow(); // buat row baru
+      setToday(); // set tanggal hari ini
+      // reset semua preview image
+      const previews = itemsTableBody.querySelectorAll('.img-preview');
+      previews.forEach(img=>{
+        img.src='';
+        img.style.display='none';
+      });
     } else {
       output.innerHTML='❌ '+result.message;
       output.className='alert alert-danger mt-3 rounded-3';
