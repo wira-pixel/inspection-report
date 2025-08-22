@@ -13,7 +13,17 @@
   <!-- ===========================
        LOGIN & REGISTER LAYER
   ============================ -->
- <canvas id="loginCanvas"></canvas>
+ <!-- Container Animasi Dozer -->
+<div id="animationContainer" class="d-flex justify-content-center align-items-end vh-100">
+  <img id="dozerAnim" src="dozer.gif" alt="Dozer Animation" style="width:300px; height:auto;">
+</div>
+
+<!-- LOGIN & REGISTER LAYER -->
+<div id="authContainer" class="d-flex flex-column justify-content-center align-items-center vh-100" style="pointer-events:none; transform: translateY(100vh);">
+  <div class="glass-card p-4" style="max-width:400px; width:100%;">
+    <!-- Form login/register tetap seperti biasa -->
+  </div>
+</div>
  <div id="authContainer" class="d-flex flex-column justify-content-center align-items-center vh-100">
     <div class="glass-card p-4" style="max-width:400px; width:100%;">
       <div class="text-center mb-4 header-gradient p-3 rounded-3 shadow-neon">
@@ -129,4 +139,5 @@
   <script src="script.js"></script>
 </body>
 </html>
+
 
