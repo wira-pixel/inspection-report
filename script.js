@@ -265,93 +265,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
 }); // End DOMContentLoaded
 
-// ========================
-// ANIMASI EXCAVATOR NEON
-// ========================
-const canvas = document.getElementById('loginCanvas');
-const ctx = canvas.getContext('2d');
-let cw, ch;
-function resizeCanvas(){
-  cw = canvas.width = window.innerWidth;
-  ch = canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+// ==========================
+// ANIMASI DOZER MENDORONG LOGIN
+// ==========================
+function dozerPushLogin() {
+  const auth = document.getElementById('authContainer');
+  const anim = document.getElementById('animationContainer');
 
-// Particle untuk debris neon
-const particles = [];
-function spawnParticle(x, y){
-  particles.push({
-    x, y,
-    vx: (Math.random()-0.5)*2,
-    vy: -Math.random()*3,
-    life: 60 + Math.random()*30,
-    color: `hsl(${Math.random()*360}, 100%, 60%)`
-  });
+  // Durasi animasi dozer
+  const duration = 2000; // 2 detik
+
+  // Setelah durasi, geser login ke tengah dan hilangkan dozer
+  setTimeout(() => {
+    auth.style.transform = 'translateY(0)';
+    auth.style.pointerEvents = 'auto';
+    anim.style.display = 'none';
+  }, duration);
 }
 
-// Excavator object
-const excavator = {
-  x: -200,
-  y: ch*0.6,
-  width: 180,
-  height: 80,
-  bucketAngle: 0,
-  bucketDirection: 1
-};
-
-function drawExcavator(){
-  ctx.save();
-  ctx.translate(excavator.x, excavator.y);
-
-  // body
-  ctx.fillStyle = '#00f2fe';
-  ctx.strokeStyle = '#4facfe';
-  ctx.lineWidth = 3;
-  ctx.fillRect(0, -excavator.height, excavator.width, excavator.height);
-  ctx.strokeRect(0, -excavator.height, excavator.width, excavator.height);
-
-  // bucket arm
-  ctx.save();
-  ctx.translate(excavator.width, -excavator.height/2);
-  ctx.rotate(Math.sin(excavator.bucketAngle)*0.5);
-  ctx.fillStyle = '#4facfe';
-  ctx.fillRect(0, 0, 60, 20);
-  ctx.restore();
-
-  ctx.restore();
-}
-
-// update loop
-function update(){
-  ctx.clearRect(0,0,cw,ch);
-
-  // gerak excavator
-  excavator.x += 1;
-  if(excavator.x > cw) excavator.x = -excavator.width;
-
-  excavator.bucketAngle += 0.05 * excavator.bucketDirection;
-  if(excavator.bucketAngle > 1 || excavator.bucketAngle < -1) excavator.bucketDirection *= -1;
-
-  // spawn particle saat bucket menyentuh tanah
-  if(Math.abs(Math.sin(excavator.bucketAngle)) < 0.05){
-    spawnParticle(excavator.x + excavator.width + 30, excavator.y - excavator.height/2 + 20);
-  }
-
-  // update particles
-  for(let i=particles.length-1;i>=0;i--){
-    const p = particles[i];
-    p.x += p.vx;
-    p.y += p.vy;
-    p.life--;
-    ctx.fillStyle = p.color;
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,3,0,Math.PI*2);
-    ctx.fill();
-    if(p.life<=0) particles.splice(i,1);
-  }
-
-  drawExcavator();
-  requestAnimationFrame(update);
-}
-update();
+// Jalankan animasi saat page load
+window.addEventListener('load', dozerPushLogin);
