@@ -266,35 +266,24 @@ document.addEventListener('DOMContentLoaded', () => {
 }); // End DOMContentLoaded
 
 // ==========================
-// ANIMASI DOZER MENDORONG LOGIN
+// ANIMASI DOZER LOGIN
 // ==========================
-function dozerPushLogin() {
+window.addEventListener('load', () => {
+  document.body.classList.add('lock-scroll'); // kunci scroll
+
   const auth = document.getElementById('authContainer');
   const anim = document.getElementById('animationContainer');
 
-  if(!anim) return;
+  // delay sedikit supaya dozer muncul
+  setTimeout(() => {
+    auth.style.transform = 'translateX(-50%) translateY(-50%)';
+  }, 500);
 
-  // Lock scroll selama animasi
-  document.body.style.overflow = 'hidden';
+  // setelah animasi selesai, hilangkan dozer dan buka interaksi login
+  setTimeout(() => {
+    anim.style.display = 'none';
+    auth.style.pointerEvents = 'auto';
+    document.body.classList.remove('lock-scroll'); // unlock scroll
+  }, 2000); // 2 detik
+});
 
-  // Mulai dari bawah
-  auth.style.transform = 'translateY(150%)';
-  auth.style.pointerEvents = 'none';
-
-  // Animasi geser login ke tengah
-  auth.style.transition = 'transform 2s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-
-  setTimeout(()=>{
-    auth.style.transform = 'translateY(0)';
-  }, 50);
-
-  // Setelah animasi selesai, hilangkan dozer & unlock scroll
-  setTimeout(()=>{
-    if(anim) anim.style.display='none';
-    auth.style.pointerEvents='auto';
-    document.body.style.overflow = 'auto';
-  }, 2050);
-}
-
-// Jalankan animasi saat page load
-window.addEventListener('load', dozerPushLogin);
