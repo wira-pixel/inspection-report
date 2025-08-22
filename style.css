@@ -243,21 +243,18 @@ input[type="checkbox"] {
 }
 
 /* ========================
-   ANIMASI EXCAVATOR NEON
+   ANIMASI LOGIN
 ======================== */
-#loginCanvas {
+
+#authContainer {
+  transition: transform 1.2s ease-out;
+}
+#animationContainer {
   position: fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  z-index: -1; /* di belakang form */
-  pointer-events: none; /* form tetap bisa diklik */
+  bottom: 0;
+  width: 100%;
+  z-index: 999;
+  pointer-events: none;
 }
 
-/* Neon glow effect untuk excavator dan debris */
-.neon-glow {
-  filter: drop-shadow(0 0 10px #00f2fe)
-          drop-shadow(0 0 20px #4facfe)
-          drop-shadow(0 0 30px #00f2fe);
-}
+
