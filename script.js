@@ -10,74 +10,74 @@ const formContainer = document.getElementById('formContainer');
 const authUsername = document.getElementById('authUsername');
 const authPassword = document.getElementById('authPassword');
 
-// URL App Script Web App untuk auth
-const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMOYp7ogjRPpGybHEOfa_crJbRmOf9vTn-hDqenQHq3KHDL_-Rw9eT_dvN9NQD38KR/exec"; //  ID Web App 
+// URL Apps Script Web App
+const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMOYp7ogjRPpGybHEOfa_crJbRmOf9vTn-hDqenQHq3KHDL_-Rw9eT_dvN9NQD38KR/exec";
 
 // Fungsi fetch ke Apps Script
-async function postToSheet(payload) {
-  try {
-    const res = await fetch(APP_SCRIPT_URL, {
-      method: 'POST',
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+async function postToSheet(payload){
+  try{
+    const res = await fetch(APP_SCRIPT_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
     });
-    if(!res.ok) throw new Error("HTTP error "+res.status);
-    return await res.json();
-  } catch(err) {
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const data = await res.json();
+    console.log("Response:", data);
+    return data;
+  } catch(err){
     console.error("Error postToSheet:", err);
-    return { success:false, message: '❌ Koneksi gagal. Pastikan Web App sudah di-deploy dan URL benar.' };
+    return {success:false, message:'❌ Koneksi gagal. Pastikan Web App sudah di-deploy dan URL benar.'};
   }
 }
 
 // Login
-loginBtn.addEventListener('click', async () => {
+loginBtn.addEventListener('click', async()=>{
   const username = authUsername.value.trim();
   const password = authPassword.value.trim();
-  if(!username || !password){
-    authOutput.innerHTML = '❌ Username & password harus diisi';
-    authOutput.className = 'alert alert-danger mt-3 rounded-3';
+  if(!username||!password){
+    authOutput.innerHTML='❌ Username & password harus diisi';
+    authOutput.className='alert alert-danger mt-3 rounded-3';
     authOutput.classList.remove('d-none');
     return;
   }
-
-  authOutput.innerHTML = '🔄 Memproses...';
-  authOutput.className = 'alert alert-info mt-3 rounded-3';
+  authOutput.innerHTML='🔄 Memproses...';
+  authOutput.className='alert alert-info mt-3 rounded-3';
   authOutput.classList.remove('d-none');
 
-  const result = await postToSheet({ action:'login', username, password });
+  const result = await postToSheet({action:'login', username, password});
   if(result.success){
     authOutput.classList.add('d-none');
     authContainer.classList.add('d-none');
     formContainer.classList.remove('d-none');
     setToday();
   } else {
-    authOutput.innerHTML = '❌ ' + result.message;
-    authOutput.className = 'alert alert-danger mt-3 rounded-3';
+    authOutput.innerHTML='❌ '+result.message;
+    authOutput.className='alert alert-danger mt-3 rounded-3';
   }
 });
 
 // Register
-registerBtn.addEventListener('click', async () => {
+registerBtn.addEventListener('click', async()=>{
   const username = authUsername.value.trim();
   const password = authPassword.value.trim();
-  if(!username || !password){
-    authOutput.innerHTML = '❌ Username & password harus diisi';
-    authOutput.className = 'alert alert-danger mt-3 rounded-3';
+  if(!username||!password){
+    authOutput.innerHTML='❌ Username & password harus diisi';
+    authOutput.className='alert alert-danger mt-3 rounded-3';
     authOutput.classList.remove('d-none');
     return;
   }
-
-  authOutput.innerHTML = '🔄 Memproses pendaftaran...';
-  authOutput.className = 'alert alert-info mt-3 rounded-3';
+  authOutput.innerHTML='🔄 Memproses pendaftaran...';
+  authOutput.className='alert alert-info mt-3 rounded-3';
   authOutput.classList.remove('d-none');
 
-  const result = await postToSheet({ action:'register', username, password });
+  const result = await postToSheet({action:'register', username, password});
   if(result.success){
-    authOutput.innerHTML = '✅ Registrasi berhasil, silahkan login';
-    authOutput.className = 'alert alert-success mt-3 rounded-3';
+    authOutput.innerHTML='✅ Registrasi berhasil, silahkan login';
+    authOutput.className='alert alert-success mt-3 rounded-3';
   } else {
-    authOutput.innerHTML = '❌ ' + result.message;
-    authOutput.className = 'alert alert-danger mt-3 rounded-3';
+    authOutput.innerHTML='❌ '+result.message;
+    authOutput.className='alert alert-danger mt-3 rounded-3';
   }
 });
 
@@ -267,4 +267,5 @@ form.addEventListener('submit', async e=>{
     allInputs.forEach(el=>el.disabled=false);
   }
 });
+
 
