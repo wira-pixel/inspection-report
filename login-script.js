@@ -1,5 +1,4 @@
-// Ganti dengan URL Cloudflare Worker
-const SCRIPT_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";  
+const SCRIPT_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // Cloudflare Worker
 
 function showLoader(show) {
   document.getElementById("loader").style.display = show ? "flex" : "none";
@@ -8,7 +7,7 @@ function showLoader(show) {
 async function login() {
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
-  if(!username || !password) {
+  if (!username || !password) {
     alert("Isi username dan password!");
     return;
   }
@@ -18,9 +17,16 @@ async function login() {
   try {
     const res = await fetch(SCRIPT_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" }, // penting biar JSON dibaca benar
-      body: JSON.stringify({ action: "login", username, password })
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        action: "login",
+        username,
+        password
+      })
     });
+
     const data = await res.json();
     showLoader(false);
 
@@ -32,13 +38,14 @@ async function login() {
   } catch (err) {
     showLoader(false);
     alert("Gagal terhubung ke server!");
+    console.error(err);
   }
 }
 
 async function register() {
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
-  if(!username || !password) {
+  if (!username || !password) {
     alert("Isi username dan password!");
     return;
   }
@@ -48,9 +55,16 @@ async function register() {
   try {
     const res = await fetch(SCRIPT_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" }, // sama juga untuk register
-      body: JSON.stringify({ action: "register", username, password })
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        action: "register",
+        username,
+        password
+      })
     });
+
     const data = await res.json();
     showLoader(false);
 
@@ -58,5 +72,6 @@ async function register() {
   } catch (err) {
     showLoader(false);
     alert("Gagal terhubung ke server!");
+    console.error(err);
   }
 }
