@@ -68,7 +68,11 @@ async function register() {
     const data = await res.json();
     showLoader(false);
 
-    alert(data.message);
+    if (data.success) {
+  localStorage.setItem("loggedIn", "true");
+  window.location.href = "dashboard.html"; // langsung pindah tanpa alert
+}
+
   } catch (err) {
     showLoader(false);
     alert("Gagal terhubung ke server!");
