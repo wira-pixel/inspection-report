@@ -3,7 +3,7 @@
 /* ========================== */
 body {
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #0b1d3a, #10294d); /* biru tua lembut */
+  background: rgba(22,142,194,255); /* warna */
   color: #ffffff;
   margin: 0;
   padding: 0;
@@ -19,7 +19,7 @@ h1,h2,h3,h4,h5,h6 {
 /* GLASS CARD / CONTAINER */
 /* ========================== */
 .glass-card, .form-container, #authContainer, #formContainer, #tableContainer {
-  background: rgba(15, 34, 60, 0.85); /* biru tua semi transparan */
+  background: rgba(35,28,82,255); /* warna */
   backdrop-filter: blur(8px);
   border-radius: 18px;
   box-shadow: 0 8px 25px rgba(0,0,0,0.3);
@@ -199,3 +199,4 @@ h1,h2,h3,h4,h5,h6 {
     max-width: 100%;
   }
 }
+
