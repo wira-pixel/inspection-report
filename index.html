@@ -3,38 +3,138 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Inspeksi</title>
-  <link rel="stylesheet" href="dashboard.css">
+  <title>Form Inspeksi Dinamis</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="container">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <h2>Dashboard Inspeksi</h2>
-      <p class="version">v1.0 • Single File</p>
-      <nav>
-        <ul>
-          <li><button data-page="home">🏠 Dashboard</button></li>
-          <li><button data-page="index.html">📝 Form Inspeksi</button></li>
-          <li><button data-page="database.html">💾 Database</button></li>
-          <li><button data-page="jadwal.html">📅 Jadwal Inspeksi</button></li>
-        </ul>
-      </nav>
-    </aside>
+  <!-- LOGIN & REGISTER -->
+  <div id="authContainer" class="d-flex flex-column justify-content-center align-items-center vh-100">
+    <div class="glass-card p-4" style="max-width:400px; width:100%;">
+      <div class="text-center mb-4 header-gradient p-3 rounded-3 shadow-neon">
+        <h3 class="fw-bold text-white"><i class="bi bi-person-circle"></i> Login / Register</h3>
+      </div>
 
-    <!-- Main -->
-    <main class="main">
-      <header class="header">
-        <h1 id="panel-title">Panel</h1>
-        <input type="text" placeholder="Cari…" class="search-box">
-      </header>
+      <form id="authForm">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Username</label>
+          <input type="text" class="form-control neon-input" id="authUsernameLogin" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Password</label>
+          <input type="password" class="form-control neon-input" id="authPasswordLogin" required>
+        </div>
+        <div class="d-flex justify-content-between">
+          <button type="button" id="loginBtn" class="btn btn-gradient btn-pop">Login</button>
+          <button type="button" id="registerBtn" class="btn btn-gradient-dark btn-pop">Register</button>
+        </div>
+      </form>
 
-      <section class="content">
-        <iframe id="iframe-content" src="index.html" frameborder="0"></iframe>
-      </section>
-    </main>
+      <form id="registerForm" class="d-none mt-3">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Username</label>
+          <input type="text" class="form-control neon-input" id="authUsernameRegister" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Password</label>
+          <input type="password" class="form-control neon-input" id="authPasswordRegister" required>
+        </div>
+        <button type="button" id="registerBtnSubmit" class="btn btn-gradient-dark btn-pop">Buat Akun</button>
+      </form>
+
+      <div class="text-center mt-3">
+        <button type="button" id="toRegister" class="btn btn-link text-decoration-none">Belum punya akun? Register</button>
+        <button type="button" id="toLogin" class="btn btn-link text-decoration-none d-none">Sudah punya akun? Login</button>
+      </div>
+
+      <div id="authOutput" class="alert mt-3 d-none rounded-3 shadow-sm"></div>
+    </div>
   </div>
 
-  <script src="dashboard.js"></script>
+  <!-- FORM INSPEKSI -->
+  <div id="formContainer" class="d-none">
+    <div class="form-container glass-card p-4">
+      <div class="text-center mb-4 header-gradient p-3 rounded-3 shadow-neon">
+        <h3 class="fw-bold text-white"><i class="bi bi-card-checklist"></i> Form Inspection Report</h3>
+      </div>
+
+      <form id="myForm" novalidate>
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">Date</label>
+            <input type="date" class="form-control neon-input" name="date" id="Date" required>
+          </div>
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">Site</label>
+            <input type="text" class="form-control neon-input" name="site" required>
+          </div>
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">Code Unit</label>
+            <input type="text" class="form-control neon-input" name="codeUnit" required>
+          </div>
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">Hour Meter</label>
+            <input type="number" class="form-control neon-input" name="hourMeter" required>
+          </div>
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">Inspected By</label>
+            <input type="text" class="form-control neon-input" name="inspectedBy" required>
+          </div>
+          <div class="col-12 col-sm-6">
+            <label class="form-label fw-semibold">Priority</label>
+            <input type="text" class="form-control neon-input" name="priority" required>
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="fw-semibold"><i class="bi bi-list-check"></i> Detail Inspection</h5>
+          <div>
+            <button type="button" class="btn btn-gradient btn-sm me-1 btn-pop" id="addRowBtn">
+              <i class="bi bi-plus-lg"></i> Tambah Item
+            </button>
+            <button type="button" class="btn btn-gradient-dark btn-sm btn-pop" id="addSubRowBtn">
+              <i class="bi bi-plus-square"></i> Tambah Baris FPB
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive shadow-sm rounded table-card">
+          <table class="table align-middle table-hover" id="itemsTable">
+            <thead class="table-head-gradient text-white shadow-neon">
+              <tr>
+                <th>Description</th>
+                <th>Condition</th>
+                <th>Gambar</th>
+                <th>Part Number</th>
+                <th>Nama Barang</th>
+                <th>Qty</th>
+                <th>Satuan</th>
+                <th>Masuk FPB</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="text-end mt-3">
+          <button type="submit" class="btn btn-gradient btn-lg fw-semibold btn-pop"><i class="bi bi-send-fill"></i> Kirim</button>
+        </div>
+      </form>
+
+      <div id="output" class="alert alert-success mt-3 d-none rounded-3 shadow-sm"></div>
+    </div>
+
+    <div id="overlay" class="d-none">
+      <div class="spinner-border text-white" role="status"></div>
+      <p class="mt-3 text-white fw-semibold">Mengirim data, mohon tunggu...</p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
