@@ -3,6 +3,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const iframe = document.getElementById("iframe-content");
   const title = document.getElementById("panel-title");
 
+  // ==========================
+// LOGIN & REGISTER
+// ==========================
+const authForm = document.getElementById('authForm');
+const loginBtn = document.getElementById('loginBtn');
+const registerBtn = document.getElementById('registerBtn');
+const authOutput = document.getElementById('authOutput');
+const authContainer = document.getElementById('authContainer');
+const formContainer = document.getElementById('formContainer');
+
+const registerForm = document.getElementById('registerForm');
+const toRegister = document.getElementById('toRegister');
+const toLogin = document.getElementById('toLogin');
+
+const CLOUD_FLARE_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
+
   // Login
 loginBtn.addEventListener('click', async ()=>{
   const username = document.getElementById('authUsernameLogin').value.trim();
@@ -77,4 +93,5 @@ document.getElementById('registerBtnSubmit').addEventListener('click', async ()=
     });
   });
 });
+
 
