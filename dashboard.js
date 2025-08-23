@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (page === "home") {
         iframe.src = "about:blank";
         title.textContent = "Dashboard Utama";
-        iframe.contentDocument?.write("<h2 style='padding:20px'>Selamat datang di Dashboard</h2>");
+        iframe.contentDocument?.write("<h2 style='padding:20px'>Dashboard Inspection Report PT Jhonlin Baratama</h2>");
       } else {
         iframe.src = page;
         title.textContent = btn.textContent.replace("🏠 ","").replace("📝 ","").replace("💾 ","").replace("📅 ","");
@@ -17,3 +17,4 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+
