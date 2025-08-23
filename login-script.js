@@ -1,4 +1,5 @@
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMOYp7ogjRPpGybHEOfa_crJbRmOf9vTn-hDqenQHq3KHDL_-Rw9eT_dvN9NQD38KR/exec"; // Ganti dengan URL Apps Script
+// Ganti dengan URL Cloudflare Worker
+const SCRIPT_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";  
 
 function showLoader(show) {
   document.getElementById("loader").style.display = show ? "flex" : "none";
@@ -17,6 +18,7 @@ async function login() {
   try {
     const res = await fetch(SCRIPT_URL, {
       method: "POST",
+      headers: { "Content-Type": "application/json" }, // penting biar JSON dibaca benar
       body: JSON.stringify({ action: "login", username, password })
     });
     const data = await res.json();
@@ -46,6 +48,7 @@ async function register() {
   try {
     const res = await fetch(SCRIPT_URL, {
       method: "POST",
+      headers: { "Content-Type": "application/json" }, // sama juga untuk register
       body: JSON.stringify({ action: "register", username, password })
     });
     const data = await res.json();
