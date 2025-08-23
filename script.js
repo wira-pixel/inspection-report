@@ -152,3 +152,21 @@ form.addEventListener('submit', async e=>{
   setToday();
 });
 
+// ==========================
+// KIRIM DATA KE CLOUDFLARE
+// ==========================
+async function postToSheet(payload){
+  try {
+    const response = await fetch("https://delicate-union-ad99.sayaryant.workers.dev/", {
+      method: "POST",
+      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+    return await response.json();
+  } catch (err) {
+    console.error("Gagal kirim data:", err);
+    return { success: false, message: "Gagal kirim data ke server Cloudflare." };
+  }
+}
