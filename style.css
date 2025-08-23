@@ -1,259 +1,171 @@
-/* ========================
-   BODY & FONT
-======================== */
-body { 
-  background: linear-gradient(135deg, #80caff, #0099ff); 
-  font-family: 'Poppins', sans-serif; 
-  color: #333;
-  margin:0;
-  padding:0;
-}
-
-/* ========================
-   GLASS CARD (FORM & TABLE)
-======================== */
-.glass-card {
-  max-width: 1050px; 
-  margin: 30px auto; 
-  padding: 30px; 
-  background: rgba(255,255,255,0.15); 
-  border-radius: 25px; 
-  backdrop-filter: blur(15px); 
-  box-shadow: 0 15px 40px rgba(0,0,0,0.2); 
-}
-
-/* ========================
-   HEADER GRADIENT
-======================== */
-.header-gradient {
-  background: linear-gradient(90deg, #4facfe, #00f2fe);
+/* ========================== */
+/* GLOBAL / BODY */
+/* ========================== */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #1a1a1a;
   color: #fff;
+  margin: 0;
+  padding: 0;
+}
+
+h1,h2,h3,h4,h5,h6 {
   font-weight: 600;
-  padding: 15px 25px;
-  border-radius: 20px 20px 0 0;
-  text-align: center;
-  box-shadow: 0 0 15px rgba(0,0,0,0.2);
 }
 
-/* ========================
-   NEON INPUT
-======================== */
-.neon-input {
-  border-radius: 12px;
-  border: 2px solid #fff;
-  background: rgba(255,255,255,0.15);
-  padding: 10px 15px;
-  font-size: 0.95rem;
+/* ========================== */
+/* GLASS CARD / CONTAINER */
+/* ========================== */
+.glass-card, .form-container {
+  background: rgba(30,30,30,0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+}
+
+/* ========================== */
+/* HEADER GRADIENT */
+/* ========================== */
+.header-gradient {
+  background: linear-gradient(90deg, #0d6efd, #6610f2);
   color: #fff;
-  transition: all 0.3s;
-  backdrop-filter: blur(5px);
+  text-align: center;
 }
-.neon-input::placeholder {
-  color: rgba(255,255,255,0.7);
+
+/* ========================== */
+/* NEON INPUT */
+/* ========================== */
+.neon-input {
+  background: #222;
+  border: 1px solid #444;
+  color: #fff;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
+
 .neon-input:focus {
-  border-color: #00f2fe;
-  box-shadow: 0 0 15px #00f2fe, 0 0 30px #4facfe;
+  border-color: #0d6efd;
+  box-shadow: 0 0 8px #0d6efd;
   outline: none;
 }
 
-/* ========================
-   BUTTONS
-======================== */
+/* ========================== */
+/* BUTTONS GRADIENT / NEON */
+/* ========================== */
 .btn-gradient {
-  background: linear-gradient(90deg, #4facfe, #00f2fe);
+  background: linear-gradient(90deg,#0d6efd,#6610f2);
+  border: none;
   color: #fff;
-  border-radius: 50px;
-  padding: 10px 25px;
   font-weight: 600;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
 }
-.btn-gradient:hover {
-  box-shadow: 0 0 15px #00f2fe, 0 0 30px #4facfe;
-  transform: scale(1.08);
+
+.btn-gradient:hover, .btn-gradient:focus {
+  filter: brightness(1.2);
+  transform: translateY(-2px);
 }
+
 .btn-gradient-dark {
-  background: linear-gradient(90deg, #1f6aa5, #3795d1);
+  background: linear-gradient(90deg,#343a40,#495057);
+  border: none;
   color: #fff;
-  border-radius: 50px;
-  padding: 10px 25px;
-  transition: all 0.3s;
-}
-.btn-gradient-dark:hover {
-  box-shadow: 0 0 15px #3795d1, 0 0 30px #1f6aa5;
-  transform: scale(1.08);
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
-/* ========================
-   POP BUTTON
-======================== */
+.btn-gradient-dark:hover, .btn-gradient-dark:focus {
+  filter: brightness(1.2);
+  transform: translateY(-2px);
+}
+
 .btn-pop {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.btn-pop:active {
-  transform: scale(0.95);
-  box-shadow: 0 0 20px #00f2fe inset;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  border-radius: 10px;
 }
 
-/* ========================
-   TABLE CARD
-======================== */
+/* ========================== */
+/* TABLE */
 .table-card {
-  background: rgba(255,255,255,0.25);
-  border-radius: 20px;
+  background: rgba(30,30,30,0.85);
+  border-radius: 10px;
   overflow: hidden;
 }
 
 .table-head-gradient {
-  background: linear-gradient(90deg, #4facfe, #00f2fe);
-  font-weight: 600;
-  text-align: center;
-  box-shadow: 0 0 10px #00f2fe;
+  background: linear-gradient(90deg,#0d6efd,#6610f2);
 }
 
-.table tbody tr {
-  transition: all 0.3s ease;
+/* ========================== */
+/* IMG PREVIEW */
+.img-preview {
+  max-width: 50px;
+  max-height: 50px;
+  margin-top: 5px;
+  border-radius: 5px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
 }
 
-.table tbody tr:hover {
-  background: rgba(0,192,255,0.2);
-  box-shadow: 0 0 15px #00f2fe inset;
-}
-
-/* ========================
-   IMAGE PREVIEW
-======================== */
-.img-preview { 
-  width: 80px; 
-  height: 80px; 
-  margin-top: 6px; 
-  display: block; 
-  border-radius: 16px; 
-  object-fit: cover; 
-  box-shadow: 0 3px 10px rgba(0,0,0,0.25); 
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-.img-preview:hover {
-  transform: scale(1.2) rotate(3deg);
-  box-shadow: 0 0 20px #00f2fe, 0 0 30px #4facfe;
-}
-
-/* ========================
-   CHECKBOX
-======================== */
-input[type="checkbox"] { 
-  transform: scale(1.3); 
-  margin-top:5px; 
-}
-
-/* ========================
-   ROW ANIMATION
-======================== */
-.main-row { 
-  background: rgba(255,255,255,0.3); 
-  animation: slideIn 0.5s ease;
-}
-.sub-row { 
-  background: rgba(255,255,255,0.1); 
-  animation: slideIn 0.5s ease;
-}
-
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.sub-row td:first-child, 
-.sub-row td:nth-child(2),
-.sub-row td:nth-child(3) {
-  border-top: none;
-  border-left: none;
-}
-
-/* ========================
-   OVERLAY LOADING
-======================== */
+/* ========================== */
+/* OVERLAY LOADING */
 #overlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.65);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  z-index: 9999;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.7);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+  text-align:center;
 }
 
-/* ========================
-   UTILITY
-======================== */
-.no-border-left { border-left: none !important; }
-.shadow-neon { text-shadow: 0 0 10px #00f2fe, 0 0 20px #4facfe; }
-
-/* ========================
-   LOGIN & REGISTER CARD
-======================== */
-.auth-card {
-  max-width: 400px;
-  margin: 60px auto;
-  padding: 40px 30px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 25px;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-  text-align: center;
-  color: #fff;
-  animation: fadeIn 0.7s ease;
+#overlay p {
+  margin-top: 15px;
+  font-weight: 600;
+  font-size:1.2rem;
 }
 
-.auth-card {
-  position: absolute;
-  width: 100%;
-  top: 0; left: 0;
-  opacity: 0;
-  transform: translateX(50px);
-  transition: all 0.5s ease;
-  pointer-events: none;
+/* ========================== */
+/* TABLE BORDER SUB ROW */
+.sub-row td {
+  border-left: 2px dashed #444;
 }
 
-.auth-card.active {
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
+.no-border-left {
+  border-left: none !important;
 }
 
-.auth-card h2 {
-  font-size: 1.8rem;
-  margin-bottom: 20px;
-  text-shadow: 0 0 5px #00f2fe, 0 0 10px #4facfe;
+/* ========================== */
+/* ALERT */
+.alert {
+  transition: all 0.3s ease;
+  text-align:center;
 }
 
-.auth-card .neon-input {
-  margin-bottom: 15px;
+/* ========================== */
+/* SCROLLBAR */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-.auth-card .btn-gradient {
-  width: 100%;
-  margin-top: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+::-webkit-scrollbar-thumb {
+  background: #0d6efd;
+  border-radius: 10px;
 }
 
-/* ========================
-   FADE IN ANIMATION
-======================== */
-@keyframes fadeIn {
-  from { opacity:0; transform: translateY(-20px); }
-  to { opacity:1; transform: translateY(0); }
+::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
 }
 
-/* ========================
-   RESPONSIVE
-======================== */
-@media (max-width: 480px){
-  .glass-card { padding: 20px; margin: 20px; }
-  .auth-card { padding: 30px 20px; margin: 40px 15px; }
-  .img-preview { width: 60px; height: 60px; }
+/* ========================== */
+/* RESPONSIVE */
+@media(max-width:768px){
+  .row.g-3.mb-3 > .col-12.col-sm-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
 }
