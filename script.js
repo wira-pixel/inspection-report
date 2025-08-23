@@ -269,5 +269,3 @@ form.addEventListener('submit', async e=>{
   overlay.classList.add('d-none');
   allInputs.forEach(el=>el.disabled=false);
 });
-
-i
