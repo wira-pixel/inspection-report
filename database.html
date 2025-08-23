@@ -2,93 +2,56 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Database Inspeksi</title>
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Database Dashboard</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .filter-box { margin-bottom: 15px; }
-    .filter-box input, .filter-box select {
-      margin-right: 10px;
-      padding: 5px;
-    }
+    body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background: #007bff; color: #fff; }
   </style>
 </head>
 <body>
-  <h2>📊 Database Inspeksi</h2>
-
-  <div class="filter-box">
-    <label for="filterDate">Filter Tanggal:</label>
-    <input type="date" id="filterDate">
-
-    <label for="filterCode">Code Unit:</label>
-    <input type="text" id="filterCode" placeholder="Cari code unit...">
-
-    <button id="resetFilter">Reset</button>
-  </div>
-
-  <table id="databaseTable" class="display" style="width:100%">
+  <h2>Data Unit dari Google Sheet</h2>
+  <table id="dataTable">
     <thead>
       <tr>
         <th>Nama Unit</th>
         <th>Tanggal</th>
-        <th>Hour Meter</th>
+        <th>HM</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 
-  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script>
-    let table;
-
-    // Ganti URL ini dengan endpoint Cloudflare Worker kamu
-    const API_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
+    // Ganti dengan link Cloudflare kamu
+    const endpoint = "https://delicate-union-ad99.sayaryant.workers.dev/";
 
     async function loadData() {
       try {
-        const res = await fetch(API_URL);
-        const data = await res.json(); // pastikan Apps Script return JSON array
-        table = $('#databaseTable').DataTable({
-          data: data,
-          columns: [
-            { data: 'codeUnit' },
-            { data: 'date' },
-            { data: 'hourMeter' }
-          ],
-          destroy: true, // biar bisa reload
-          pageLength: 10
+        const res = await fetch(endpoint);
+        const data = await res.json(); // pastikan endpoint balikan JSON
+
+        // ambil hanya nama_unit, tanggal, hm
+        const tbody = document.querySelector("#dataTable tbody");
+        tbody.innerHTML = ""; // clear
+
+        data.forEach(row => {
+          const tr = document.createElement("tr");
+
+          // asumsi nama field: row.nama_unit, row.tanggal, row.hm
+          tr.innerHTML = `
+            <td>${row.nama_unit || "-"}</td>
+            <td>${row.tanggal || "-"}</td>
+            <td>${row.hm || "-"}</td>
+          `;
+          tbody.appendChild(tr);
         });
       } catch (err) {
-        console.error("Gagal load data:", err);
+        console.error("Gagal ambil data:", err);
       }
     }
-
-    // Filter
-    function applyFilter() {
-      const dateVal = document.getElementById('filterDate').value;
-      const codeVal = document.getElementById('filterCode').value.toLowerCase();
-
-      table.rows().every(function() {
-        const row = this.data();
-        const matchDate = !dateVal || row.date === dateVal;
-        const matchCode = !codeVal || row.codeUnit.toLowerCase().includes(codeVal);
-
-        if (matchDate && matchCode) {
-          this.node().style.display = "";
-        } else {
-          this.node().style.display = "none";
-        }
-      });
-    }
-
-    document.getElementById('filterDate').addEventListener('change', applyFilter);
-    document.getElementById('filterCode').addEventListener('keyup', applyFilter);
-    document.getElementById('resetFilter').addEventListener('click', ()=>{
-      document.getElementById('filterDate').value = "";
-      document.getElementById('filterCode').value = "";
-      applyFilter();
-    });
 
     loadData();
   </script>
