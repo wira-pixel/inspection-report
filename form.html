@@ -10,49 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- LOGIN & REGISTER -->
-  <div id="authContainer" class="d-flex flex-column justify-content-center align-items-center vh-100">
-    <div class="glass-card p-4" style="max-width:400px; width:100%;">
-      <div class="text-center mb-4 header-gradient p-3 rounded-3 shadow-neon">
-        <h3 class="fw-bold text-white"><i class="bi bi-person-circle"></i> Login / Register</h3>
-      </div>
-
-      <form id="authForm">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Username</label>
-          <input type="text" class="form-control neon-input" id="authUsernameLogin" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Password</label>
-          <input type="password" class="form-control neon-input" id="authPasswordLogin" required>
-        </div>
-        <div class="d-flex justify-content-between">
-          <button type="button" id="loginBtn" class="btn btn-gradient btn-pop">Login</button>
-          <button type="button" id="registerBtn" class="btn btn-gradient-dark btn-pop">Register</button>
-        </div>
-      </form>
-
-      <form id="registerForm" class="d-none mt-3">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Username</label>
-          <input type="text" class="form-control neon-input" id="authUsernameRegister" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Password</label>
-          <input type="password" class="form-control neon-input" id="authPasswordRegister" required>
-        </div>
-        <button type="button" id="registerBtnSubmit" class="btn btn-gradient-dark btn-pop">Buat Akun</button>
-      </form>
-
-      <div class="text-center mt-3">
-        <button type="button" id="toRegister" class="btn btn-link text-decoration-none">Belum punya akun? Register</button>
-        <button type="button" id="toLogin" class="btn btn-link text-decoration-none d-none">Sudah punya akun? Login</button>
-      </div>
-
-      <div id="authOutput" class="alert mt-3 d-none rounded-3 shadow-sm"></div>
-    </div>
-  </div>
-
+  
   <!-- FORM INSPEKSI -->
   <div id="formContainer" class="d-none">
     <div class="form-container glass-card p-4">
@@ -138,4 +96,5 @@
   <script src="script.js"></script>
 </body>
 </html>
+
 
