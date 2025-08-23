@@ -1,35 +1,4 @@
 // ==========================
-// LOGIN & REGISTER
-// ==========================
-const authForm = document.getElementById('authForm');
-const loginBtn = document.getElementById('loginBtn');
-const registerBtn = document.getElementById('registerBtn');
-const authOutput = document.getElementById('authOutput');
-const authContainer = document.getElementById('authContainer');
-const formContainer = document.getElementById('formContainer');
-
-const registerForm = document.getElementById('registerForm');
-const toRegister = document.getElementById('toRegister');
-const toLogin = document.getElementById('toLogin');
-
-const CLOUD_FLARE_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
-
-async function postToSheet(payload){
-  try{
-    const res = await fetch(CLOUD_FLARE_URL,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify(payload)
-    });
-    if(!res.ok) throw new Error("HTTP "+res.status);
-    return await res.json();
-  } catch(err){
-    console.error(err);
-    return {success:false, message:'❌ Koneksi gagal'};
-  }
-}
-
-// ==========================
 // FORM INSPEKSI DYNAMIC
 // ==========================
 const form = document.getElementById('myForm');
@@ -182,4 +151,5 @@ form.addEventListener('submit', async e=>{
   addRow();
   setToday();
 });
+
 
