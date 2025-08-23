@@ -113,7 +113,7 @@ function setToday() {
   const yyyy = today.getFullYear();
   const mm = String(today.getMonth()+1).padStart(2,'0');
   const dd = String(today.getDate()).padStart(2,'0');
-  el.value = ${yyyy}-${mm}-${dd};
+  el.value = `${yyyy}-${mm}-${dd}`;
 }
 
 // ==========================
@@ -269,3 +269,4 @@ form.addEventListener('submit', async e=>{
   overlay.classList.add('d-none');
   allInputs.forEach(el=>el.disabled=false);
 });
+
