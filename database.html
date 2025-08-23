@@ -1,19 +1,42 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Database Dashboard</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; }
-    table { border-collapse: collapse; width: 100%; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-    th { background: #007bff; color: #fff; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f4f6f9;
+    }
+    h2 {
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    th {
+      background: #007bff;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background: #f9f9f9;
+    }
   </style>
 </head>
 <body>
-  <h2>Data Unit dari Google Sheet</h2>
-  <table id="dataTable">
+  <h2>Database Unit</h2>
+  <table id="data-table">
     <thead>
       <tr>
         <th>Nama Unit</th>
@@ -25,31 +48,42 @@
   </table>
 
   <script>
-    // Ganti dengan link Cloudflare kamu
-    const endpoint = "https://delicate-union-ad99.sayaryant.workers.dev/";
-
     async function loadData() {
       try {
-        const res = await fetch(endpoint);
-        const data = await res.json(); // pastikan endpoint balikan JSON
+        // Ganti dengan URL Cloudflare Worker-mu
+        const response = await fetch("https://delicate-union-ad99.sayaryant.workers.dev/");
+        const text = await response.text();
 
-        // ambil hanya nama_unit, tanggal, hm
-        const tbody = document.querySelector("#dataTable tbody");
-        tbody.innerHTML = ""; // clear
+        console.log("Response dari server:", text);
+
+        let data;
+        try {
+          data = JSON.parse(text); // coba parsing JSON
+        } catch (e) {
+          throw new Error("Response bukan JSON valid. Cek Cloudflare Worker-mu!");
+        }
+
+        const tbody = document.querySelector("#data-table tbody");
+        tbody.innerHTML = "";
 
         data.forEach(row => {
           const tr = document.createElement("tr");
 
-          // asumsi nama field: row.nama_unit, row.tanggal, row.hm
+          // pastikan property sesuai JSON dari Apps Script / Worker
+          const nama_unit = row.nama_unit || "-";
+          const tanggal = row.tanggal || "-";
+          const hm = row.hm || "-";
+
           tr.innerHTML = `
-            <td>${row.nama_unit || "-"}</td>
-            <td>${row.tanggal || "-"}</td>
-            <td>${row.hm || "-"}</td>
+            <td>${nama_unit}</td>
+            <td>${tanggal}</td>
+            <td>${hm}</td>
           `;
           tbody.appendChild(tr);
         });
       } catch (err) {
         console.error("Gagal ambil data:", err);
+        alert("Gagal ambil data. Cek console untuk detail.");
       }
     }
 
