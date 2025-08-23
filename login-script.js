@@ -1,4 +1,4 @@
-const SCRIPT_URL = "PASTE_URL_APPS_SCRIPT_EXEC_HERE"; // Ganti dengan URL Apps Script
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMOYp7ogjRPpGybHEOfa_crJbRmOf9vTn-hDqenQHq3KHDL_-Rw9eT_dvN9NQD38KR/exec"; // Ganti dengan URL Apps Script
 
 function showLoader(show) {
   document.getElementById("loader").style.display = show ? "flex" : "none";
