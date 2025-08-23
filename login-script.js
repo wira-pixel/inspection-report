@@ -71,11 +71,5 @@ async function register() {
     if (data.success) {
   localStorage.setItem("loggedIn", "true");
   window.location.href = "dashboard.html"; // langsung pindah tanpa alert
-}
-
-  } catch (err) {
-    showLoader(false);
-    alert("Gagal terhubung ke server!");
-    console.error(err);
   }
 }
