@@ -17,24 +17,25 @@ h1,h2,h3,h4,h5,h6 {
 /* ========================== */
 /* GLASS CARD / CONTAINER */
 /* ========================== */
-.glass-card, .form-container, #formContainer, #authContainer {
+.glass-card, .form-container {
   background: rgba(255,255,255,0.05);
   backdrop-filter: blur(12px);
   border-radius: 18px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.6);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  max-width: 550px;       /* lebih compact */
-  margin: 30px auto;      /* center horizontal */
-  padding: 25px 30px;
+  max-width: 600px;       /* lebih kecil, compact */
+  margin: 30px auto;      /* center horizontal + spacing */
+  padding: 25px 30px;     /* nyaman */
 }
 
-.glass-card:hover, .form-container:hover, #formContainer:hover, #authContainer:hover {
+.glass-card:hover, .form-container:hover {
   transform: translateY(-4px);
   box-shadow: 0 15px 35px rgba(0,0,0,0.7);
 }
 
 /* ========================== */
 /* HEADER GRADIENT */
+/* ========================== */
 .header-gradient {
   background: linear-gradient(90deg, #6a11cb, #2575fc);
   color: #fff;
@@ -43,12 +44,12 @@ h1,h2,h3,h4,h5,h6 {
   border-radius: 12px 12px 0 0;
   box-shadow: 0 4px 10px rgba(0,0,0,0.5);
   font-size: 1.2rem;
-  margin-bottom: 15px;
 }
 
 /* ========================== */
 /* NEON INPUT */
-.neon-input, input.form-control, select.form-select {
+/* ========================== */
+.neon-input {
   background: rgba(30,30,30,0.85);
   border: 1px solid #444;
   color: #fff;
@@ -58,7 +59,7 @@ h1,h2,h3,h4,h5,h6 {
   padding: 7px 10px;
 }
 
-.neon-input:focus, input.form-control:focus, select.form-select:focus {
+.neon-input:focus {
   border-color: #6a11cb;
   box-shadow: 0 0 10px #6a11cb;
   outline: none;
@@ -66,18 +67,17 @@ h1,h2,h3,h4,h5,h6 {
 
 /* ========================== */
 /* BUTTONS GRADIENT / NEON */
-.btn-gradient, .btn-gradient-dark {
-  border-radius: 12px;
-  font-size: 0.95rem;
-  padding: 8px 14px;
-  font-weight: 600;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-  transition: all 0.3s ease, transform 0.2s ease;
-}
-
+/* ========================== */
 .btn-gradient {
   background: linear-gradient(90deg,#6a11cb,#2575fc);
+  border: none;
   color: #fff;
+  font-weight: 600;
+  transition: all 0.3s ease, transform 0.2s ease;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+  font-size: 0.95rem;
+  padding: 8px 14px;
 }
 
 .btn-gradient:hover, .btn-gradient:focus {
@@ -87,7 +87,13 @@ h1,h2,h3,h4,h5,h6 {
 
 .btn-gradient-dark {
   background: linear-gradient(90deg,#343a40,#495057);
+  border: none;
   color: #fff;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+  font-size: 0.95rem;
+  padding: 8px 14px;
 }
 
 .btn-gradient-dark:hover, .btn-gradient-dark:focus {
@@ -122,8 +128,8 @@ h1,h2,h3,h4,h5,h6 {
 /* ========================== */
 /* IMG PREVIEW */
 .img-preview {
-  max-width: 50px;
-  max-height: 50px;
+  max-width: 40px;
+  max-height: 40px;
   margin-top: 5px;
   border-radius: 8px;
   box-shadow: 0 3px 12px rgba(0,0,0,0.6);
@@ -201,7 +207,7 @@ h1,h2,h3,h4,h5,h6 {
     max-width: 100%;
   }
 
-  .glass-card, .form-container, #formContainer, #authContainer {
+  .glass-card, .form-container {
     max-width: 90%;
     margin: 20px auto;
     padding: 20px;
