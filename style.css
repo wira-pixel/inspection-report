@@ -23,10 +23,8 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 18px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  width: 100%; /* Full-width form */
-  max-width: 900px; /* Batasi maksimal supaya tetap enak dilihat */
-  margin: 0 auto; /* Center */
-  padding: 25px;
+  width: 100%; /* full-width */
+  padding: 25px; /* jarak di dalam tetap nyaman */
 }
 
 .glass-card:hover, .form-container:hover {
@@ -209,3 +207,4 @@ h1, h2, h3, h4, h5, h6 {
     padding: 20px;
   }
 }
+
