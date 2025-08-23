@@ -3,90 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- LOGIN & REGISTER -->
-  <div id="authContainer" class="d-flex flex-column justify-content-center align-items-center vh-100">
-    <div class="glass-card p-4" style="max-width:400px; width:100%;">
-      <div class="text-center mb-4 header-gradient p-3 rounded-3 shadow-neon">
-        <h3 class="fw-bold text-white"><i class="bi bi-person-circle"></i> Login / Register</h3>
-      </div>
-
-      <form id="authForm">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Username</label>
-          <input type="text" class="form-control neon-input" id="authUsernameLogin" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Password</label>
-          <input type="password" class="form-control neon-input" id="authPasswordLogin" required>
-        </div>
-        <div class="d-flex justify-content-between">
-          <button type="button" id="loginBtn" class="btn btn-gradient btn-pop">Login</button>
-          <button type="button" id="registerBtn" class="btn btn-gradient-dark btn-pop">Register</button>
-        </div>
-      </form>
-
-      <form id="registerForm" class="d-none mt-3">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Username</label>
-          <input type="text" class="form-control neon-input" id="authUsernameRegister" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Password</label>
-          <input type="password" class="form-control neon-input" id="authPasswordRegister" required>
-        </div>
-        <button type="button" id="registerBtnSubmit" class="btn btn-gradient-dark btn-pop">Buat Akun</button>
-      </form>
-
-      <div class="text-center mt-3">
-        <button type="button" id="toRegister" class="btn btn-link text-decoration-none">Belum punya akun? Register</button>
-        <button type="button" id="toLogin" class="btn btn-link text-decoration-none d-none">Sudah punya akun? Login</button>
-      </div>
-
-      <div id="authOutput" class="alert mt-3 d-none rounded-3 shadow-sm"></div>
-    </div>
-  </div>
-
+  <title>Dashboard Inspeksi</title>
+  <link rel="stylesheet" href="dashboard.css">
 </head>
-<body class="bg-light">
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>Dashboard Inspeksi</h2>
+      <p class="version">v1.0 • Single File</p>
+      <nav>
+        <ul>
+          <li><button data-page="home">🏠 Dashboard</button></li>
+          <li><button data-page="index.html">📝 Form Inspeksi</button></li>
+          <li><button data-page="database.html">💾 Database</button></li>
+          <li><button data-page="jadwal.html">📅 Jadwal Inspeksi</button></li>
+        </ul>
+      </nav>
+    </aside>
 
-  <nav class="navbar navbar-dark bg-dark">
-    <div class="container-fluid">
-      <span class="navbar-brand mb-0 h1">Dashboard</span>
-    </div>
-  </nav>
+    <!-- Main -->
+    <main class="main">
+      <header class="header">
+        <h1 id="panel-title">Panel</h1>
+        <input type="text" placeholder="Cari…" class="search-box">
+      </header>
 
-  <div class="container py-5">
-    <h3 class="mb-4 text-center">Selamat Datang di Dashboard</h3>
-
-    <div class="row g-4">
-      <div class="col-md-4">
-        <div class="card shadow-sm text-center p-3">
-          <h5 class="card-title">Form Inspeksi</h5>
-          <p class="card-text">Isi laporan inspeksi unit.</p>
-          <a href="form.html" class="btn btn-primary">Buka Form</a>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card shadow-sm text-center p-3">
-          <h5 class="card-title">Laporan</h5>
-          <p class="card-text">Lihat data laporan di Google Sheets.</p>
-          <a href="https://docs.google.com/spreadsheets/d/1c-S6kwRr8M62AF5bkWnAeEBBENjL30QR2AAN8pV4pNA/edit" target="_blank" class="btn btn-secondary">Lihat Laporan</a>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card shadow-sm text-center p-3">
-          <h5 class="card-title">Pengaturan</h5>
-          <p class="card-text">Atur preferensi aplikasi.</p>
-          <button class="btn btn-outline-dark">Pengaturan</button>
-        </div>
-      </div>
-    </div>
+      <section class="content">
+        <iframe id="iframe-content" src="index.html" frameborder="0"></iframe>
+      </section>
+    </main>
   </div>
 
+  <script src="dashboard.js"></script>
 </body>
 </html>
-
-
