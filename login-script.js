@@ -30,10 +30,11 @@ async function login() {
     const data = await res.json();
     showLoader(false);
 
-    alert(data.message);
     if (data.success) {
       localStorage.setItem("loggedIn", "true");
-      window.location.href = "dashboard.html";
+      window.location.href = "dashboard.html"; // langsung redirect tanpa alert
+    } else {
+      alert(data.message); // tetap tampilkan kalau gagal login
     }
   } catch (err) {
     showLoader(false);
@@ -69,7 +70,14 @@ async function register() {
     showLoader(false);
 
     if (data.success) {
-  localStorage.setItem("loggedIn", "true");
-  window.location.href = "dashboard.html"; // langsung pindah tanpa alert
+      localStorage.setItem("loggedIn", "true");
+      window.location.href = "dashboard.html"; // langsung redirect tanpa alert
+    } else {
+      alert(data.message); // tetap kasih pesan kalau gagal register
+    }
+  } catch (err) {
+    showLoader(false);
+    alert("Gagal terhubung ke server!");
+    console.error(err);
   }
 }
