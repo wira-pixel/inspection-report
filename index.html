@@ -6,124 +6,139 @@
   <title>Login / Register</title>
   <style>
     body {
+      margin: 0;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      background: #081c34;
+      background: #0a1a3f;
       font-family: Arial, sans-serif;
     }
-    .login-box {
-      background: #0f2a4a;
+    .login-container {
+      background: #0d204b;
       padding: 30px;
       border-radius: 15px;
+      box-shadow: 0px 4px 20px rgba(0,0,0,0.4);
       width: 350px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.5);
-    }
-    .login-box h2 {
-      text-align: center;
       color: #fff;
+    }
+    .login-header {
+      text-align: center;
+      background: linear-gradient(90deg,#01b6ff,#007bff);
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .form-group {
       margin-bottom: 20px;
-      background: linear-gradient(45deg, #007bff, #00d4ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
     }
     label {
-      color: #ccc;
       display: block;
-      margin: 10px 0 5px;
+      margin-bottom: 6px;
+      font-weight: bold;
     }
     input {
       width: 100%;
-      padding: 10px;
-      border-radius: 8px;
+      padding: 12px;
       border: none;
-      margin-bottom: 15px;
+      border-radius: 8px;
+      outline: none;
+      font-size: 14px;
     }
     .btn {
       width: 48%;
-      padding: 10px;
-      margin: 5px 1%;
+      padding: 12px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      font-size: 15px;
       font-weight: bold;
+      margin-top: 10px;
+      transition: 0.3s;
     }
     .btn-login {
-      background: linear-gradient(45deg, #007bff, #00d4ff);
-      color: #fff;
+      background: linear-gradient(90deg,#01b6ff,#007bff);
+      color: white;
+    }
+    .btn-login:hover {
+      opacity: 0.8;
     }
     .btn-register {
-      background: #1b2f4f;
-      color: #fff;
+      background: #1a2a50;
+      color: #bbb;
     }
-    .link {
+    .btn-register:hover {
+      background: #243a6a;
+    }
+    .btn-container {
+      display: flex;
+      justify-content: space-between;
+    }
+    .register-link {
       text-align: center;
-      margin-top: 10px;
+      margin-top: 15px;
     }
-    .link a {
-      color: #00d4ff;
+    .register-link a {
+      color: #2a8cff;
       text-decoration: none;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
-  <div class="login-box">
-    <h2>🔐 Login / Register</h2>
-    <label for="username">Username</label>
-    <input type="text" id="username" placeholder="Masukkan username">
-    
-    <label for="password">Password</label>
-    <input type="password" id="password" placeholder="Masukkan password">
-
-    <div style="display:flex; justify-content:space-between;">
+  <div class="login-container">
+    <div class="login-header">
+      <span>🔑 Login / Register</span>
+    </div>
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" placeholder="Masukkan Username">
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Masukkan Password">
+    </div>
+    <div class="btn-container">
       <button class="btn btn-login" onclick="login()">Login</button>
       <button class="btn btn-register" onclick="register()">Register</button>
     </div>
-
-    <div class="link">
-      <p>Belum punya akun? <a href="#" onclick="register()">Register</a></p>
+    <div class="register-link">
+      <a href="#">Belum punya akun? Register</a>
     </div>
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMOYp7ogjRPpGybHEOfa_crJbRmOf9vTn-hDqenQHq3KHDL_-Rw9eT_dvN9NQD38KR/exec"; // ganti dengan URL Web App Apps Script kamu
+    const SCRIPT_URL = "PASTE_URL_APPS_SCRIPT_EXEC_HERE"; // ganti dengan URL deploy Apps Script
 
     async function login(){
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
 
-      const res = await fetch(SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "login",
-          username: username,
-          password: password
-        })
+      const res = await fetch(SCRIPT_URL,{
+        method:"POST",
+        body: JSON.stringify({action:"login", username, password})
       });
-
       const data = await res.json();
+
       alert(data.message);
       if(data.success){
         localStorage.setItem("loggedIn", "true");
-        window.location.href = "dashboard.html"; // redirect setelah login
+        window.location.href = "dashboard.html";
       }
     }
 
     async function register(){
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
 
-      const res = await fetch(SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "register",
-          username: username,
-          password: password
-        })
+      const res = await fetch(SCRIPT_URL,{
+        method:"POST",
+        body: JSON.stringify({action:"register", username, password})
       });
-
       const data = await res.json();
+
       alert(data.message);
     }
   </script>
