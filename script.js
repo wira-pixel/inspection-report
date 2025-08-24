@@ -170,3 +170,82 @@ async function postToSheet(payload){
     return { success: false, message: "Gagal kirim data ke server Cloudflare." };
   }
 }
+
+// ==========================
+// DATABASE SEARCH & FILTER
+// ==========================
+let globalDataDB = [];
+
+async function loadDatabase() {
+  try {
+    const response = await fetch("https://delicate-union-ad99.sayaryant.workers.dev/");
+    if (!response.ok) throw new Error("HTTP Error " + response.status);
+
+    const data = await response.json();
+    console.log("Database JSON:", data);
+
+    if (!data.success || !Array.isArray(data.data)) {
+      console.error("Data database tidak valid:", data);
+      return;
+    }
+
+    globalDataDB = data.data;
+    renderTableDB(globalDataDB);
+
+  } catch (err) {
+    console.error("Gagal ambil data database:", err);
+  }
+}
+
+function renderTableDB(dataArray) {
+  const tbody = document.querySelector("#data-table tbody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  dataArray.forEach(row => {
+    const tr = document.createElement("tr");
+    const codeUnit = row["codeUnit"] || row["Code Unit"] || "-";
+    const date     = row["date"]     || row["Date"]     || "-";
+    const hourMeter= row["hourMeter"]|| row["Hour Meter"]|| "-";
+
+    tr.innerHTML = `
+      <td>${codeUnit}</td>
+      <td>${date}</td>
+      <td>${hourMeter}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Setup search/filter
+const searchInput = document.getElementById("searchInput");
+const minHour     = document.getElementById("minHour");
+const maxHour     = document.getElementById("maxHour");
+const filterBtn   = document.getElementById("filterBtn");
+const resetBtn    = document.getElementById("resetBtn");
+
+if (filterBtn && resetBtn) {
+  filterBtn.addEventListener("click", () => {
+    const searchText = searchInput?.value.toLowerCase() || "";
+    const min = parseFloat(minHour?.value) || 0;
+    const max = parseFloat(maxHour?.value) || Infinity;
+
+    const filteredData = globalDataDB.filter(row => {
+      const codeUnit = (row["codeUnit"] || row["Code Unit"] || "").toLowerCase();
+      const hourMeter = parseFloat(row["hourMeter"] || row["Hour Meter"] || 0);
+      return codeUnit.includes(searchText) && hourMeter >= min && hourMeter <= max;
+    });
+
+    renderTableDB(filteredData);
+  });
+
+  resetBtn.addEventListener("click", () => {
+    if (searchInput) searchInput.value = "";
+    if (minHour) minHour.value = "";
+    if (maxHour) maxHour.value = "";
+    renderTableDB(globalDataDB);
+  });
+}
+
+// Load database otomatis
+loadDatabase();
