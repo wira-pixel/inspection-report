@@ -37,7 +37,8 @@ document.getElementById("jadwalForm").addEventListener("submit", async (e) => {
 // Ambil data dari Cloudflare Worker
 async function loadJadwal() {
   try {
-    const res = await fetch(`${scriptURL}?action=readJadwal`, { method: "GET" }); // 🔑 ambil khusus jadwal
+    // 🔑 pakai type=jadwal biar App Script ambil sheet Jadwal
+    const res = await fetch(`${scriptURL}?type=jadwal`, { method: "GET" });
     const result = await res.json();
 
     const tbody = document.getElementById("jadwalBody");
@@ -51,10 +52,10 @@ async function loadJadwal() {
     result.data.forEach(row => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${row.kodeUnit || ""}</td>
-        <td>${row.tanggal || ""}</td>
-        <td>${row.lokasi || ""}</td>
-        <td>${row.sudahInspeksi || "Belum"}</td>
+        <td>${row.Kode\ Unit || row.kodeUnit || ""}</td>
+        <td>${row.Tanggal || row.tanggal || ""}</td>
+        <td>${row.Lokasi || row.lokasi || ""}</td>
+        <td>${row["Sudah Inspeksi"] || row.sudahInspeksi || "Belum"}</td>
       `;
       tbody.appendChild(tr);
     });
