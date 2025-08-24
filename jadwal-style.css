@@ -5,7 +5,7 @@ body {
   margin: 0;
   padding: 0;
 }
-.
+
 .container {
   max-width: 800px;
   margin: 40px auto;
@@ -60,4 +60,5 @@ th {
   background: #00d4ff;
   color: #000;
 }
+
 
