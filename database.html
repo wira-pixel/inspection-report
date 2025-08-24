@@ -32,10 +32,34 @@
     tr:nth-child(even) {
       background: #f9f9f9;
     }
+    .filters {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .filters input {
+      padding: 6px;
+      font-size: 14px;
+    }
+    .filters button {
+      padding: 6px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <h2>Database Unit</h2>
+
+  <div class="filters">
+    <input type="text" id="searchInput" placeholder="Search Code Unit...">
+    <input type="number" id="minHour" placeholder="Min Hour Meter">
+    <input type="number" id="maxHour" placeholder="Max Hour Meter">
+    <button id="filterBtn">Filter</button>
+    <button id="resetBtn">Reset</button>
+  </div>
+
   <table id="data-table">
     <thead>
       <tr>
@@ -48,6 +72,8 @@
   </table>
 
   <script>
+  let globalData = []; // Simpan semua data dari server
+
   async function loadData() {
     try {
       const response = await fetch("https://delicate-union-ad99.sayaryant.workers.dev/");
@@ -55,9 +81,6 @@
 
       const data = await response.json();
       console.log("Response JSON:", data);
-
-      const tbody = document.querySelector("#data-table tbody");
-      tbody.innerHTML = "";
 
       // Pastikan response sukses
       if (!data.success) {
@@ -72,27 +95,61 @@
         return;
       }
 
-      // Iterasi data
-      data.data.forEach(row => {
-        const tr = document.createElement("tr");
-
-        const codeUnit = row["Code Unit"] || "-";
-        const date     = row["Date"]      || "-";
-        const hourMeter= row["Hour Meter"]|| "-";
-
-        tr.innerHTML = `
-          <td>${codeUnit}</td>
-          <td>${date}</td>
-          <td>${hourMeter}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+      globalData = data.data; // Simpan data ke global
+      renderTable(globalData);
 
     } catch (err) {
       console.error("Gagal ambil data:", err);
       alert("Gagal ambil data. Cek console untuk detail.");
     }
   }
+
+  function renderTable(dataArray) {
+    const tbody = document.querySelector("#data-table tbody");
+    tbody.innerHTML = "";
+
+    dataArray.forEach(row => {
+      const tr = document.createElement("tr");
+      const codeUnit = row["Code Unit"] || "-";
+      const date     = row["Date"]      || "-";
+      const hourMeter= row["Hour Meter"]|| "-";
+
+      tr.innerHTML = `
+        <td>${codeUnit}</td>
+        <td>${date}</td>
+        <td>${hourMeter}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Filter & Search
+  const searchInput = document.getElementById("searchInput");
+  const minHour = document.getElementById("minHour");
+  const maxHour = document.getElementById("maxHour");
+  const filterBtn = document.getElementById("filterBtn");
+  const resetBtn = document.getElementById("resetBtn");
+
+  filterBtn.addEventListener("click", () => {
+    const searchText = searchInput.value.toLowerCase();
+    const min = parseFloat(minHour.value) || 0;
+    const max = parseFloat(maxHour.value) || Infinity;
+
+    const filteredData = globalData.filter(row => {
+      const codeUnit = row["Code Unit"]?.toLowerCase() || "";
+      const hourMeter = parseFloat(row["Hour Meter"]) || 0;
+      return codeUnit.includes(searchText) && hourMeter >= min && hourMeter <= max;
+    });
+
+    renderTable(filteredData);
+  });
+
+  resetBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    minHour.value = "";
+    maxHour.value = "";
+    renderTable(globalData);
+  });
 
   loadData();
   </script>
