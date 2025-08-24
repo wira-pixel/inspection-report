@@ -52,28 +52,28 @@
     try {
       // URL Cloudflare Worker / Apps Script Web App
       const response = await fetch("https://delicate-union-ad99.sayaryant.workers.dev/");
-      if (!response.ok) throw new Error("HTTP Error " + response.status);
+const data = await response.json();
+console.log("Response JSON:", data);
 
-      const data = await response.json();
-      console.log("Response JSON:", data);
+const tbody = document.querySelector("#data-table tbody");
+tbody.innerHTML = "";
 
-      const tbody = document.querySelector("#data-table tbody");
-      tbody.innerHTML = "";
+// Ganti data.forEach → data.data.forEach
+data.data.forEach(row => {
+  const tr = document.createElement("tr");
 
-      data.forEach(row => {
-        const tr = document.createElement("tr");
+  const nama_unit = row.nama_unit || "-";
+  const tanggal   = row.tanggal || "-";
+  const hm        = row.hm || "-";
 
-        const nama_unit = row.nama_unit || "-";
-        const tanggal   = row.tanggal || "-";
-        const hm        = row.hm || "-";
+  tr.innerHTML = `
+    <td>${nama_unit}</td>
+    <td>${tanggal}</td>
+    <td>${hm}</td>
+  `;
+  tbody.appendChild(tr);
+});
 
-        tr.innerHTML = `
-          <td>${nama_unit}</td>
-          <td>${tanggal}</td>
-          <td>${hm}</td>
-        `;
-        tbody.appendChild(tr);
-      });
     } catch (err) {
       console.error("Gagal ambil data:", err);
       alert("Gagal ambil data. Cek console untuk detail.");
