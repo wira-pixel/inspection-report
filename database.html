@@ -74,18 +74,20 @@
 
       // Iterasi data
       data.data.forEach(row => {
-        const tr = document.createElement("tr");
+  const tr = document.createElement("tr");
 
-        const nama_unit = row.nama_unit || "-";
-        const tanggal   = row.tanggal || "-";
-        const hm        = row.hm || "-";
+  const nama_unit = row["Nama Unit"] || "-";
+  const tanggal   = row["Tanggal"]  || "-";
+  const hm        = row["HM"]       || "-";
 
-        tr.innerHTML = `
-          <td>${nama_unit}</td>
-          <td>${tanggal}</td>
-          <td>${hm}</td>
-        `;
-        tbody.appendChild(tr);
+  tr.innerHTML = `
+    <td>${nama_unit}</td>
+    <td>${tanggal}</td>
+    <td>${hm}</td>
+  `;
+  tbody.appendChild(tr);
+});
+
       });
     } catch (err) {
       console.error("Gagal ambil data:", err);
