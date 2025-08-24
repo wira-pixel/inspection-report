@@ -50,30 +50,43 @@
   <script>
   async function loadData() {
     try {
-      // URL Cloudflare Worker / Apps Script Web App
       const response = await fetch("https://delicate-union-ad99.sayaryant.workers.dev/");
-const data = await response.json();
-console.log("Response JSON:", data);
+      if (!response.ok) throw new Error("HTTP Error " + response.status);
 
-const tbody = document.querySelector("#data-table tbody");
-tbody.innerHTML = "";
+      const data = await response.json();
+      console.log("Response JSON:", data);
 
-// Ganti data.forEach → data.data.forEach
-data.data.forEach(row => {
-  const tr = document.createElement("tr");
+      const tbody = document.querySelector("#data-table tbody");
+      tbody.innerHTML = "";
 
-  const nama_unit = row.nama_unit || "-";
-  const tanggal   = row.tanggal || "-";
-  const hm        = row.hm || "-";
+      // Pastikan response sukses
+      if (!data.success) {
+        alert("Gagal ambil data: " + (data.message || "Unknown error"));
+        return;
+      }
 
-  tr.innerHTML = `
-    <td>${nama_unit}</td>
-    <td>${tanggal}</td>
-    <td>${hm}</td>
-  `;
-  tbody.appendChild(tr);
-});
+      // Pastikan data.data itu array
+      if (!Array.isArray(data.data)) {
+        console.error("Data bukan array:", data.data);
+        alert("Data tidak valid atau kosong");
+        return;
+      }
 
+      // Iterasi data
+      data.data.forEach(row => {
+        const tr = document.createElement("tr");
+
+        const nama_unit = row.nama_unit || "-";
+        const tanggal   = row.tanggal || "-";
+        const hm        = row.hm || "-";
+
+        tr.innerHTML = `
+          <td>${nama_unit}</td>
+          <td>${tanggal}</td>
+          <td>${hm}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     } catch (err) {
       console.error("Gagal ambil data:", err);
       alert("Gagal ambil data. Cek console untuk detail.");
@@ -81,6 +94,6 @@ data.data.forEach(row => {
   }
 
   loadData();
-</script>
+  </script>
 </body>
 </html>
