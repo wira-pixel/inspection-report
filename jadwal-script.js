@@ -1,5 +1,5 @@
-// Ganti dengan URL Web App Google Apps Script kamu
-const SCRIPT_URL = "PASTE_URL_APPS_SCRIPT_KAMU_DISINI";
+// Ganti dengan URL Cloudflare Worker kamu
+const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; 
 
 // Form submit
 document.getElementById("jadwalForm").addEventListener("submit", async (e) => {
@@ -12,9 +12,8 @@ document.getElementById("jadwalForm").addEventListener("submit", async (e) => {
   };
 
   try {
-    await fetch(SCRIPT_URL, {
+    await fetch(WORKER_URL, {
       method: "POST",
-      mode: "cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
@@ -28,10 +27,10 @@ document.getElementById("jadwalForm").addEventListener("submit", async (e) => {
   }
 });
 
-// Load data dari Google Sheets
+// Load data dari Google Sheets via Cloudflare Worker
 async function loadData() {
   try {
-    const res = await fetch(SCRIPT_URL);
+    const res = await fetch(WORKER_URL);
     const jadwalList = await res.json();
     const tbody = document.getElementById("jadwalBody");
     tbody.innerHTML = "";
