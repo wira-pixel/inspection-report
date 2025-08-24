@@ -4,24 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jadwal Inspeksi</title>
-  <link rel="stylesheet" href="jadwal-style.css">
+  <link rel="stylesheet" href="jadwal.css">
 </head>
 <body>
   <div class="container">
-    <h2>Form Jadwal Inspeksi</h2>
+    <h1>Jadwal Inspeksi</h1>
+
+    <!-- Form -->
     <form id="jadwalForm">
-      <label for="tanggal">Tanggal Inspeksi</label>
+      <label>Tanggal Inspeksi</label>
       <input type="date" id="tanggal" name="tanggal" required>
 
-      <label for="kodeUnit">Kode Unit</label>
-      <input type="text" id="kodeUnit" name="kodeUnit" required placeholder="Masukkan kode unit">
+      <label>Kode Unit</label>
+      <input type="text" id="kode" name="kode" placeholder="Masukkan kode unit" required>
 
-      <label for="lokasi">Lokasi Unit</label>
-      <input type="text" id="lokasi" name="lokasi" required placeholder="Masukkan lokasi unit">
+      <label>Lokasi Unit</label>
+      <input type="text" id="lokasi" name="lokasi" placeholder="Masukkan lokasi unit" required>
 
       <button type="submit">Simpan Jadwal</button>
     </form>
 
+    <!-- Tabel -->
     <h2>Daftar Jadwal Unit</h2>
     <table id="jadwalTable">
       <thead>
@@ -32,10 +35,10 @@
           <th>Sudah Inspeksi</th>
         </tr>
       </thead>
-      <tbody id="jadwalBody">
-        <!-- Data dari Cloudflare Worker akan dimuat di sini -->
-      </tbody>
+      <tbody></tbody>
     </table>
   </div>
 
-  <script>
+  <script src="jadwal.js"></script>
+</body>
+</html>
