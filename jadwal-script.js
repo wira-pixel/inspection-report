@@ -1,5 +1,5 @@
 // Ganti dengan URL Cloudflare Worker kamu
-const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; 
+const WORKER_URL = ""; 
 
 // Form submit
 document.getElementById("jadwalForm").addEventListener("submit", async (e) => {
