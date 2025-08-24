@@ -172,7 +172,7 @@ async function postToSheet(payload){
 }
 
 // ==========================
-// DATABASE SEARCH & FILTER
+// DATABASE SEARCH & FILTER (AMAN)
 // ==========================
 let globalDataDB = [];
 
@@ -204,9 +204,9 @@ function renderTableDB(dataArray) {
 
   dataArray.forEach(row => {
     const tr = document.createElement("tr");
-    const codeUnit = row["codeUnit"] || row["Code Unit"] || "-";
-    const date     = row["date"]     || row["Date"]     || "-";
-    const hourMeter= row["hourMeter"]|| row["Hour Meter"]|| "-";
+    const codeUnit = row["Code Unit"] ?? row["codeUnit"] ?? "-";
+    const date     = row["Date"]      ?? row["date"] ?? "-";
+    const hourMeter= row["Hour Meter"]?? row["hourMeter"] ?? "-";
 
     tr.innerHTML = `
       <td>${codeUnit}</td>
@@ -217,7 +217,7 @@ function renderTableDB(dataArray) {
   });
 }
 
-// Setup search/filter
+// FILTER & SEARCH
 const searchInput = document.getElementById("searchInput");
 const minHour     = document.getElementById("minHour");
 const maxHour     = document.getElementById("maxHour");
@@ -226,13 +226,17 @@ const resetBtn    = document.getElementById("resetBtn");
 
 if (filterBtn && resetBtn) {
   filterBtn.addEventListener("click", () => {
-    const searchText = searchInput?.value.toLowerCase() || "";
+    const searchText = (searchInput?.value || "").toString().toLowerCase();
     const min = parseFloat(minHour?.value) || 0;
     const max = parseFloat(maxHour?.value) || Infinity;
 
     const filteredData = globalDataDB.filter(row => {
-      const codeUnit = (row["codeUnit"] || row["Code Unit"] || "").toLowerCase();
-      const hourMeter = parseFloat(row["hourMeter"] || row["Hour Meter"] || 0);
+      // Pastikan Code Unit string dulu
+      const codeUnitRaw = row["Code Unit"] ?? row["codeUnit"] ?? "";
+      const codeUnit = codeUnitRaw?.toString().toLowerCase() || "";
+      const hourMeterRaw = row["Hour Meter"] ?? row["hourMeter"] ?? 0;
+      const hourMeter = parseFloat(hourMeterRaw) || 0;
+
       return codeUnit.includes(searchText) && hourMeter >= min && hourMeter <= max;
     });
 
@@ -249,3 +253,4 @@ if (filterBtn && resetBtn) {
 
 // Load database otomatis
 loadDatabase();
+
