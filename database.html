@@ -131,25 +131,26 @@
   const resetBtn = document.getElementById("resetBtn");
 
   filterBtn.addEventListener("click", () => {
-    const searchText = searchInput.value.toLowerCase();
-    const min = parseFloat(minHour.value) || 0;
-    const max = parseFloat(maxHour.value) || Infinity;
+  const searchText = (searchInput.value || "").toString().toLowerCase();
+  const min = parseFloat(minHour.value) || 0;
+  const max = parseFloat(maxHour.value) || Infinity;
 
-    const filteredData = globalData.filter(row => {
-      const codeUnit = row["Code Unit"]?.toLowerCase() || "";
-      const hourMeter = parseFloat(row["Hour Meter"]) || 0;
-      return codeUnit.includes(searchText) && hourMeter >= min && hourMeter <= max;
-    });
-
-    renderTable(filteredData);
+  const filteredData = globalData.filter(row => {
+    // Pastikan Code Unit string dulu
+    const codeUnit = (row["Code Unit"] ?? "").toString().toLowerCase();
+    const hourMeter = parseFloat(row["Hour Meter"]) || 0;
+    return codeUnit.includes(searchText) && hourMeter >= min && hourMeter <= max;
   });
 
-  resetBtn.addEventListener("click", () => {
-    searchInput.value = "";
-    minHour.value = "";
-    maxHour.value = "";
-    renderTable(globalData);
-  });
+  renderTable(filteredData);
+});
+
+resetBtn.addEventListener("click", () => {
+  searchInput.value = "";
+  minHour.value = "";
+  maxHour.value = "";
+  renderTable(globalData);
+});
 
   loadData();
   </script>
