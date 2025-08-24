@@ -1,72 +1,69 @@
-// Ganti dengan URL Cloudflare Worker kamu
-const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/jadwal";
+ // Ganti dengan URL Cloudflare Worker kamu
+    const scriptURL = "https://delicate-union-ad99.sayaryant.workers.dev/jadwal";
 
-// === Form Submit ===
-document.getElementById("jadwalForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+    // Form submit ke Cloudflare Worker
+    document.getElementById("jadwalForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-  const data = {
-    kode_unit: document.getElementById("kode_unit").value,
-    tanggal_inspeksi: document.getElementById("tanggal_inspeksi").value,
-    lokasi_unit: document.getElementById("lokasi_unit").value,
-    sudah_inspeksi: "" // default kosong, bisa update jadi "sudah"
-  };
+      const data = {
+        tanggal: document.getElementById("tanggal").value,
+        kodeUnit: document.getElementById("kodeUnit").value,
+        lokasi: document.getElementById("lokasi").value,
+        sudahInspeksi: "" // default kosong
+      };
 
-  try {
-    const res = await fetch(WORKER_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
+      try {
+        const res = await fetch(scriptURL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+
+        if (result.success) {
+          alert("Data berhasil disimpan!");
+          e.target.reset();
+          loadJadwal();
+        } else {
+          alert("Gagal simpan: " + result.message);
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("Gagal menyimpan jadwal!");
+      }
     });
 
-    const result = await res.json();
-    console.log("DEBUG simpan:", result);
+    // Ambil data dari Cloudflare Worker
+    async function loadJadwal() {
+      try {
+        const res = await fetch(scriptURL, { method: "GET" });
+        const result = await res.json();
 
-    if (result.success) {
-      alert("Jadwal berhasil disimpan!");
-      document.getElementById("jadwalForm").reset();
-      loadData(); // refresh tabel
-    } else {
-      alert("Gagal simpan: " + result.message);
+        const tbody = document.getElementById("jadwalBody");
+        tbody.innerHTML = "";
+
+        if (!Array.isArray(result.data)) {
+          console.error("Data bukan array:", result);
+          return;
+        }
+
+        result.data.forEach(row => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${row.kodeUnit || ""}</td>
+            <td>${row.tanggal || ""}</td>
+            <td>${row.lokasi || ""}</td>
+            <td>${row.sudahInspeksi || "Belum"}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error("Error load data:", err);
+      }
     }
 
-  } catch (err) {
-    console.error("Error:", err);
-    alert("Gagal menyimpan jadwal!");
-  }
-});
-
-// === Load Data ===
-async function loadData() {
-  try {
-    const res = await fetch(WORKER_URL, { method: "GET" });
-    const result = await res.json();
-
-    console.log("DEBUG hasil fetch jadwal:", result);
-
-    const jadwalList = result.data;
-    const tbody = document.getElementById("jadwalBody");
-    tbody.innerHTML = "";
-
-    if (!Array.isArray(jadwalList)) {
-      console.error("Data bukan array:", jadwalList);
-      return;
-    }
-
-    jadwalList.forEach(item => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${item.kode_unit || ""}</td>
-        <td>${item.tanggal_inspeksi || ""}</td>
-        <td>${item.lokasi_unit || ""}</td>
-        <td><input type="checkbox" ${item.sudah_inspeksi === "sudah" ? "checked" : ""}></td>
-      `;
-      tbody.appendChild(tr);
-    });
-  } catch (err) {
-    console.error("Error load data:", err);
-  }
-}
-
-// === Load pertama kali ===
-loadData();
+    // Load pertama kali
+    loadJadwal();
+  </script>
+</body>
+</html>
