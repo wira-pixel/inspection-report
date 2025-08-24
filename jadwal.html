@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jadwal Inspeksi</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Form Jadwal Inspeksi</h2>
+    <form id="jadwalForm">
+      <label for="tanggal">Tanggal Inspeksi</label>
+      <input type="date" id="tanggal" name="tanggal" required>
+
+      <label for="kodeUnit">Kode Unit</label>
+      <input type="text" id="kodeUnit" name="kodeUnit" required placeholder="Masukkan kode unit">
+
+      <label for="lokasi">Lokasi Unit</label>
+      <input type="text" id="lokasi" name="lokasi" required placeholder="Masukkan lokasi unit">
+
+      <button type="submit">Simpan Jadwal</button>
+    </form>
+
+    <h2>Daftar Jadwal Unit</h2>
+    <table id="jadwalTable">
+      <thead>
+        <tr>
+          <th>Kode Unit</th>
+          <th>Tanggal Inspeksi</th>
+          <th>Lokasi Unit</th>
+          <th>Sudah Inspeksi</th>
+        </tr>
+      </thead>
+      <tbody id="jadwalBody">
+        <!-- Data dari Google Sheets akan muncul di sini -->
+      </tbody>
+    </table>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
