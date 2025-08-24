@@ -30,7 +30,7 @@ document.getElementById("jadwalForm").addEventListener("submit", async (e) => {
 // Load data dari Google Sheets via Cloudflare Worker
 async function loadData() {
   try {
-    const res = await fetch(WORKER_URL, { method: "GET" });  // ⬅️ perbaikan di sini
+    const res = await fetch(`${WORKER_URL}?type=jadwal`, { method: "GET" });  // ⬅️ pakai query ?type=jadwal
     const jadwalList = await res.json();
 
     console.log("DEBUG hasil fetch jadwal:", jadwalList);
