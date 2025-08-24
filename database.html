@@ -39,9 +39,9 @@
   <table id="data-table">
     <thead>
       <tr>
-        <th>Nama Unit</th>
-        <th>Tanggal</th>
-        <th>HM</th>
+        <th>Code Unit</th>
+        <th>Date</th>
+        <th>Hour Meter</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -81,9 +81,9 @@
   const hour_meter = row["Hour Meter"]       || "-";
 
   tr.innerHTML = `
-    <td>${Code Unit}</td>
+    <td>${CodeUnit}</td>
     <td>${Date}</td>
-    <td>${Hour Meter}</td>
+    <td>${HourMeter}</td>
   `;
   tbody.appendChild(tr);
 });
