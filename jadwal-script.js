@@ -30,18 +30,15 @@ document.getElementById("jadwalForm").addEventListener("submit", async (e) => {
 // Load data dari Google Sheets via Cloudflare Worker
 async function loadData() {
   try {
-    const res = await fetch(SCRIPT_URL);
-    const result = await res.json();
+    const res = await fetch(`${SCRIPT_URL}?type=jadwal`); // ⬅️ wajib pakai ?type=jadwal
+    const jadwalList = await res.json();
 
-    if (!result.data || !Array.isArray(result.data)) {
-      console.error("Data jadwal tidak valid:", result);
-      return;
-    }
+    console.log("DEBUG hasil fetch jadwal:", jadwalList);
 
     const tbody = document.getElementById("jadwalBody");
     tbody.innerHTML = "";
 
-    result.data.forEach(row => {
+    jadwalList.forEach(row => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${row.kodeUnit}</td>
@@ -55,6 +52,7 @@ async function loadData() {
     console.error("Error load data:", err);
   }
 }
+
 
 
 // Load pertama kali
