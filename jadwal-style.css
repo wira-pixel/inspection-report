@@ -1,26 +1,23 @@
 body {
   font-family: Arial, sans-serif;
-  background-color: #0d1b2a;
+  background: #0a1a2f;
   color: #fff;
   margin: 0;
   padding: 0;
 }
 
 .container {
-  width: 90%;
   max-width: 800px;
-  margin: 20px auto;
-  background: #1b263b;
+  margin: 40px auto;
+  background: #162447;
   padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  border-radius: 8px;
 }
 
-h2 {
-  color: #fff;
-  margin-bottom: 15px;
-  border-bottom: 2px solid #00b4d8;
-  padding-bottom: 5px;
+h1, h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #00d4ff;
 }
 
 form {
@@ -29,54 +26,37 @@ form {
   gap: 10px;
 }
 
-label {
-  font-weight: bold;
-  margin-bottom: 3px;
+input, button {
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
 }
 
 input {
-  padding: 8px;
-  border-radius: 6px;
-  border: none;
-  outline: none;
+  background: #fff;
+  color: #000;
 }
 
 button {
-  padding: 10px;
-  background: #00b4d8;
-  border: none;
-  border-radius: 8px;
-  color: white;
+  background: #00d4ff;
+  color: #000;
   font-weight: bold;
   cursor: pointer;
-  margin-top: 10px;
-}
-
-button:hover {
-  background: #0096c7;
 }
 
 table {
   width: 100%;
-  border-collapse: collapse;
   margin-top: 20px;
+  border-collapse: collapse;
 }
 
 th, td {
-  border: 1px solid #2d3748;
+  border: 1px solid #00d4ff;
   padding: 10px;
   text-align: center;
 }
 
 th {
-  background: #0077b6;
-}
-
-tr:nth-child(even) {
-  background: #2d3748;
-}
-
-input[type="checkbox"] {
-  transform: scale(1.2);
-  cursor: pointer;
+  background: #00d4ff;
+  color: #000;
 }
