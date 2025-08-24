@@ -76,14 +76,14 @@
       data.data.forEach(row => {
   const tr = document.createElement("tr");
 
-  const code_unit = row["Code Unit"] || "-";
+  const codeUnit = row["Code Unit"] || "-";
   const date   = row["Date"]  || "-";
-  const hour_meter = row["Hour Meter"]       || "-";
+  const hourMeter = row["Hour Meter"]       || "-";
 
   tr.innerHTML = `
-    <td>${CodeUnit}</td>
+    <td>${codeUnit}</td>
     <td>${Date}</td>
-    <td>${HourMeter}</td>
+    <td>${hourMeter}</td>
   `;
   tbody.appendChild(tr);
 });
