@@ -74,19 +74,19 @@
 
       // Iterasi data
       data.data.forEach(row => {
-  const tr = document.createElement("tr");
+        const tr = document.createElement("tr");
 
-  const codeUnit = row["Code Unit"] || "-";
-  const date   = row["Date"]  || "-";
-  const hourMeter = row["Hour Meter"]       || "-";
+        const codeUnit = row["Code Unit"] || "-";
+        const date     = row["Date"]      || "-";
+        const hourMeter= row["Hour Meter"]|| "-";
 
-  tr.innerHTML = `
-    <td>${codeUnit}</td>
-    <td>${Date}</td>
-    <td>${hourMeter}</td>
-  `;
-  tbody.appendChild(tr);
-});
+        tr.innerHTML = `
+          <td>${codeUnit}</td>
+          <td>${date}</td>
+          <td>${hourMeter}</td>
+        `;
+        tbody.appendChild(tr);
+      });
 
     } catch (err) {
       console.error("Gagal ambil data:", err);
