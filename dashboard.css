@@ -95,3 +95,30 @@ body {
   border-radius: 12px;
   background: white;
 }
+
+/* === TODAY WIDGET (namespaced .tw-*) === */
+:root{
+  --tw-card:#1e2945; --tw-border:#2b375a; --tw-accent:#19d3ff;
+  --tw-text:#e9eef7; --tw-muted:#a7b1c6; --tw-row:#243155; --tw-row2:#202c4c;
+  --tw-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+.today-widget{ background:var(--tw-card); border:1px solid var(--tw-border);
+  border-radius:14px; padding:14px; box-shadow:var(--tw-shadow); }
+.tw-header{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+.tw-header h2{ color:var(--tw-accent); margin:0; letter-spacing:.3px; }
+.tw-meta{ display:flex; align-items:center; gap:10px; color:var(--tw-muted); }
+#tw-refresh{ padding:8px 12px; border-radius:10px; border:1px solid #0fb8ff;
+  background:linear-gradient(180deg,#19d3ff,#0fb8ff); color:#001424; font-weight:700; cursor:pointer; }
+#tw-refresh:hover{ filter:brightness(1.06); }
+.tw-msg{ text-align:center; background:#0f172a; border:1px solid var(--tw-border);
+  color:var(--tw-muted); border-radius:10px; padding:8px 10px; margin-bottom:10px; }
+.tw-hidden{ display:none; }
+
+.tw-tablewrap{ border-radius:12px; overflow:hidden; border:1px solid var(--tw-border); }
+.tw-table{ width:100%; border-collapse:collapse; color:var(--tw-text); }
+.tw-table thead th{ background:var(--tw-accent); color:#001424; padding:12px 10px; text-align:center; font-weight:800; }
+.tw-table tbody td{ padding:12px 10px; text-align:center; border-top:1px solid var(--tw-border); }
+.tw-table tbody tr{ background:var(--tw-row); }
+.tw-table tbody tr:nth-child(even){ background:var(--tw-row2); }
+.tw-muted{ color:var(--tw-muted); }
+
