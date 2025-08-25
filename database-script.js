@@ -40,6 +40,13 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // waji
     const yy = d.getFullYear();
     return `${dd}/${mm}/${yy}`;
   }
+  function dateStrToTime(s){ // "dd/mm/yyyy" -> epoch ms (NaN jika tidak valid)
+    if (!s || typeof s !== "string") return NaN;
+    const parts = s.split("/");
+    if (parts.length !== 3) return NaN;
+    const [dd, mm, yy] = parts;
+    return Date.parse(`${yy}-${mm}-${dd}`);
+  }
 
   // --- Ambil dari Worker (GET ?action=getInspeksi, fallback POST) ---
   async function fetchInspeksi(){
@@ -98,11 +105,18 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // waji
       inspectedBy: row["Inspected By"] ?? row["inspectedBy"] ?? "-"
     }));
 
-    // urutkan terbaru di atas (pakai string dd/mm/yyyy → yyyy-mm-dd)
-    rowsRaw.sort((a,b) => {
-      const pa = a.date.split("/").reverse().join("-");
-      const pb = b.date.split("/").reverse().join("-");
-      return (pb > pa) ? 1 : (pb < pa ? -1 : 0);
+    // === Urutkan: tanggal terbaru → terlama; jika sama, HM terbesar dulu ===
+    rowsRaw.sort((a, b) => {
+      const ta = dateStrToTime(a.date);
+      const tb = dateStrToTime(b.date);
+      const at = isNaN(ta) ? 0 : ta;
+      const bt = isNaN(tb) ? 0 : tb;
+
+      if (bt !== at) return bt - at; // tanggal descending
+
+      const hma = parseFloat(a.hourMeter) || 0;
+      const hmb = parseFloat(b.hourMeter) || 0;
+      return hmb - hma; // tie-breaker: HM descending
     });
 
     view = rowsRaw.slice();
