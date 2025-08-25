@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard Utama</title>
+
+  <!-- Style widget -->
+  <link rel="stylesheet" href="dashboard-home.css" />
+</head>
+<body>
+  <h2>Dashboard Inspection Report PT Jhonlin Baratama</h2>
+
+  <!-- Widget: Jadwal Inspeksi Hari Ini -->
+  <section class="today-widget">
+    <div class="tw-header">
+      <h3>Jadwal Inspeksi Hari Ini</h3>
+      <div class="tw-meta">
+        <span id="tw-date">—</span>
+        <button id="tw-refresh" type="button">Refresh</button>
+      </div>
+    </div>
+
+    <div id="tw-msg" class="tw-msg tw-hidden">Memuat data…</div>
+
+    <div class="tw-tablewrap">
+      <table class="tw-table" id="tw-table">
+        <thead>
+          <tr>
+            <th>Kode Unit</th>
+            <th>Tanggal</th>
+            <th>Lokasi</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tw-tbody">
+          <tr><td colspan="4" class="tw-muted">Memuat…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Script widget -->
+  <script src="dashboard-home.js"></script>
+</body>
+</html>
