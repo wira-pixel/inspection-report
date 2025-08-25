@@ -46,10 +46,10 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // waji
     try{
       const u = new URL(WORKER_URL);
       u.searchParams.set("action", "getInspeksi");
-      u.searchParams.set("ts", Date.now());
+      u.searchParams.set("ts", Date.now()); // anti-cache via query param
 
-      // ⬇️ Tidak kirim header "Cache-Control" agar preflight tidak gagal
-      const r = await fetch(u.toString(), { method:"GET", cache:"no-store" });
+      // GET sederhana TANPA opsi/header tambahan agar tidak memicu preflight CORS
+      const r = await fetch(u.toString());
       const d = await r.json();
       if (d?.success && Array.isArray(d.data)) return d;
       console.warn("[DB] GET tidak valid, mencoba POST …", d);
@@ -57,7 +57,7 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // waji
       console.warn("[DB] GET error, mencoba POST …", e);
     }
 
-    // Fallback POST — hanya header Content-Type (diizinkan oleh Worker)
+    // Fallback POST — hanya Content-Type
     const rp = await fetch(WORKER_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -98,6 +98,7 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // waji
       inspectedBy: row["Inspected By"] ?? row["inspectedBy"] ?? "-"
     }));
 
+    // urutkan terbaru di atas (pakai string dd/mm/yyyy → yyyy-mm-dd)
     rowsRaw.sort((a,b) => {
       const pa = a.date.split("/").reverse().join("-");
       const pb = b.date.split("/").reverse().join("-");
