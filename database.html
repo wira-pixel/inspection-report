@@ -1,161 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Database Dashboard</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f4f6f9;
-    }
-    h2 {
-      text-align: center;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    th, td {
-      padding: 12px;
-      text-align: center;
-      border: 1px solid #ddd;
-    }
-    th {
-      background: #007bff;
-      color: white;
-    }
-    tr:nth-child(even) {
-      background: #f9f9f9;
-    }
-    .filters {
-      margin-top: 20px;
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-    }
-    .filters input {
-      padding: 6px;
-      font-size: 14px;
-    }
-    .filters button {
-      padding: 6px 12px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Database Unit</title>
+  <link rel="stylesheet" href="database.css"/>
 </head>
 <body>
-  <h2>Database Unit</h2>
+  <main class="container">
+    <h1>Database Unit</h1>
 
-  <div class="filters">
-    <input type="text" id="searchInput" placeholder="Search Code Unit...">
-    <input type="number" id="minHour" placeholder="Min Hour Meter">
-    <input type="number" id="maxHour" placeholder="Max Hour Meter">
-    <button id="filterBtn">Filter</button>
-    <button id="resetBtn">Reset</button>
-  </div>
+    <div class="toolbar">
+      <input id="searchBox" type="text" placeholder="Cari kode unit / inspektor / tanggal / HM..." />
+      <button id="refreshBtn" title="Muat ulang">Refresh</button>
+    </div>
 
-  <table id="data-table">
-    <thead>
-      <tr>
-        <th>Code Unit</th>
-        <th>Date</th>
-        <th>Hour Meter</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <div id="dbMessage" class="msg hidden">Memuat data…</div>
 
-  <script>
-  let globalDataDB = [];
+    <div class="table-wrap">
+      <table id="data-table">
+        <thead>
+          <tr>
+            <th>Kode Unit</th>
+            <th>Tanggal Inspeksi</th>
+            <th>Hour Meter</th>
+            <th>Inspektor</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </main>
 
-  async function loadDatabase() {
-    try {
-      const response = await fetch("https://delicate-union-ad99.sayaryant.workers.dev/");
-      if (!response.ok) throw new Error("HTTP Error " + response.status);
-
-      const data = await response.json();
-      console.log("Database JSON:", data);
-
-      if (!data.success || !Array.isArray(data.data)) {
-        console.error("Data database tidak valid:", data);
-        return;
-      }
-
-      globalDataDB = data.data;
-      renderTableDB(globalDataDB);
-
-    } catch (err) {
-      console.error("Gagal ambil data database:", err);
-    }
-  }
-
-  function renderTableDB(dataArray) {
-    const tbody = document.querySelector("#data-table tbody");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    dataArray.forEach(row => {
-      const tr = document.createElement("tr");
-      const codeUnit = row["Code Unit"] ?? row["codeUnit"] ?? "-";
-      const date     = row["Date"]      ?? row["date"] ?? "-";
-      const hourMeter= row["Hour Meter"]?? row["hourMeter"] ?? "-";
-
-      tr.innerHTML = `
-        <td>${codeUnit}</td>
-        <td>${date}</td>
-        <td>${hourMeter}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  // FILTER & SEARCH IMPROVED
-const searchInput = document.getElementById("searchInput");
-const minHour     = document.getElementById("minHour");
-const maxHour     = document.getElementById("maxHour");
-const filterBtn   = document.getElementById("filterBtn");
-const resetBtn    = document.getElementById("resetBtn");
-
-if (filterBtn && resetBtn) {
-  filterBtn.addEventListener("click", () => {
-    const searchText = (searchInput?.value || "").trim().toLowerCase();
-    const min = parseFloat(minHour?.value) || 0;
-    const max = parseFloat(maxHour?.value) || Infinity;
-
-    const filteredData = globalDataDB.filter(row => {
-      // Pastikan semua nilai string dulu
-      const codeUnitRaw = row["Code Unit"] ?? row["codeUnit"] ?? "";
-      const codeUnit = codeUnitRaw.toString().toLowerCase();
-      const dateRaw = row["Date"] ?? row["date"] ?? "";
-      const date = dateRaw.toString().toLowerCase();
-      const hourMeterRaw = row["Hour Meter"] ?? row["hourMeter"] ?? 0;
-      const hourMeter = parseFloat(hourMeterRaw) || 0;
-
-      // Search di Code Unit **dan** tanggal
-      const matchText = codeUnit.includes(searchText) || date.includes(searchText);
-      const matchHour = hourMeter >= min && hourMeter <= max;
-
-      return matchText && matchHour;
-    });
-
-    renderTableDB(filteredData);
-  });
-
-  resetBtn.addEventListener("click", () => {
-    if (searchInput) searchInput.value = "";
-    if (minHour) minHour.value = "";
-    if (maxHour) maxHour.value = "";
-    renderTableDB(globalDataDB);
-  });
-}
-
-  loadDatabase();
-  </script>
+  <script src="database.js"></script>
 </body>
 </html>
