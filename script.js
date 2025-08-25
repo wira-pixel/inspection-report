@@ -1,8 +1,6 @@
-<script>
 // ==========================
 // KONFIGURASI GLOBAL
 // ==========================
-  
 const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // konsisten pakai trailing slash
 
 // ==========================
@@ -288,5 +286,3 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
   document.addEventListener("DOMContentLoaded", loadDatabase);
   loadDatabase();
 })();
-</script>
-
