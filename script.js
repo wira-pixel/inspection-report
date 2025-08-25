@@ -178,29 +178,20 @@ let globalDataDB = [];
 
 async function loadDatabase() {
   try {
-    // PAKAI POST ke Worker + action yg dikenali Apps Script
-    const response = await fetch("https://delicate-union-ad99.sayaryant.workers.dev/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "getInspeksi" })
-    });
+    // Ubah ke GET + query parameter action=getInspeksi
+    const response = await fetch("https://delicate-union-ad99.sayaryant.workers.dev/?action=getInspeksi");
 
     if (!response.ok) throw new Error("HTTP Error " + response.status);
 
     const data = await response.json();
     console.log("Database JSON:", data);
 
-    // Terima format {success:true,data:[...]} atau langsung array (fallback)
-    const rows = Array.isArray(data?.data) ? data.data
-               : Array.isArray(data)       ? data
-               : null;
-
-    if (!rows) {
+    if (!data.success || !Array.isArray(data.data)) {
       console.error("Data database tidak valid:", data);
       return;
     }
 
-    globalDataDB = rows;
+    globalDataDB = data.data;
     renderTableDB(globalDataDB);
 
   } catch (err) {
@@ -216,7 +207,6 @@ function renderTableDB(dataArray) {
   dataArray.forEach(row => {
     const tr = document.createElement("tr");
 
-    // Dukungan header “Code Unit” (sheet) & camelCase (jika suatu saat diubah)
     const codeUnit  = row["Code Unit"]  ?? row["codeUnit"]  ?? "-";
     const date      = row["Date"]       ?? row["date"]      ?? "-";
     const hourMeter = row["Hour Meter"] ?? row["hourMeter"] ?? "-";
@@ -234,8 +224,6 @@ function renderTableDB(dataArray) {
 // Load database otomatis
 loadDatabase();
 
-
-
 // FILTER & SEARCH
 const searchInput = document.getElementById("searchInput");
 const minHour     = document.getElementById("minHour");
@@ -250,7 +238,6 @@ if (filterBtn && resetBtn) {
     const max = parseFloat(maxHour?.value) || Infinity;
 
     const filteredData = globalDataDB.filter(row => {
-      // Pastikan Code Unit string dulu
       const codeUnitRaw = row["Code Unit"] ?? row["codeUnit"] ?? "";
       const codeUnit = codeUnitRaw?.toString().toLowerCase() || "";
       const hourMeterRaw = row["Hour Meter"] ?? row["hourMeter"] ?? 0;
@@ -269,12 +256,3 @@ if (filterBtn && resetBtn) {
     renderTableDB(globalDataDB);
   });
 }
-
-// Load database otomatis
-loadDatabase();
-
-
-
-
-
-
