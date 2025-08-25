@@ -178,28 +178,35 @@ let globalDataDB = [];
 
 async function loadDatabase() {
   try {
-    const response = await fetch("https://delicate-union-ad99.sayaryant.workers.dev/?action=getInspeksi"); 
-    // 🔥 pakai URL Web Apps kamu langsung + parameter action=getInspeksi
-    // kalau mau data jadwal → ganti jadi ?action=getJadwal
+    // PAKAI POST ke Worker + action yg dikenali Apps Script
+    const response = await fetch("https://delicate-union-ad99.sayaryant.workers.dev/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "getInspeksi" })
+    });
 
     if (!response.ok) throw new Error("HTTP Error " + response.status);
 
     const data = await response.json();
     console.log("Database JSON:", data);
 
-    if (!data.success || !Array.isArray(data.data)) {
+    // Terima format {success:true,data:[...]} atau langsung array (fallback)
+    const rows = Array.isArray(data?.data) ? data.data
+               : Array.isArray(data)       ? data
+               : null;
+
+    if (!rows) {
       console.error("Data database tidak valid:", data);
       return;
     }
 
-    globalDataDB = data.data;
+    globalDataDB = rows;
     renderTableDB(globalDataDB);
 
   } catch (err) {
     console.error("Gagal ambil data database:", err);
   }
 }
-
 
 function renderTableDB(dataArray) {
   const tbody = document.querySelector("#data-table tbody");
@@ -209,8 +216,9 @@ function renderTableDB(dataArray) {
   dataArray.forEach(row => {
     const tr = document.createElement("tr");
 
-    const codeUnit  = row["Code Unit"] ?? row["codeUnit"] ?? "-";
-    const date      = row["Date"] ?? row["date"] ?? "-";
+    // Dukungan header “Code Unit” (sheet) & camelCase (jika suatu saat diubah)
+    const codeUnit  = row["Code Unit"]  ?? row["codeUnit"]  ?? "-";
+    const date      = row["Date"]       ?? row["date"]      ?? "-";
     const hourMeter = row["Hour Meter"] ?? row["hourMeter"] ?? "-";
 
     tr.innerHTML = `
@@ -222,6 +230,9 @@ function renderTableDB(dataArray) {
     tbody.appendChild(tr);
   });
 }
+
+// Load database otomatis
+loadDatabase();
 
 
 
@@ -261,6 +272,7 @@ if (filterBtn && resetBtn) {
 
 // Load database otomatis
 loadDatabase();
+
 
 
 
