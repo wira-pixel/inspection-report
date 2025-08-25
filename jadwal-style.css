@@ -101,4 +101,35 @@ th {
   to { transform: rotate(360deg); }
 }
 
+/* Toast Notification */
+#toast {
+  visibility: hidden;
+  min-width: 260px;
+  background: #162447;
+  color: #fff;
+  text-align: center;
+  border-radius: 8px;
+  padding: 14px;
+  position: fixed;
+  z-index: 10000;
+  left: 50%;
+  bottom: 30px;
+  font-weight: bold;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out, bottom 0.5s ease-in-out;
+}
 
+#toast.show {
+  visibility: visible;
+  opacity: 1;
+  bottom: 50px;
+}
+
+#toast.success {
+  border-left: 6px solid #00ff88;
+}
+
+#toast.error {
+  border-left: 6px solid #ff3b3b;
+}
