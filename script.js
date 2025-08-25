@@ -202,81 +202,84 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
 // ==========================
 (() => {
   const tableEl = document.querySelector("#data-table");
-  if (!tableEl) return; // berhenti jika ini bukan halaman database
+  if (!tableEl) return; // bukan halaman database
 
-  // Global data
+  const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // pastikan trailing slash
   let globalDataDB = [];
 
-  // Render data ke tabel
   function renderTableDB(dataArray) {
     const tbody = document.querySelector("#data-table tbody");
     if (!tbody) return;
     tbody.innerHTML = "";
-
     dataArray.forEach(row => {
       const tr = document.createElement("tr");
-
       const codeUnit  = row["Code Unit"]  ?? row["codeUnit"]  ?? "-";
       const date      = row["Date"]       ?? row["date"]      ?? "-";
       const hourMeter = row["Hour Meter"] ?? row["hourMeter"] ?? "-";
-
-      tr.innerHTML = `
-        <td>${codeUnit}</td>
-        <td>${date}</td>
-        <td>${hourMeter}</td>
-      `;
+      tr.innerHTML = `<td>${codeUnit}</td><td>${date}</td><td>${hourMeter}</td>`;
       tbody.appendChild(tr);
     });
   }
 
-  // Helper: coba GET lalu fallback POST jika perlu
+  // GET ?action=getInspeksi (pakai URL API), fallback ke POST kalau perlu
   async function fetchInspeksiWithFallback() {
-    // 1) GET dengan query action
-    const urlGet = `${WORKER_URL}?action=getInspeksi`;
-    console.log("GET URL:", urlGet);
+    // --- Build URL GET dengan param yang benar + anti cache ---
+    const urlGet = new URL(WORKER_URL);
+    urlGet.searchParams.set("action", "getInspeksi");
+    urlGet.searchParams.set("ts", String(Date.now())); // bypass cache
+
+    console.log("[DB] GET URL:", urlGet.toString());
+
     try {
-      const respGet = await fetch(urlGet, { method: "GET" });
+      const respGet = await fetch(urlGet.toString(), {
+        method: "GET",
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" },
+        mode: "cors",
+      });
       const dataGet = await respGet.json();
-      console.log("GET →", dataGet);
+      console.log("[DB] GET →", dataGet);
+
+      // Jika balik data valid, langsung pakai
       if (dataGet?.success && Array.isArray(dataGet.data)) return dataGet;
 
-      // Kalau yang kembali justru health-check (success:true tapi tanpa data)
+      // Jika balasan adalah health-check (success:true TANPA field 'data')
       if (dataGet?.success && !("data" in dataGet)) {
-        console.warn("Worker health-check terpicu (tidak ada action). Pastikan URL mengandung ?action=...");
+        console.warn("[DB] Health-check terpicu. Cek apakah URL benar-benar berisi ?action=getInspeksi di Network tab.");
       } else {
-        console.warn("GET gagal/invalid, mencoba POST ...", dataGet);
+        console.warn("[DB] GET tidak valid, akan coba POST …", dataGet);
       }
     } catch (e) {
-      console.warn("GET error, mencoba POST ...", e);
+      console.warn("[DB] GET error, coba POST …", e);
     }
 
-    // 2) Fallback POST JSON
-    const respPost = await fetch(WORKER_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "getInspeksi" })
-    });
-    const dataPost = await respPost.json();
-    console.log("POST →", dataPost);
-    return dataPost;
+    // --- Fallback: POST JSON { action: "getInspeksi" } ---
+    try {
+      const respPost = await fetch(WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-cache" },
+        body: JSON.stringify({ action: "getInspeksi" }),
+        mode: "cors",
+      });
+      const dataPost = await respPost.json();
+      console.log("[DB] POST →", dataPost);
+      return dataPost;
+    } catch (e) {
+      console.error("[DB] POST error:", e);
+      return { success: false, message: e.message };
+    }
   }
 
-  // Load database dari server
   async function loadDatabase() {
-    try {
-      const data = await fetchInspeksiWithFallback();
+    const data = await fetchInspeksiWithFallback();
 
-      if (!data?.success || !Array.isArray(data.data)) {
-        console.error("Data database tidak valid:", data);
-        return;
-      }
-
-      globalDataDB = data.data;
-      renderTableDB(globalDataDB);
-
-    } catch (err) {
-      console.error("Gagal ambil data database:", err);
+    if (!data?.success || !Array.isArray(data.data)) {
+      console.error("Data database tidak valid:", data);
+      return;
     }
+
+    globalDataDB = data.data;
+    renderTableDB(globalDataDB);
   }
 
   // Filter & Search
@@ -287,16 +290,13 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
   const resetBtn    = document.getElementById("resetBtn");
 
   filterBtn?.addEventListener("click", () => {
-    const searchText = (searchInput?.value || "").toString().toLowerCase();
+    const searchText = (searchInput?.value || "").toLowerCase();
     const min = parseFloat(minHour?.value) || 0;
     const max = parseFloat(maxHour?.value) || Infinity;
 
     const filteredData = globalDataDB.filter(row => {
-      const codeUnitRaw = row["Code Unit"] ?? row["codeUnit"] ?? "";
-      const codeUnit = codeUnitRaw?.toString().toLowerCase() || "";
-      const hourMeterRaw = row["Hour Meter"] ?? row["hourMeter"] ?? 0;
-      const hourMeter = parseFloat(hourMeterRaw) || 0;
-
+      const codeUnit = (row["Code Unit"] ?? row["codeUnit"] ?? "").toString().toLowerCase();
+      const hourMeter = parseFloat(row["Hour Meter"] ?? row["hourMeter"] ?? 0) || 0;
       return codeUnit.includes(searchText) && hourMeter >= min && hourMeter <= max;
     });
 
@@ -310,9 +310,10 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
     renderTableDB(globalDataDB);
   });
 
-  // Auto load
   document.addEventListener("DOMContentLoaded", loadDatabase);
   loadDatabase();
 })();
+
+
 
 
