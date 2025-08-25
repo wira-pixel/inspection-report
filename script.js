@@ -231,28 +231,33 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
 
   // Helper: coba GET lalu fallback POST jika perlu
   async function fetchInspeksiWithFallback() {
-    // 1) Coba GET ?action=getInspeksi
+    // 1) GET dengan query action
+    const urlGet = `${WORKER_URL}?action=getInspeksi`;
+    console.log("GET URL:", urlGet);
     try {
-      const respGet = await fetch(`${WORKER_URL}?action=getInspeksi`);
+      const respGet = await fetch(urlGet, { method: "GET" });
       const dataGet = await respGet.json();
-      if (dataGet?.success && Array.isArray(dataGet.data)) {
-        return dataGet;
-      }
-      // Jika gagal karena action tidak valid / tidak sukses, lanjut ke POST
-      if (!dataGet?.success) {
+      console.log("GET →", dataGet);
+      if (dataGet?.success && Array.isArray(dataGet.data)) return dataGet;
+
+      // Kalau yang kembali justru health-check (success:true tapi tanpa data)
+      if (dataGet?.success && !("data" in dataGet)) {
+        console.warn("Worker health-check terpicu (tidak ada action). Pastikan URL mengandung ?action=...");
+      } else {
         console.warn("GET gagal/invalid, mencoba POST ...", dataGet);
       }
     } catch (e) {
       console.warn("GET error, mencoba POST ...", e);
     }
 
-    // 2) Fallback ke POST {action:"getInspeksi"}
+    // 2) Fallback POST JSON
     const respPost = await fetch(WORKER_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "getInspeksi" })
     });
     const dataPost = await respPost.json();
+    console.log("POST →", dataPost);
     return dataPost;
   }
 
@@ -260,7 +265,6 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
   async function loadDatabase() {
     try {
       const data = await fetchInspeksiWithFallback();
-      console.log("Database JSON:", data);
 
       if (!data?.success || !Array.isArray(data.data)) {
         console.error("Data database tidak valid:", data);
@@ -310,3 +314,5 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
   document.addEventListener("DOMContentLoaded", loadDatabase);
   loadDatabase();
 })();
+
+
