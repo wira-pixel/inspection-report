@@ -4,7 +4,7 @@
 const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // konsisten pakai trailing slash
 
 // ==========================
-// BLOK 1 — FORM INSPEKSI (jalan hanya jika #myForm ada)
+// FORM INSPEKSI (jalan hanya jika #myForm ada)
 // ==========================
 (() => {
   const form = document.getElementById('myForm');
@@ -34,7 +34,10 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
     row.innerHTML=`
       <td><input type="text" name="description[]" class="form-control" required></td>
       <td><input type="text" name="condition[]" class="form-control" required></td>
-      <td><input type="file" name="file[]" accept="image/*" class="form-control fileInput"><img class="img-preview" style="display:none;width:50px;"></td>
+      <td>
+        <input type="file" name="file[]" accept="image/*" class="form-control fileInput">
+        <img class="img-preview" style="display:none;width:50px;">
+      </td>
       <td><input type="text" name="partNumber[]" class="form-control"></td>
       <td><input type="text" name="namaBarang[]" class="form-control"></td>
       <td><input type="number" name="qty[]" class="form-control" min="0"></td>
@@ -112,14 +115,14 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
     });
   }
 
-  // Tombol tambah row/sub-row (aman bila tombol tidak ada di halaman lain)
+  // Tombol tambah row/sub-row
   document.getElementById('addRowBtn')?.addEventListener('click', addRow);
   document.getElementById('addSubRowBtn')?.addEventListener('click', addSubRow);
 
   // Baris awal
   addRow();
 
-  // KIRIM DATA KE CLOUDFLARE (POST -> diteruskan ke Apps Script doPost)
+  // Kirim data ke Cloudflare (POST -> diteruskan ke Apps Script doPost)
   async function postToSheet(payload){
     try {
       const response = await fetch(WORKER_URL, {
@@ -196,124 +199,3 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
   document.addEventListener("DOMContentLoaded", setToday);
   setToday();
 })();
-
-// ==========================
-// BLOK 2 — DATABASE (jalan hanya jika #data-table ada)
-// ==========================
-(() => {
-  const tableEl = document.querySelector("#data-table");
-  if (!tableEl) return; // bukan halaman database
-
-  const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // pastikan trailing slash
-  let globalDataDB = [];
-
-  function renderTableDB(dataArray) {
-    const tbody = document.querySelector("#data-table tbody");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-    dataArray.forEach(row => {
-      const tr = document.createElement("tr");
-      const codeUnit  = row["Code Unit"]  ?? row["codeUnit"]  ?? "-";
-      const date      = row["Date"]       ?? row["date"]      ?? "-";
-      const hourMeter = row["Hour Meter"] ?? row["hourMeter"] ?? "-";
-      tr.innerHTML = `<td>${codeUnit}</td><td>${date}</td><td>${hourMeter}</td>`;
-      tbody.appendChild(tr);
-    });
-  }
-
-  // GET ?action=getInspeksi (pakai URL API), fallback ke POST kalau perlu
-  async function fetchInspeksiWithFallback() {
-    // --- Build URL GET dengan param yang benar + anti cache ---
-    const urlGet = new URL(WORKER_URL);
-    urlGet.searchParams.set("action", "getInspeksi");
-    urlGet.searchParams.set("ts", String(Date.now())); // bypass cache
-
-    console.log("[DB] GET URL:", urlGet.toString());
-
-    try {
-      const respGet = await fetch(urlGet.toString(), {
-        method: "GET",
-        cache: "no-store",
-        headers: { "Cache-Control": "no-cache" },
-        mode: "cors",
-      });
-      const dataGet = await respGet.json();
-      console.log("[DB] GET →", dataGet);
-
-      // Jika balik data valid, langsung pakai
-      if (dataGet?.success && Array.isArray(dataGet.data)) return dataGet;
-
-      // Jika balasan adalah health-check (success:true TANPA field 'data')
-      if (dataGet?.success && !("data" in dataGet)) {
-        console.warn("[DB] Health-check terpicu. Cek apakah URL benar-benar berisi ?action=getInspeksi di Network tab.");
-      } else {
-        console.warn("[DB] GET tidak valid, akan coba POST …", dataGet);
-      }
-    } catch (e) {
-      console.warn("[DB] GET error, coba POST …", e);
-    }
-
-    // --- Fallback: POST JSON { action: "getInspeksi" } ---
-    try {
-      const respPost = await fetch(WORKER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Cache-Control": "no-cache" },
-        body: JSON.stringify({ action: "getInspeksi" }),
-        mode: "cors",
-      });
-      const dataPost = await respPost.json();
-      console.log("[DB] POST →", dataPost);
-      return dataPost;
-    } catch (e) {
-      console.error("[DB] POST error:", e);
-      return { success: false, message: e.message };
-    }
-  }
-
-  async function loadDatabase() {
-    const data = await fetchInspeksiWithFallback();
-
-    if (!data?.success || !Array.isArray(data.data)) {
-      console.error("Data database tidak valid:", data);
-      return;
-    }
-
-    globalDataDB = data.data;
-    renderTableDB(globalDataDB);
-  }
-
-  // Filter & Search
-  const searchInput = document.getElementById("searchInput");
-  const minHour     = document.getElementById("minHour");
-  const maxHour     = document.getElementById("maxHour");
-  const filterBtn   = document.getElementById("filterBtn");
-  const resetBtn    = document.getElementById("resetBtn");
-
-  filterBtn?.addEventListener("click", () => {
-    const searchText = (searchInput?.value || "").toLowerCase();
-    const min = parseFloat(minHour?.value) || 0;
-    const max = parseFloat(maxHour?.value) || Infinity;
-
-    const filteredData = globalDataDB.filter(row => {
-      const codeUnit = (row["Code Unit"] ?? row["codeUnit"] ?? "").toString().toLowerCase();
-      const hourMeter = parseFloat(row["Hour Meter"] ?? row["hourMeter"] ?? 0) || 0;
-      return codeUnit.includes(searchText) && hourMeter >= min && hourMeter <= max;
-    });
-
-    renderTableDB(filteredData);
-  });
-
-  resetBtn?.addEventListener("click", () => {
-    if (searchInput) searchInput.value = "";
-    if (minHour) minHour.value = "";
-    if (maxHour) maxHour.value = "";
-    renderTableDB(globalDataDB);
-  });
-
-  document.addEventListener("DOMContentLoaded", loadDatabase);
-  loadDatabase();
-})();
-
-
-
-
