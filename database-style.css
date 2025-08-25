@@ -1,0 +1,117 @@
+:root{
+  --bg: #172033;
+  --card: #1e2945;
+  --accent: #19d3ff;
+  --accent-2: #0fb8ff;
+  --text: #e9eef7;
+  --muted: #a7b1c6;
+  --border: #2b375a;
+  --row: #243155;
+  --row-alt: #202c4c;
+  --shadow: 0 8px 24px rgba(0,0,0,.25);
+}
+
+*{ box-sizing: border-box; }
+
+html,body{
+  height:100%;
+  margin:0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Segoe UI Symbol", "Apple Color Emoji", "Noto Color Emoji";
+}
+
+.container{
+  max-width: 1100px;
+  margin: 28px auto;
+  padding: 16px;
+}
+
+h1{
+  margin: 0 0 18px;
+  text-align: center;
+  color: var(--accent);
+  letter-spacing: .5px;
+}
+
+.toolbar{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0 16px;
+  flex-wrap: wrap;
+}
+
+.toolbar input{
+  width: min(520px, 90vw);
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #0f172a;
+  color: var(--text);
+  outline: none;
+  box-shadow: var(--shadow);
+}
+
+.toolbar button{
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--accent-2);
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  color: #001424;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.toolbar button:hover{ filter: brightness(1.05); }
+
+.table-wrap{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+table{
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead th{
+  background: var(--accent);
+  color: #001424;
+  text-transform: none;
+  letter-spacing: .3px;
+  padding: 14px 10px;
+  font-weight: 800;
+  border-bottom: 1px solid var(--border);
+}
+
+tbody td{
+  padding: 12px 10px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+tbody tr{ background: var(--row); }
+tbody tr:nth-child(even){ background: var(--row-alt); }
+
+.msg{
+  text-align:center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #0f172a;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  width: fit-content;
+  margin: 0 auto 14px;
+  box-shadow: var(--shadow);
+}
+.hidden{ display:none; }
+
+@media (max-width: 640px){
+  thead th, tbody td{ padding: 10px 6px; font-size: 14px; }
+  .toolbar input{ width: 100%; }
+}
