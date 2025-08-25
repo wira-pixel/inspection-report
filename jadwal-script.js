@@ -1,123 +1,80 @@
-// URL Cloudflare Worker kamu
-const scriptURL = "https://delicate-union-ad99.sayaryant.workers.dev";
+// Realtime broadcast + staging lokal untuk draft jadwal (tidak kirim ke Sheet)
+(() => {
+  const JADWAL_CHANNEL = new BroadcastChannel('jadwal-inspeksi');
+  const STAGED_KEY = 'stagedJadwal';
 
-// Toast function
-function showToast(msg, type = "success") {
-  const toast = document.getElementById("toast");
-  if (!toast) return console.warn("Elemen #toast tidak ditemukan");
-  toast.innerText = msg;
-  toast.className = "show " + type;
-  setTimeout(() => {
-    toast.className = toast.className.replace("show " + type, "");
-  }, 3000);
-}
+  const form = document.getElementById('jadwalForm');
+  if (!form) return;
 
-// [PERBAIKAN] Fungsi load semua jadwal dari server
-async function loadJadwal() {
-  try {
-    const res = await fetch(scriptURL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "getJadwal" }) // WAJIB kirim action
-    });
+  const kodeEl    = document.getElementById('kode');
+  const tanggalEl = document.getElementById('tanggal');
+  const lokasiEl  = document.getElementById('lokasi');
+  const toastEl   = document.getElementById('toast');
 
-    const result = await res.json();
+  const pad2 = n => String(n).padStart(2,'0');
 
-    if (!result.success || !Array.isArray(result.data)) {
-      console.error("Data jadwal tidak valid:", result);
-      showToast("❌ Data jadwal tidak valid!", "error");
-      return;
-    }
-
-    const tbody = document.querySelector("#jadwalTable tbody");
-    if (!tbody) return;
-
-    tbody.innerHTML = ""; // kosongkan tabel dulu
-
-    result.data.forEach(item => {
-      const row = tbody.insertRow();
-
-      // Kolom 0: Kode unit
-      row.insertCell(0).innerText = item.kode || "";
-
-      // Kolom 1: Tanggal inspeksi (format rapi)
-      let tgl = "";
-      if (item.tanggal) {
-        try {
-          const d = new Date(item.tanggal);
-          tgl = d.toLocaleDateString("id-ID", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit"
-          });
-        } catch {
-          tgl = item.tanggal; // fallback kalau bukan ISO
-        }
-      }
-      row.insertCell(1).innerText = tgl;
-
-      // Kolom 2: Lokasi unit
-      row.insertCell(2).innerText = item.lokasi || "";
-
-      // Kolom 3: Checkbox sudah inspeksi
-      row.insertCell(3).innerHTML =
-        `<input type="checkbox" ${item.sudahInspeksi ? "checked" : ""}>`;
-    });
-
-  } catch (err) {
-    showToast("❌ Gagal memuat jadwal: " + err.message, "error");
+  function toYMD(any){
+    if (!any) return "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(any)) return any;           // yyyy-mm-dd
+    const m1 = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(any).trim()); // dd/mm/yyyy
+    if (m1) return `${m1[3]}-${m1[2]}-${m1[1]}`;
+    const d = new Date(any);
+    if (!isNaN(d)) return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+    return "";
   }
-}
+  function toDisp(any){
+    const ymd = toYMD(any);
+    if (!ymd) return "-";
+    const [y,m,d] = ymd.split('-');
+    return `${d}/${m}/${y}`;
+  }
 
-// Panggil saat halaman sudah siap
-document.addEventListener("DOMContentLoaded", loadJadwal);
+  function pushStaged(item){
+    try{
+      const arr = JSON.parse(localStorage.getItem(STAGED_KEY) || '[]');
+      arr.unshift(item); // prepend biar draft terbaru di atas
+      localStorage.setItem(STAGED_KEY, JSON.stringify(arr.slice(0,200)));
+    }catch{}
+  }
+  function broadcastDraft(item){
+    JADWAL_CHANNEL.postMessage({ type: 'jadwal:new', data: item });
+  }
+  function toast(msg){
+    if (!toastEl) { alert(msg); return; }
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    setTimeout(()=>toastEl.classList.remove('show'), 1800);
+  }
 
-// Pastikan form jadwal ada
-const jadwalForm = document.getElementById("jadwalForm");
-if (jadwalForm) {
-  jadwalForm.addEventListener("submit", async (e) => {
+  // Ambil alih submit: hanya staging + broadcast (tidak ke Sheet)
+  const onSubmit = (e) => {
     e.preventDefault();
+    e.stopImmediatePropagation();  // blok handler submit lain (kalau ada)
 
-    const tanggal = document.getElementById("tanggal")?.value.trim();
-    const kode    = document.getElementById("kode")?.value.trim();
-    const lokasi  = document.getElementById("lokasi")?.value.trim();
+    const kode = (kodeEl?.value || '').trim();
+    const tgl  = (tanggalEl?.value || '').trim();
+    const lok  = (lokasiEl?.value || '').trim();
 
-    if (!tanggal || !kode || !lokasi) {
-      showToast("Mohon lengkapi semua field!", "error");
+    if (!kode || !tgl){
+      alert('Kode & Tanggal wajib diisi.');
       return;
     }
 
-    const payload = { action: "submitJadwal", tanggal, kode, lokasi };
+    const item = {
+      kode: kode,
+      lokasi: lok,
+      tanggalYMD : toYMD(tgl),
+      tanggalDisp: toDisp(tgl),
+      status     : 'Belum' // akan diedit di Dashboard
+    };
 
-    // tampilkan loading (null-safe)
-    const overlay = document.getElementById("loadingOverlay");
-    if (overlay) overlay.classList.add("active");
+    pushStaged(item);
+    broadcastDraft(item);
 
-    try {
-      const res = await fetch(scriptURL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+    form.reset();
+    toast('✅ Draft jadwal disimpan & dikirim ke Dashboard');
+  };
 
-      let result = {};
-      try { result = await res.json(); } catch { /* ignore */ }
-
-      if (!result.success) {
-        throw new Error(result.message || ("HTTP " + res.status));
-      }
-
-      // reload tabel biar sinkron dengan database
-      await loadJadwal(); 
-
-      showToast(result.message || "✅ Jadwal berhasil disimpan!", "success");
-      e.target.reset();
-    } catch (err) {
-      showToast("❌ Gagal menyimpan: " + err.message, "error");
-    } finally {
-      // sembunyikan loading (null-safe)
-      const overlay2 = document.getElementById("loadingOverlay");
-      if (overlay2) overlay2.classList.remove("active");
-    }
-  });
-}
+  // Pakai capture=true agar listener ini dieksekusi lebih dulu
+  form.addEventListener('submit', onSubmit, true);
+})();
