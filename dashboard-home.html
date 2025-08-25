@@ -4,14 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Dashboard Utama</title>
-
-  <!-- Style widget -->
   <link rel="stylesheet" href="dashboard-home.css" />
 </head>
 <body>
   <h2>Dashboard Inspection Report PT Jhonlin Baratama</h2>
 
-  <!-- Widget: Jadwal Inspeksi Hari Ini -->
+  <!-- Widget: Jadwal Inspeksi Hari Ini (tetap) -->
   <section class="today-widget">
     <div class="tw-header">
       <h3>Jadwal Inspeksi Hari Ini</h3>
@@ -20,27 +18,37 @@
         <button id="tw-refresh" type="button">Refresh</button>
       </div>
     </div>
-
     <div id="tw-msg" class="tw-msg tw-hidden">Memuat data…</div>
-
     <div class="tw-tablewrap">
       <table class="tw-table" id="tw-table">
         <thead>
-          <tr>
-            <th>Kode Unit</th>
-            <th>Tanggal</th>
-            <th>Lokasi</th>
-            <th>Status</th>
-          </tr>
+          <tr><th>Kode Unit</th><th>Tanggal</th><th>Lokasi</th><th>Status</th></tr>
         </thead>
-        <tbody id="tw-tbody">
-          <tr><td colspan="4" class="tw-muted">Memuat…</td></tr>
-        </tbody>
+        <tbody id="tw-tbody"><tr><td colspan="4" class="tw-muted">Memuat…</td></tr></tbody>
       </table>
     </div>
   </section>
 
-  <!-- Script widget -->
+  <!-- Widget: Draft Jadwal (Belum Terkirim) -->
+  <section class="stage-widget">
+    <div class="sw-header">
+      <h3>Draft Jadwal (Belum Terkirim)</h3>
+      <div class="sw-actions">
+        <button id="sw-submit-all" class="btn-primary">Kirim Semua</button>
+        <button id="sw-clear" class="btn-danger">Bersihkan Draft</button>
+      </div>
+    </div>
+    <div id="sw-msg" class="tw-msg tw-hidden">—</div>
+    <div class="tw-tablewrap">
+      <table class="tw-table" id="stage-table">
+        <thead>
+          <tr><th>Kode Unit</th><th>Tanggal</th><th>Lokasi</th><th>Status</th><th>Aksi</th></tr>
+        </thead>
+        <tbody id="stage-tbody"><tr><td colspan="5" class="tw-muted">Tidak ada draft.</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
   <script src="dashboard-home.js"></script>
 </body>
 </html>
