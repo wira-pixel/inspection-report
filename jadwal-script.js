@@ -12,27 +12,33 @@ function showToast(msg, type = "success") {
   }, 3000);
 }
 
-// [BARU] Fungsi load semua jadwal dari server
+// [PERBAIKAN] Fungsi load semua jadwal dari server
 async function loadJadwal() {
   try {
     const res = await fetch(scriptURL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "getJadwal" }) // nanti AppScript/Worker harus support ini
+      body: JSON.stringify({ action: "getJadwal" }) // WAJIB kirim action
     });
 
-    const data = await res.json();
+    const result = await res.json();
+
+    if (!result.success || !Array.isArray(result.data)) {
+      console.error("Data jadwal tidak valid:", result);
+      showToast("❌ Data jadwal tidak valid!", "error");
+      return;
+    }
 
     const tbody = document.querySelector("#jadwalTable tbody");
     if (!tbody) return;
 
     tbody.innerHTML = ""; // kosongkan tabel dulu
 
-    data.forEach(item => {
+    result.data.forEach(item => {
       const row = tbody.insertRow();
-      row.insertCell(0).innerText = item.kode;
-      row.insertCell(1).innerText = item.tanggal;
-      row.insertCell(2).innerText = item.lokasi;
+      row.insertCell(0).innerText = item.kode || "";
+      row.insertCell(1).innerText = item.tanggal || "";
+      row.insertCell(2).innerText = item.lokasi || "";
       row.insertCell(3).innerHTML = `<input type="checkbox" ${item.sudahInspeksi ? "checked" : ""}>`;
     });
 
@@ -42,7 +48,7 @@ async function loadJadwal() {
 }
 
 // Panggil saat halaman sudah siap
-document.addEventListener("DOMContentLoaded", loadJadwal); // [BARU]
+document.addEventListener("DOMContentLoaded", loadJadwal);
 
 // Pastikan form jadwal ada
 const jadwalForm = document.getElementById("jadwalForm");
@@ -75,11 +81,11 @@ if (jadwalForm) {
       let result = {};
       try { result = await res.json(); } catch { /* ignore */ }
 
-      if (!res.ok) {
+      if (!result.success) {
         throw new Error(result.message || ("HTTP " + res.status));
       }
 
-      // [UPDATE] -> sekarang tidak perlu insert manual, cukup reload dari server
+      // reload tabel biar sinkron dengan database
       await loadJadwal(); 
 
       showToast(result.message || "✅ Jadwal berhasil disimpan!", "success");
