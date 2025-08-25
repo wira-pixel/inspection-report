@@ -1,0 +1,31 @@
+<!-- WIDGET: Jadwal Inspeksi Hari Ini -->
+<section class="today-card">
+  <div class="today-header">
+    <h2>Jadwal Inspeksi Hari Ini</h2>
+    <div class="today-meta">
+      <span id="todayDateText">—</span>
+      <button id="refreshToday" type="button">Refresh</button>
+    </div>
+  </div>
+
+  <div id="todayMessage" class="today-msg hidden">Memuat data…</div>
+
+  <div class="today-table-wrap">
+    <table class="today-table" id="today-table">
+      <thead>
+        <tr>
+          <th>Kode Unit</th>
+          <th>Tanggal</th>
+          <th>Lokasi</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="today-tbody">
+        <tr><td colspan="4" class="muted">Memuat…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- script -->
+<script src="dashboard-today.js"></script>
