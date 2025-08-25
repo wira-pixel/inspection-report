@@ -178,7 +178,12 @@ let globalDataDB = [];
 
 async function loadDatabase() {
   try {
-    const response = await fetch("https://delicate-union-ad99.sayaryant.workers.dev/");
+    const response = await fetch("https://delicate-union-ad99.sayaryant.workers.dev/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "getDatabase" }) // ✅ WAJIB kirim action
+    });
+
     if (!response.ok) throw new Error("HTTP Error " + response.status);
 
     const data = await response.json();
@@ -220,6 +225,7 @@ function renderTableDB(dataArray) {
 }
 
 
+
 // FILTER & SEARCH
 const searchInput = document.getElementById("searchInput");
 const minHour     = document.getElementById("minHour");
@@ -256,6 +262,7 @@ if (filterBtn && resetBtn) {
 
 // Load database otomatis
 loadDatabase();
+
 
 
 
