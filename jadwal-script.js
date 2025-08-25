@@ -36,10 +36,32 @@ async function loadJadwal() {
 
     result.data.forEach(item => {
       const row = tbody.insertRow();
+
+      // Kolom 0: Kode unit
       row.insertCell(0).innerText = item.kode || "";
-      row.insertCell(1).innerText = item.tanggal || "";
+
+      // Kolom 1: Tanggal inspeksi (format rapi)
+      let tgl = "";
+      if (item.tanggal) {
+        try {
+          const d = new Date(item.tanggal);
+          tgl = d.toLocaleDateString("id-ID", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+          });
+        } catch {
+          tgl = item.tanggal; // fallback kalau bukan ISO
+        }
+      }
+      row.insertCell(1).innerText = tgl;
+
+      // Kolom 2: Lokasi unit
       row.insertCell(2).innerText = item.lokasi || "";
-      row.insertCell(3).innerHTML = `<input type="checkbox" ${item.sudahInspeksi ? "checked" : ""}>`;
+
+      // Kolom 3: Checkbox sudah inspeksi
+      row.insertCell(3).innerHTML =
+        `<input type="checkbox" ${item.sudahInspeksi ? "checked" : ""}>`;
     });
 
   } catch (err) {
