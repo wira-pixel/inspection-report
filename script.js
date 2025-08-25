@@ -172,10 +172,18 @@ async function postToSheet(payload){
 }
 
 // ==========================
-// DATABASE SEARCH & FILTER (AMAN)
+// DATABASE SCRIPT
 // ==========================
+
+// URL Cloudflare Worker
+const scriptURL = "https://delicate-union-ad99.sayaryant.workers.dev";
+
+// Global data
 let globalDataDB = [];
 
+// ==========================
+// Load database dari server
+// ==========================
 async function loadDatabase() {
   try {
     const response = await fetch(scriptURL, {
@@ -202,7 +210,9 @@ async function loadDatabase() {
   }
 }
 
-
+// ==========================
+// Render data ke tabel
+// ==========================
 function renderTableDB(dataArray) {
   const tbody = document.querySelector("#data-table tbody");
   if (!tbody) return;
@@ -225,10 +235,9 @@ function renderTableDB(dataArray) {
   });
 }
 
-// Load database otomatis
-loadDatabase();
-
-// FILTER & SEARCH
+// ==========================
+// Filter & Search
+// ==========================
 const searchInput = document.getElementById("searchInput");
 const minHour     = document.getElementById("minHour");
 const maxHour     = document.getElementById("maxHour");
@@ -260,4 +269,34 @@ if (filterBtn && resetBtn) {
     renderTableDB(globalDataDB);
   });
 }
+
+// ==========================
+// Submit form inspeksi (existing code)
+// ==========================
+const form = document.getElementById('myForm');
+const itemsTableBody = document.querySelector('#itemsTable tbody');
+const output = document.getElementById('output');
+const overlay = document.getElementById('overlay');
+let currentMainRow = null;
+
+// Set tanggal hari ini
+function setToday(){
+  const el = document.getElementById('Date');
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const dd = String(today.getDate()).padStart(2,'0');
+  el.value = `${yyyy}-${mm}-${dd}`;
+}
+
+// Add row, add sub row, setupRow, submit form, etc.
+// (copy dari script aslinya, tidak diubah fungsi lainnya)
+
+// ==========================
+// Load database otomatis
+// ==========================
+document.addEventListener("DOMContentLoaded", loadDatabase);
+setToday();
+
+
 
