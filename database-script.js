@@ -15,6 +15,7 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // waji
   let rowsRaw = [];
   let view    = [];
 
+  // ---------- Util tanggal ----------
   function formatDate(val){
     if (val == null || val === "") return "-";
     if (typeof val === "number") {
@@ -46,6 +47,32 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // waji
     if (parts.length !== 3) return NaN;
     const [dd, mm, yy] = parts;
     return Date.parse(`${yy}-${mm}-${dd}`);
+  }
+
+  // ---------- Util ambil field dengan fallback/fuzzy ----------
+  function pickField(obj, candidates, fuzzyContains) {
+    // 1) coba nama pasti (case sensitive)
+    for (const k of candidates) {
+      if (obj[k] !== undefined && obj[k] !== "") return obj[k];
+    }
+    // 2) case-insensitive exact
+    const lowerMap = {};
+    for (const k of Object.keys(obj)) lowerMap[k.trim().toLowerCase()] = k;
+    for (const k of candidates) {
+      const lk = k.trim().toLowerCase();
+      if (lowerMap[lk] !== undefined && obj[lowerMap[lk]] !== "") return obj[lowerMap[lk]];
+    }
+    // 3) fuzzy: cari key yang mengandung salah satu substring (lowercase)
+    if (Array.isArray(fuzzyContains) && fuzzyContains.length) {
+      for (const key of Object.keys(obj)) {
+        const norm = key.trim().toLowerCase();
+        if (fuzzyContains.some(f => norm.includes(f))) {
+          const val = obj[key];
+          if (val !== undefined && val !== "") return val;
+        }
+      }
+    }
+    return "-";
   }
 
   // --- Ambil dari Worker (GET ?action=getInspeksi, fallback POST) ---
@@ -99,10 +126,19 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // waji
     hideMessage();
 
     rowsRaw = payload.data.map(row => ({
-      codeUnit   : row["Code Unit"]  ?? row["codeUnit"]  ?? "-",
-      date       : formatDate(row["Date"] ?? row["date"] ?? "-"),
-      hourMeter  : (row["Hour Meter"] ?? row["hourMeter"] ?? "-"),
-      inspectedBy: row["Inspected By"] ?? row["inspectedBy"] ?? "-"
+      codeUnit   : pickField(row,
+                      ["Code Unit","codeUnit","Kode Unit","Unit Code"],
+                      ["code unit","kode unit","unit code"]),
+      date       : formatDate(pickField(row,
+                      ["Date","date","Tanggal"],
+                      ["date","tanggal","tgl"])),
+      hourMeter  : pickField(row,
+                      ["Hour Meter","hourMeter","HM","Hourmeter"],
+                      ["hour","meter","hm"]),
+      // >>> di sini kita toleran banyak nama kolom untuk inspektor <<<
+      inspectedBy: pickField(row,
+                      ["Inspected By","Inspected by","InspectedBy","Inspektor","Inspector","inspectedBy","Nama Inspektor","Petugas"],
+                      ["inspect","inspek","inspekt","inspector","petugas","checker"])
     }));
 
     // === Urutkan: tanggal terbaru → terlama; jika sama, HM terbesar dulu ===
