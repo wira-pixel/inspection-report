@@ -38,7 +38,7 @@ async function loadJadwal() {
       const row = tbody.insertRow();
 
       // Kolom 0: Kode unit
-      row.insertCell(0).innerText = item.Kode || "";
+      row.insertCell(0).innerText = item.kode || "";
 
       // Kolom 1: Tanggal inspeksi (format rapi)
       let tgl = "";
