@@ -229,16 +229,40 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
     });
   }
 
-  // Load database dari server (GET ?action=getInspeksi -> Apps Script doGet)
+  // Helper: coba GET lalu fallback POST jika perlu
+  async function fetchInspeksiWithFallback() {
+    // 1) Coba GET ?action=getInspeksi
+    try {
+      const respGet = await fetch(`${WORKER_URL}?action=getInspeksi`);
+      const dataGet = await respGet.json();
+      if (dataGet?.success && Array.isArray(dataGet.data)) {
+        return dataGet;
+      }
+      // Jika gagal karena action tidak valid / tidak sukses, lanjut ke POST
+      if (!dataGet?.success) {
+        console.warn("GET gagal/invalid, mencoba POST ...", dataGet);
+      }
+    } catch (e) {
+      console.warn("GET error, mencoba POST ...", e);
+    }
+
+    // 2) Fallback ke POST {action:"getInspeksi"}
+    const respPost = await fetch(WORKER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "getInspeksi" })
+    });
+    const dataPost = await respPost.json();
+    return dataPost;
+  }
+
+  // Load database dari server
   async function loadDatabase() {
     try {
-      const response = await fetch(`${WORKER_URL}?action=getInspeksi`); // GET
-      if (!response.ok) throw new Error("HTTP Error " + response.status);
-
-      const data = await response.json();
+      const data = await fetchInspeksiWithFallback();
       console.log("Database JSON:", data);
 
-      if (!data.success || !Array.isArray(data.data)) {
+      if (!data?.success || !Array.isArray(data.data)) {
         console.error("Data database tidak valid:", data);
         return;
       }
