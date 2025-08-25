@@ -1,12 +1,12 @@
 // URL Cloudflare Worker kamu
 const scriptURL = "https://delicate-union-ad99.sayaryant.workers.dev";
 
-// Fungsi tampil / sembunyi loading overlay
-function showLoading() {
-  document.getElementById("loadingOverlay").classList.add("active");
-}
-function hideLoading() {
-  document.getElementById("loadingOverlay").classList.remove("active");
+// Toast function
+function showToast(msg, type = "success") {
+  const toast = document.getElementById("toast");
+  toast.innerText = msg;
+  toast.className = "show " + type;
+  setTimeout(() => { toast.className = toast.className.replace("show " + type, ""); }, 3000);
 }
 
 // Pastikan form jadwal ada
@@ -20,23 +20,23 @@ if (jadwalForm) {
     const lokasi  = document.getElementById("lokasi").value.trim();
 
     if (!tanggal || !kode || !lokasi) {
-      alert("Mohon lengkapi semua field!");
+      showToast("Mohon lengkapi semua field!", "error");
       return;
     }
 
     // WAJIB: action untuk routing di Worker & GAS
     const payload = { action: "submitJadwal", tanggal, kode, lokasi };
 
-    try {
-      showLoading(); // tampilkan overlay
+    // tampilkan loading
+    document.getElementById("loadingOverlay").classList.add("active");
 
+    try {
       const res = await fetch(scriptURL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      // coba baca JSON; kalau gagal ya sudah, anggap teks biasa
       let result = {};
       try { result = await res.json(); } catch { /* ignore */ }
 
@@ -54,12 +54,13 @@ if (jadwalForm) {
         row.insertCell(3).innerHTML = `<input type="checkbox">`;
       }
 
-      alert(result.message || "✅ Jadwal berhasil disimpan!");
+      showToast(result.message || "✅ Jadwal berhasil disimpan!", "success");
       e.target.reset();
     } catch (err) {
-      alert("❌ Gagal menyimpan: " + err.message);
+      showToast("❌ Gagal menyimpan: " + err.message, "error");
     } finally {
-      hideLoading(); // sembunyikan overlay di akhir proses
+      // sembunyikan loading
+      document.getElementById("loadingOverlay").classList.remove("active");
     }
   });
 }
