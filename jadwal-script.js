@@ -12,6 +12,38 @@ function showToast(msg, type = "success") {
   }, 3000);
 }
 
+// [BARU] Fungsi load semua jadwal dari server
+async function loadJadwal() {
+  try {
+    const res = await fetch(scriptURL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "getJadwal" }) // nanti AppScript/Worker harus support ini
+    });
+
+    const data = await res.json();
+
+    const tbody = document.querySelector("#jadwalTable tbody");
+    if (!tbody) return;
+
+    tbody.innerHTML = ""; // kosongkan tabel dulu
+
+    data.forEach(item => {
+      const row = tbody.insertRow();
+      row.insertCell(0).innerText = item.kode;
+      row.insertCell(1).innerText = item.tanggal;
+      row.insertCell(2).innerText = item.lokasi;
+      row.insertCell(3).innerHTML = `<input type="checkbox" ${item.sudahInspeksi ? "checked" : ""}>`;
+    });
+
+  } catch (err) {
+    showToast("❌ Gagal memuat jadwal: " + err.message, "error");
+  }
+}
+
+// Panggil saat halaman sudah siap
+document.addEventListener("DOMContentLoaded", loadJadwal); // [BARU]
+
 // Pastikan form jadwal ada
 const jadwalForm = document.getElementById("jadwalForm");
 if (jadwalForm) {
@@ -47,15 +79,8 @@ if (jadwalForm) {
         throw new Error(result.message || ("HTTP " + res.status));
       }
 
-      // Tambahkan ke tabel hanya setelah sukses tersimpan
-      const tbody = document.querySelector("#jadwalTable tbody");
-      if (tbody) {
-        const row = tbody.insertRow();
-        row.insertCell(0).innerText = kode;
-        row.insertCell(1).innerText = tanggal;
-        row.insertCell(2).innerText = lokasi;
-        row.insertCell(3).innerHTML = `<input type="checkbox">`;
-      }
+      // [UPDATE] -> sekarang tidak perlu insert manual, cukup reload dari server
+      await loadJadwal(); 
 
       showToast(result.message || "✅ Jadwal berhasil disimpan!", "success");
       e.target.reset();
