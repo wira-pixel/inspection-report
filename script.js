@@ -178,7 +178,7 @@ let globalDataDB = [];
 
 async function loadDatabase() {
   try {
-    // Ubah ke GET + query parameter action=getInspeksi
+    // Gunakan GET + query parameter action=getInspeksi
     const response = await fetch("https://delicate-union-ad99.sayaryant.workers.dev/?action=getInspeksi");
 
     if (!response.ok) throw new Error("HTTP Error " + response.status);
