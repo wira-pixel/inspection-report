@@ -178,8 +178,11 @@ let globalDataDB = [];
 
 async function loadDatabase() {
   try {
-    // Gunakan GET + query parameter action=getInspeksi
-    const response = await fetch("https://delicate-union-ad99.sayaryant.workers.dev/?action=getInspeksi");
+    const response = await fetch(scriptURL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "getInspeksi" })
+    });
 
     if (!response.ok) throw new Error("HTTP Error " + response.status);
 
@@ -198,6 +201,7 @@ async function loadDatabase() {
     console.error("Gagal ambil data database:", err);
   }
 }
+
 
 function renderTableDB(dataArray) {
   const tbody = document.querySelector("#data-table tbody");
@@ -256,3 +260,4 @@ if (filterBtn && resetBtn) {
     renderTableDB(globalDataDB);
   });
 }
+
