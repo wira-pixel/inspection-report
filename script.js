@@ -204,18 +204,33 @@ function renderTableDB(dataArray) {
 
   dataArray.forEach(row => {
     const tr = document.createElement("tr");
-    const codeUnit = row["Code Unit"] ?? row["codeUnit"] ?? "-";
-    const date     = row["Date"]      ?? row["date"] ?? "-";
-    const hourMeter= row["Hour Meter"]?? row["hourMeter"] ?? "-";
+
+    const codeUnit  = row["Code Unit"] ?? row["codeUnit"] ?? "-";
+    const rawDate   = row["Date"] ?? row["date"] ?? "-";
+    const hourMeter = row["Hour Meter"] ?? row["hourMeter"] ?? "-";
+
+    // Format tanggal kalau valid
+    let formattedDate = rawDate;
+    if (rawDate && rawDate !== "-") {
+      const d = new Date(rawDate);
+      if (!isNaN(d)) {
+        formattedDate = d.toLocaleDateString("id-ID", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric"
+        });
+      }
+    }
 
     tr.innerHTML = `
       <td>${codeUnit}</td>
-      <td>${date}</td>
+      <td>${formattedDate}</td>
       <td>${hourMeter}</td>
     `;
     tbody.appendChild(tr);
   });
 }
+
 
 // FILTER & SEARCH
 const searchInput = document.getElementById("searchInput");
@@ -253,4 +268,5 @@ if (filterBtn && resetBtn) {
 
 // Load database otomatis
 loadDatabase();
+
 
