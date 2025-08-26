@@ -95,18 +95,3 @@ body {
   border-radius: 12px;
   background: #334155;
 }
-
-.sidebar h2 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sidebar h2 .logo {
-  height: 24px;   /* biar seukuran teks */
-  width: auto;
-}
-
-
-
-
