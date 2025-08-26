@@ -5,21 +5,22 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // trai
 
 // Util
 const pad2 = n => String(n).padStart(2, "0");
-const toDDMMYYYY = d => `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()}`;
 const todayYMD = () => { const d=new Date(); return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; };
-const anyToYMD = v => {
+
+function anyToYMD(v){
   if (!v) return "";
-  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;                 // yyyy-mm-dd
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(v).trim()); // dd/mm/yyyy
+  if (m) return `${m[3]}-${m[2]}-${m[1]}`;
   const d = new Date(v);
   if (!isNaN(d)) return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
   return "";
-};
-const dispFromAny = v => {
-  const y = anyToYMD(v);
-  if (!y) return "-";
-  const [yy, mm, dd] = y.split("-");
-  return `${dd}/${mm}/${yy}`;
-};
+}
+function ymdToDDMMYYYY(ymd){
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd||"")) return "-";
+  const [y,m,d] = ymd.split("-");
+  return `${d}/${m}/${y}`;
+}
 
 async function postWorker(payload){
   const r = await fetch(WORKER_URL, {
@@ -29,9 +30,9 @@ async function postWorker(payload){
   });
   return await r.json();
 }
-
 async function getJadwal(){ return await postWorker({ action: "getJadwal" }); }
 
+// Toast & overlay & info
 function showToast(msg, type="success"){
   const el = document.getElementById("toast");
   if (!el) return;
@@ -39,8 +40,13 @@ function showToast(msg, type="success"){
   el.className = `show ${type}`;
   setTimeout(()=> el.className = el.className.replace(`show ${type}`, ""), 2600);
 }
-function showOverlay(){ document.getElementById("loadingOverlay")?.classList.remove("hidden"); }
-function hideOverlay(){ document.getElementById("loadingOverlay")?.classList.add("hidden"); }
+const overlayEl = document.getElementById("loadingOverlay");
+const loadingText = document.getElementById("loadingText");
+function showOverlay(msg="Mengirim data, mohon tunggu..."){
+  if (loadingText) loadingText.textContent = msg;
+  overlayEl?.classList.add("active");     // <-- konsisten dengan CSS .active
+}
+function hideOverlay(){ overlayEl?.classList.remove("active"); }
 function showInfo(msg){ const i=document.getElementById("infoMsg"); if(i){ i.textContent=msg; i.classList.remove("hidden"); } }
 function hideInfo(){ const i=document.getElementById("infoMsg"); if(i){ i.classList.add("hidden"); } }
 
@@ -58,18 +64,12 @@ document.getElementById("jadwalForm")?.addEventListener("submit", async (e) => {
 
   showOverlay();
   try {
-    // status default "Belum" akan diisi di Apps Script (sudah kamu set)
-    const res = await postWorker({
-      action : "submitJadwal",
-      tanggal,
-      kode,
-      lokasi
-    });
+    // status default "Belum" diisi di Apps Script
+    const res = await postWorker({ action:"submitJadwal", tanggal, kode, lokasi });
     if (!res?.success) throw new Error(res?.message || "Gagal simpan");
     showToast(res?.message || "✅ Jadwal tersimpan");
     e.target.reset();
-    // reload draft agar langsung muncul
-    await loadDraft();
+    await loadDraft(); // refresh tabel
   } catch (err){
     showToast("❌ " + err.message, "error");
   } finally {
@@ -89,6 +89,7 @@ async function loadDraft(){
     const res = await getJadwal();
     if (!res?.success || !Array.isArray(res.data)){
       tbody.innerHTML = `<tr><td colspan="5" class="muted">${res?.message || "Gagal memuat"}</td></tr>`;
+      tbody.dataset.rows = "[]"; // reset anti stale
       return;
     }
     const today = todayYMD();
@@ -103,6 +104,7 @@ async function loadDraft(){
 
     if (!rows.length){
       tbody.innerHTML = `<tr><td colspan="5" class="muted">Tidak ada draft.</td></tr>`;
+      tbody.dataset.rows = "[]"; // reset anti stale
       return;
     }
 
@@ -110,18 +112,13 @@ async function loadDraft(){
     tbody.innerHTML = rows.map((r, i) => `
       <tr data-idx="${i}">
         <td>${r.kode}</td>
-        <td>${toDDMMYYYY(new Date(r.tanggalYMD))}</td>
+        <td>${ymdToDDMMYYYY(r.tanggalYMD)}</td>
         <td>${r.lokasi || "-"}</td>
-        <td>
-          <select class="select-status">${options}</select>
-        </td>
-        <td>
-          <button class="btn btn-row js-submit">Kirim</button>
-        </td>
+        <td><select class="select-status">${options}</select></td>
+        <td><button class="btn btn-row js-submit">Kirim</button></td>
       </tr>
     `).join("");
 
-    // simpan data baris ke dataset agar mudah diakses saat kirim
     tbody.dataset.rows = JSON.stringify(rows);
   } finally {
     hideInfo();
@@ -164,7 +161,7 @@ btnSubmitAll?.addEventListener("click", async () => {
   if (!rows.length || !trs.length) return;
 
   try {
-    showOverlay();
+    showOverlay("Mengirim semua status…");
     for (const tr of trs){
       const idx = Number(tr.dataset.idx);
       const row = rows[idx]; if (!row) continue;
@@ -190,4 +187,7 @@ btnSubmitAll?.addEventListener("click", async () => {
 btnRefresh?.addEventListener("click", loadDraft);
 
 // init
-document.addEventListener("DOMContentLoaded", loadDraft);
+document.addEventListener("DOMContentLoaded", () => {
+  hideOverlay();   // pastikan overlay mati saat start
+  loadDraft();
+});
