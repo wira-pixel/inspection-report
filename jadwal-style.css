@@ -4,6 +4,9 @@
   --shadow:0 8px 24px rgba(0,0,0,.25);
 }
 
+/* ==== Fix perhitungan lebar agar input tidak melebar ==== */
+*, *::before, *::after { box-sizing: border-box; }
+
 html,body{ background:transparent; }
 body{ margin:0; padding:20px; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; color:var(--text); }
 h1{ margin:0 0 16px 0; letter-spacing:.2px; }
@@ -15,17 +18,32 @@ h1{ margin:0 0 16px 0; letter-spacing:.2px; }
   background:var(--card); border:1px solid var(--border);
   border-radius:14px; padding:14px; box-shadow:var(--shadow); margin-top:16px;
 }
+/* Biar isi kartu nggak “maksa” melebar di layout flex */
+.card, .card * { min-width: 0; }
+
 .card-header{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
 .card-header h2{ margin:0; color:var(--accent); }
 
 /* Form */
 label{ display:block; margin-top:10px; margin-bottom:6px; color:var(--muted); }
 input[type="text"], input[type="date"]{
-  width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border);
+  width:100%;
+  max-width:100%;
+  display:block;              /* pastikan blok penuh baris */
+  padding:10px 12px;
+  border-radius:10px; border:1px solid var(--border);
   background:#0f172a; color:var(--text); outline:none;
+  box-sizing:border-box;       /* kunci agar tidak melebar karena padding/border */
 }
 
-.actions{ display:flex; gap:8px; }
+/* ruang ekstra untuk ikon calendar agar teks tidak ketimpa */
+input[type="date"]{ padding-right:38px; }
+input[type="date"]::-webkit-calendar-picker-indicator{
+  filter: invert(1);
+  cursor: pointer;
+}
+
+.actions{ display:flex; gap:8px; flex-wrap:wrap; }
 .btn{
   padding:10px 14px; border-radius:10px; border:1px solid #0fb8ff;
   background:#10263a; color:#bfeaff; cursor:pointer; font-weight:600;
@@ -49,8 +67,11 @@ input[type="text"], input[type="date"]{
 
 /* Select status + tombol baris */
 .select-status{
+  width:100%;
+  max-width:100%;
   padding:8px 10px; border-radius:10px; border:1px solid var(--border);
   background:#0f172a; color:var(--text);
+  box-sizing:border-box;
 }
 .btn-row{
   padding:8px 12px; border-radius:10px; border:1px solid #0fb8ff; background:#10263a; color:#bfeaff; cursor:pointer;
@@ -58,30 +79,31 @@ input[type="text"], input[type="date"]{
 .btn-row:hover{ filter:brightness(1.1); }
 
 /* Info baris dan overlay */
-.info{ text-align:center; background:#0f172a; border:1px solid var(--border); color:var(--muted); border-radius:10px; padding:8px 10px; margin-bottom:10px; }
-.hidden{ display:none; }
+.info{
+  text-align:center; background:#0f172a; border:1px solid var(--border);
+  color:var(--muted); border-radius:10px; padding:8px 10px; margin-bottom:10px;
+}
 
-.overlay{ position:fixed; inset:0; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; z-index:9999; }
+/* Overlay default terlihat, tapi akan disembunyikan dg .hidden dari JS */
+.overlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.6);
+  display:flex;
+  align-items:center; justify-content:center;
+  z-index:9999;
+}
 .loading{ display:flex; flex-direction:column; align-items:center; gap:12px; color:#fff; font-weight:600; }
 .spinner{ width:56px; height:56px; border-radius:50%; border:6px solid rgba(255,255,255,.25); border-top-color:#19d3ff; animation:spin 1s linear infinite; }
 @keyframes spin{ to{ transform:rotate(360deg) } }
 
 /* Toast */
-#toast{ position:fixed; right:16px; bottom:16px; background:#0f172a; color:#dbeeff; padding:10px 12px; border-radius:10px; border:1px solid var(--border); opacity:0; transform:translateY(10px); transition:.25s; z-index:9999; }
+#toast{
+  position:fixed; right:16px; bottom:16px; background:#0f172a; color:#dbeeff;
+  padding:10px 12px; border-radius:10px; border:1px solid var(--border);
+  opacity:0; transform:translateY(10px); transition:.25s; z-index:9999;
+}
 #toast.show{ opacity:1; transform:translateY(0); }
 #toast.error{ border-color:#ff6b6b; color:#ffdede; }
 
-/* aturan overlay kamu */
-.overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,.6);
-  display: flex;                 /* <- ini di-override */
-  align-items: center; justify-content: center;
-  z-index: 9999;
-}
-
-/* Letakkan paling bawah supaya menang */
-.hidden { display:none !important; }
-
-
-
+/* Utility: sembunyikan kuat (untuk overlay/toast/info dari JS) */
+.hidden{ display:none !important; }
