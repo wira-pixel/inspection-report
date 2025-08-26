@@ -95,3 +95,26 @@ body {
   border-radius: 12px;
   background: #334155;
 }
+
+/* Brand (logo + title) di sidebar */
+.sidebar .brand{
+  display:flex;
+  align-items:center;
+  gap:10px;           /* jarak antara logo & tulisan */
+  margin:0 0 6px 0;   /* jarak bawah kecil sebelum versi */
+}
+
+.sidebar .brand-logo{
+  width:28px;         /* atur ukuran logo */
+  height:28px;
+  object-fit:contain; /* jaga proporsi */
+  display:block;
+}
+
+/* pastikan h2 rapi saat di dalam brand */
+.sidebar .brand h2{
+  margin:0;
+  line-height:1.1;
+}
+
+
