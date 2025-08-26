@@ -1,40 +1,72 @@
-/* overlay + toast */
-#loadingOverlay{
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.6);
-  display: none;              /* ⬅️ default: tersembunyi */
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-#loadingOverlay.active{        /* ⬅️ hanya muncul saat .active */
-  display: flex !important;
+:root{
+  --card:#1e2945; --border:#2b375a; --accent:#19d3ff;
+  --text:#e9eef7; --muted:#a7b1c6; --row:#243155; --row2:#202c4c;
+  --shadow:0 8px 24px rgba(0,0,0,.25);
 }
 
-.loading{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  color: #fff;
-  font-weight: 600;
-}
-.spinner{
-  width: 56px; height: 56px; border-radius: 50%;
-  border: 6px solid rgba(255,255,255,.25);
-  border-top-color: #19d3ff;
-  animation: spin 1s linear infinite;
-}
-@keyframes spin{ to{ transform: rotate(360deg) } }
+html,body{ background:transparent; }
+body{ margin:0; padding:20px; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; color:var(--text); }
+h1{ margin:0 0 16px 0; letter-spacing:.2px; }
 
-#toast{
-  position: fixed; right: 16px; bottom: 16px;
-  background: #0f172a; color: #dbeeff;
-  padding: 10px 12px; border-radius: 10px;
-  border: 1px solid var(--border);
-  opacity: 0; transform: translateY(10px);
-  transition: .25s; z-index: 9999;
+.container{ max-width:1100px; margin:0 auto; }
+
+/* Kartu */
+.card{
+  background:var(--card); border:1px solid var(--border);
+  border-radius:14px; padding:14px; box-shadow:var(--shadow); margin-top:16px;
 }
-#toast.show{ opacity: 1; transform: translateY(0); }
-#toast.error{ border-color: #ff6b6b; color: #ffdede; }
+.card-header{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
+.card-header h2{ margin:0; color:var(--accent); }
+
+/* Form */
+label{ display:block; margin-top:10px; margin-bottom:6px; color:var(--muted); }
+input[type="text"], input[type="date"]{
+  width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border);
+  background:#0f172a; color:var(--text); outline:none;
+}
+
+.actions{ display:flex; gap:8px; }
+.btn{
+  padding:10px 14px; border-radius:10px; border:1px solid #0fb8ff;
+  background:#10263a; color:#bfeaff; cursor:pointer; font-weight:600;
+}
+.btn:hover{ filter:brightness(1.08); }
+.btn-primary{
+  border-color:#0fb8ff;
+  background:linear-gradient(180deg,#19d3ff,#0fb8ff); color:#001424;
+}
+
+/* Tabel */
+.table-wrap{ border-radius:12px; overflow:hidden; border:1px solid var(--border); }
+.table{ width:100%; border-collapse:collapse; color:var(--text); }
+.table thead th{
+  background:var(--accent); color:#001424; padding:12px 10px; text-align:center; font-weight:800;
+}
+.table tbody td{ padding:12px 10px; text-align:center; border-top:1px solid var(--border); }
+.table tbody tr{ background:var(--row); }
+.table tbody tr:nth-child(even){ background:var(--row2); }
+.muted{ color:var(--muted); }
+
+/* Select status + tombol baris */
+.select-status{
+  padding:8px 10px; border-radius:10px; border:1px solid var(--border);
+  background:#0f172a; color:var(--text);
+}
+.btn-row{
+  padding:8px 12px; border-radius:10px; border:1px solid #0fb8ff; background:#10263a; color:#bfeaff; cursor:pointer;
+}
+.btn-row:hover{ filter:brightness(1.1); }
+
+/* Info baris dan overlay */
+.info{ text-align:center; background:#0f172a; border:1px solid var(--border); color:var(--muted); border-radius:10px; padding:8px 10px; margin-bottom:10px; }
+.hidden{ display:none; }
+
+.overlay{ position:fixed; inset:0; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center; z-index:9999; }
+.loading{ display:flex; flex-direction:column; align-items:center; gap:12px; color:#fff; font-weight:600; }
+.spinner{ width:56px; height:56px; border-radius:50%; border:6px solid rgba(255,255,255,.25); border-top-color:#19d3ff; animation:spin 1s linear infinite; }
+@keyframes spin{ to{ transform:rotate(360deg) } }
+
+/* Toast */
+#toast{ position:fixed; right:16px; bottom:16px; background:#0f172a; color:#dbeeff; padding:10px 12px; border-radius:10px; border:1px solid var(--border); opacity:0; transform:translateY(10px); transition:.25s; z-index:9999; }
+#toast.show{ opacity:1; transform:translateY(0); }
+#toast.error{ border-color:#ff6b6b; color:#ffdede; }
