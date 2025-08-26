@@ -1,80 +1,113 @@
-// Realtime broadcast + staging lokal untuk draft jadwal (tidak kirim ke Sheet)
-(() => {
-  const JADWAL_CHANNEL = new BroadcastChannel('jadwal-inspeksi');
-  const STAGED_KEY = 'stagedJadwal';
+// ==========================
+// JADWAL — simpan ke Sheet (status kosong) + tampilkan
+// ==========================
+const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
 
-  const form = document.getElementById('jadwalForm');
-  if (!form) return;
+const tbody = document.querySelector("#jadwalTable tbody");
 
-  const kodeEl    = document.getElementById('kode');
-  const tanggalEl = document.getElementById('tanggal');
-  const lokasiEl  = document.getElementById('lokasi');
-  const toastEl   = document.getElementById('toast');
+const pad2 = n => String(n).padStart(2,'0');
+const toYMD = any => {
+  if (!any) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(any)) return any;
+  const d = new Date(any);
+  if (!isNaN(d)) return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  return "";
+};
+const toDisp = ymd => {
+  if (!ymd) return "-";
+  const [y,m,d] = ymd.split("-");
+  return `${d}/${m}/${y}`;
+};
 
-  const pad2 = n => String(n).padStart(2,'0');
+function showToast(msg, type = "success") {
+  const toast = document.getElementById("toast");
+  if (!toast) { alert(msg); return; }
+  toast.innerText = msg;
+  toast.className = "show " + type;
+  setTimeout(() => toast.classList.remove("show", type), 2500);
+}
 
-  function toYMD(any){
-    if (!any) return "";
-    if (/^\d{4}-\d{2}-\d{2}$/.test(any)) return any;           // yyyy-mm-dd
-    const m1 = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(any).trim()); // dd/mm/yyyy
-    if (m1) return `${m1[3]}-${m1[2]}-${m1[1]}`;
-    const d = new Date(any);
-    if (!isNaN(d)) return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-    return "";
+async function fetchJadwal(){
+  try{
+    const r = await fetch(WORKER_URL, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ action:"getJadwal" })
+    });
+    return await r.json();
+  }catch(e){ return { success:false, message:e.message }; }
+}
+
+function renderRows(rows){
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  if (!rows.length){
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#9aa4b2">Belum ada data</td></tr>`;
+    return;
   }
-  function toDisp(any){
-    const ymd = toYMD(any);
-    if (!ymd) return "-";
-    const [y,m,d] = ymd.split('-');
-    return `${d}/${m}/${y}`;
-  }
+  rows.forEach(it => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${it.kode || ""}</td>
+      <td>${toDisp(toYMD(it.tanggal || ""))}</td>
+      <td>${it.lokasi || ""}</td>
+      <td><input type="checkbox" ${it.status ? "checked" : ""} disabled></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
 
-  function pushStaged(item){
-    try{
-      const arr = JSON.parse(localStorage.getItem(STAGED_KEY) || '[]');
-      arr.unshift(item); // prepend biar draft terbaru di atas
-      localStorage.setItem(STAGED_KEY, JSON.stringify(arr.slice(0,200)));
-    }catch{}
+async function loadJadwal(){
+  const res = await fetchJadwal();
+  if (!res?.success || !Array.isArray(res.data)){
+    showToast(res?.message || "Gagal memuat jadwal", "error");
+    return;
   }
-  function broadcastDraft(item){
-    JADWAL_CHANNEL.postMessage({ type: 'jadwal:new', data: item });
-  }
-  function toast(msg){
-    if (!toastEl) { alert(msg); return; }
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    setTimeout(()=>toastEl.classList.remove('show'), 1800);
-  }
+  renderRows(res.data);
+}
 
-  // Ambil alih submit: hanya staging + broadcast (tidak ke Sheet)
-  const onSubmit = (e) => {
+// Submit: simpan ke Sheet dengan status kosong
+document.addEventListener("DOMContentLoaded", () => {
+  loadJadwal();
+
+  const form = document.getElementById("jadwalForm");
+  form?.addEventListener("submit", async (e) => {
     e.preventDefault();
-    e.stopImmediatePropagation();  // blok handler submit lain (kalau ada)
 
-    const kode = (kodeEl?.value || '').trim();
-    const tgl  = (tanggalEl?.value || '').trim();
-    const lok  = (lokasiEl?.value || '').trim();
-
-    if (!kode || !tgl){
-      alert('Kode & Tanggal wajib diisi.');
+    const tanggal = document.getElementById("tanggal")?.value.trim();
+    const kode    = document.getElementById("kode")?.value.trim();
+    const lokasi  = document.getElementById("lokasi")?.value.trim();
+    if (!tanggal || !kode || !lokasi){
+      showToast("Mohon lengkapi semua field!", "error");
       return;
     }
 
-    const item = {
-      kode: kode,
-      lokasi: lok,
-      tanggalYMD : toYMD(tgl),
-      tanggalDisp: toDisp(tgl),
-      status     : 'Belum' // akan diedit di Dashboard
-    };
+    const overlay = document.getElementById("loadingOverlay");
+    overlay?.classList.add("active");
 
-    pushStaged(item);
-    broadcastDraft(item);
+    try{
+      const resp = await fetch(WORKER_URL, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({
+          action : "submitJadwal",
+          kode   : kode,
+          tanggal: toYMD(tanggal), // yyyy-mm-dd
+          lokasi : lokasi,
+          status : ""               // <— status kosong (draft)
+        })
+      });
+      const data = await resp.json();
+      if (!data?.success) throw new Error(data?.message || "Gagal menyimpan");
 
-    form.reset();
-    toast('✅ Draft jadwal disimpan & dikirim ke Dashboard');
-  };
+      showToast("✅ Jadwal tersimpan (status kosong)");
+      e.target.reset();
+      loadJadwal(); // segarkan tabel di halaman jadwal
 
-  // Pakai capture=true agar listener ini dieksekusi lebih dulu
-  form.addEventListener('submit', onSubmit, true);
-})();
+    }catch(err){
+      showToast("❌ " + err.message, "error");
+    }finally{
+      overlay?.classList.remove("active");
+    }
+  });
+});
