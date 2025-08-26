@@ -11,7 +11,7 @@ h2{ margin:0 0 16px 0; letter-spacing:.2px; }
 .charts-grid{
   display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;
 }
-@media (max-width:450px){ .charts-grid{ grid-template-columns:1fr; } }
+@media (max-width:900px){ .charts-grid{ grid-template-columns:1fr; } }
 .card{
   background:var(--tw-card); border:1px solid var(--tw-border);
   border-radius:14px; overflow:hidden; box-shadow:var(--tw-shadow);
@@ -66,4 +66,16 @@ button#tw-refresh:hover,.btn-primary:hover{ filter:brightness(1.06); }
 .row-actions{ display:flex; justify-content:center; gap:8px }
 .btn-row{ padding:6px 10px; border-radius:8px; border:1px solid #0fb8ff; background:#10263a; color:#bfeaff; cursor:pointer; }
 .btn-row:hover{ filter:brightness(1.1); }
+
+
+/* Ukuran chart */
+.small-chart{
+  width: 100% !important;
+  height: 260px !important;   /* <= kecilkan di sini (mis. 220/240/260) */
+}
+
+@media (max-width: 900px){
+  .small-chart{ height: 220px !important; }  /* di layar kecil */
+}
+
 
