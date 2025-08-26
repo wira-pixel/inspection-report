@@ -116,7 +116,7 @@ tbody tr:nth-child(even){ background: var(--row-alt); }
   .toolbar input{ width: 100%; }
 }
 
-/* Tombol PDF biar match dengan tema gelap */
+/* --- tombol PDF --- */
 .btn-pdf{
   padding:6px 10px;
   border-radius:8px;
@@ -124,9 +124,18 @@ tbody tr:nth-child(even){ background: var(--row-alt); }
   background:#10263a;
   color:#bfeaff;
   cursor:pointer;
+  font-weight:600;
 }
 .btn-pdf:hover{ filter:brightness(1.08); }
 
+/* pesan */
+.msg.hidden{ display:none; }
+
+/* (opsional) responsif tabel */
+.table-wrap{ overflow:auto; }
+
+
 /* Pesan atas/bawah (opsional) */
 .hidden{ display:none; }
+
 
