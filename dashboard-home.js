@@ -57,31 +57,44 @@
   const monthSummary = document.getElementById('monthSummary');
   let chartStatus, chartMonthly;
 
-  function ensureCharts(){
-    if (!chartStatus){
-      chartStatus = new Chart(document.getElementById("chartStatus"), {
-        type: "doughnut",
-        data: { labels:["Selesai","Ditunda","Belum"], datasets:[{ data:[0,0,0,0] }] },
-        options: { plugins:{ legend:{ position:"bottom", labels:{ color:"#dbeeff" } } } }
-      });
-    }
-    if (!chartMonthly){
-      chartMonthly = new Chart(document.getElementById("chartMonthly"), {
-        type: "bar",
-        data: { labels:[], datasets:[
-          { label:"Jadwal", data:[] },
-          { label:"Selesai", data:[] },
-        ]},
-        options: {
-          scales:{
-            x:{ ticks:{ color:"#dbeeff" } },
-            y:{ ticks:{ color:"#dbeeff" }, beginAtZero:true, precision:0 }
-          },
-          plugins:{ legend:{ labels:{ color:"#dbeeff" } } }
+ function ensureCharts(){
+  if (!chartStatus){
+    chartStatus = new Chart(document.getElementById("chartStatus"), {
+      type: "doughnut",
+      data: {
+        labels: ["Selesai", "Ditunda", "Belum"],
+        datasets: [{ data: [0, 0, 0] }] // 3 data untuk 3 label
+      },
+      options: {
+        maintainAspectRatio: false, // <-- penting agar size ikut CSS
+        plugins: {
+          legend: { position: "bottom", labels: { color: "#dbeeff" } }
         }
-      });
-    }
+      }
+    });
   }
+
+  if (!chartMonthly){
+    chartMonthly = new Chart(document.getElementById("chartMonthly"), {
+      type: "bar",
+      data: {
+        labels: [],
+        datasets: [
+          { label: "Jadwal",  data: [] },
+          { label: "Selesai", data: [] }
+        ]
+      },
+      options: {
+        maintainAspectRatio: false, // <-- penting
+        scales: {
+          x: { ticks: { color: "#dbeeff" } },
+          y: { ticks: { color: "#dbeeff" }, beginAtZero: true, precision: 0 }
+        },
+        plugins: { legend: { labels: { color: "#dbeeff" } } }
+      }
+    });
+  }
+}
 
   function updateStatusChart(todayRows){
     const c = { Selesai:0, Ditunda:0, Belum:0 };
@@ -255,4 +268,5 @@
   loadAll();
   setInterval(loadAll, AUTO_REFRESH_MS);
 })();
+
 
