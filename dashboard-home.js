@@ -49,7 +49,7 @@
   const btnAll    = document.getElementById('sw-submit-all');
   const btnClear  = document.getElementById('sw-clear');
 
-  const STATUS_LIST = ["Belum","Proses","Selesai","Ditunda","Cancel"];
+  const STATUS_LIST = ["Belum","Selesai","Ditunda"];
   function stageInfo(msg){ stMsg.textContent = msg; stMsg.classList.remove('tw-hidden'); setTimeout(()=>stMsg.classList.add('tw-hidden'), 1600); }
 
   // Grafik
@@ -61,7 +61,7 @@
     if (!chartStatus){
       chartStatus = new Chart(document.getElementById("chartStatus"), {
         type: "doughnut",
-        data: { labels:["Selesai","Proses","Ditunda","Belum/Kosong"], datasets:[{ data:[0,0,0,0] }] },
+        data: { labels:["Selesai","Ditunda","Belum"], datasets:[{ data:[0,0,0,0] }] },
         options: { plugins:{ legend:{ position:"bottom", labels:{ color:"#dbeeff" } } } }
       });
     }
@@ -84,15 +84,14 @@
   }
 
   function updateStatusChart(todayRows){
-    const c = { Selesai:0, Proses:0, Ditunda:0, Belum:0 };
+    const c = { Selesai:0, Ditunda:0, Belum:0 };
     for (const r of todayRows){
       const s = (r.status||"").toLowerCase();
       if (s==="selesai") c.Selesai++;
-      else if (s==="proses") c.Proses++;
       else if (s==="ditunda") c.Ditunda++;
       else c.Belum++;
     }
-    chartStatus.data.datasets[0].data = [c.Selesai,c.Proses,c.Ditunda,c.Belum];
+    chartStatus.data.datasets[0].data = [c.Selesai,c.Ditunda,c.Belum];
     chartStatus.update();
   }
 
@@ -256,3 +255,4 @@
   loadAll();
   setInterval(loadAll, AUTO_REFRESH_MS);
 })();
+
