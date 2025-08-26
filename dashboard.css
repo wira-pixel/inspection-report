@@ -104,13 +104,16 @@ body {
   margin-bottom:8px;
 }
 .brand-logo{
-  width:28px;
-  height:28px;
-  object-fit:cover;
-  border-radius:6px;
+  width:32px;
+  height:32px;
+  flex:0 0 32px;     /* cegah mengecil */
+  object-fit:cover;  /* isi penuh kotak */
+  border-radius:6px; /* optional */
+  display:block;     /* hindari baseline offset */
 }
-/* (opsional, biar judul rapih) */
 .brand h2{ margin:0; }
+
+
 
 
 
