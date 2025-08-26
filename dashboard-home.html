@@ -9,6 +9,31 @@
 <body>
   <h2>Dashboard Inspection Report PT Jhonlin Baratama</h2>
 
+  <!-- ====== GRAFIK (baru) ====== -->
+  <section class="charts-grid">
+    <div class="card">
+      <div class="card-head">
+        <h3>Status Jadwal — Hari Ini</h3>
+      </div>
+      <div class="card-body">
+        <canvas id="chartStatus" height="180"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head between">
+        <h3>Jadwal vs Selesai — Bulanan</h3>
+        <div class="controls">
+          <input type="month" id="monthPicker" class="month">
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="monthSummary" class="muted">—</div>
+        <canvas id="chartMonthly" height="180"></canvas>
+      </div>
+    </div>
+  </section>
+
   <!-- Widget: Jadwal Inspeksi Hari Ini (tetap) -->
   <section class="today-widget">
     <div class="tw-header">
@@ -24,7 +49,9 @@
         <thead>
           <tr><th>Kode Unit</th><th>Tanggal</th><th>Lokasi</th><th>Status</th></tr>
         </thead>
-        <tbody id="tw-tbody"><tr><td colspan="4" class="tw-muted">Memuat…</td></tr></tbody>
+        <tbody id="tw-tbody">
+          <tr><td colspan="4" class="tw-muted">Memuat…</td></tr>
+        </tbody>
       </table>
     </div>
   </section>
@@ -44,11 +71,15 @@
         <thead>
           <tr><th>Kode Unit</th><th>Tanggal</th><th>Lokasi</th><th>Status</th><th>Aksi</th></tr>
         </thead>
-        <tbody id="stage-tbody"><tr><td colspan="5" class="tw-muted">Tidak ada draft.</td></tr></tbody>
+        <tbody id="stage-tbody">
+          <tr><td colspan="5" class="tw-muted">Tidak ada draft.</td></tr>
+        </tbody>
       </table>
     </div>
   </section>
 
+  <!-- Chart.js hanya untuk halaman ini -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="dashboard-home.js"></script>
 </body>
 </html>
