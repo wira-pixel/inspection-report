@@ -22,13 +22,11 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // waji
     if (val == null || val === "") return "-";
 
     if (typeof val === "number") {
-      // Excel serial date
-      const epoch = new Date(Date.UTC(1899, 11, 30));
+      const epoch = new Date(Date.UTC(1899, 11, 30)); // Excel serial
       const ms    = epoch.getTime() + val * 86400000;
       const d = new Date(ms);
       return isNaN(d) ? "-" : toDDMMYYYY(d);
     }
-
     if (typeof val === "string") {
       const ymd = /^(\d{4})-(\d{2})-(\d{2})$/.exec(val);
       if (ymd) return toDDMMYYYY(new Date(+ymd[1], +ymd[2]-1, +ymd[3]));
@@ -37,24 +35,29 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // waji
     }
     return String(val);
   }
-
-  function toDDMMYYYY(d){
-    return `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()}`;
-  }
-
+  function toDDMMYYYY(d){ return `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()}`; }
   function toYMDfromDDMMYYYY(ddmmyyyy){
     if (!ddmmyyyy || ddmmyyyy === "-") return "";
     const [dd,mm,yy] = ddmmyyyy.split("/");
     return `${yy}-${mm}-${dd}`;
   }
-
   function esc(s){
     return String(s ?? "")
-      .replace(/&/g,"&amp;")
-      .replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;")
-      .replace(/"/g,"&quot;")
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
       .replace(/'/g,"&#39;");
+  }
+
+  // Deteksi kolom PDF yang fleksibel
+  function pickPdf(row){
+    // coba kandidat umum dulu
+    const exact = row["PDF"] ?? row["PDF Url"] ?? row["PDF URL"] ??
+                  row["pdfUrl"] ?? row["Pdf"] ?? row["pdf"];
+    if (exact) return exact;
+
+    // fallback: cari key yang mengandung 'pdf'
+    const k = Object.keys(row).find(key => /pdf/i.test(key));
+    return k ? row[k] : "";
   }
 
   // ---------- Fetch ----------
@@ -68,7 +71,6 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // waji
   }
 
   async function fetchInspeksi(){
-    // Coba GET sederhana (tanpa header custom) → fallback POST
     try{
       const u = new URL(WORKER_URL);
       u.searchParams.set("action","getInspeksi");
@@ -105,11 +107,7 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // waji
     }
   }
 
-  function showMessage(text){
-    if (!msgEl) return;
-    msgEl.textContent = text;
-    msgEl.classList.remove("hidden");
-  }
+  function showMessage(text){ if (msgEl){ msgEl.textContent=text; msgEl.classList.remove("hidden"); } }
   function hideMessage(){ msgEl?.classList.add("hidden"); }
 
   async function load(){
@@ -122,38 +120,34 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // waji
     }
     hideMessage();
 
-    // Normalisasi field (pakai beberapa kemungkinan nama header)
     rowsRaw = payload.data.map(row => {
       const dateVal = row["Date"] ?? row["date"] ?? row["Tanggal"] ?? row["Tanggal Inspeksi"] ?? "";
       const hmVal   = row["Hour Meter"] ?? row["hourMeter"] ?? row["HM"] ?? "";
       const inspVal = row["Inspected By"] ?? row["inspectedBy"] ?? row["Inspektor"] ?? row["Inspector"] ?? "-";
-      const pdfVal  = row["PDF"] ?? row["PDF Url"] ?? row["PDF URL"] ?? row["pdfUrl"] ?? row["Pdf"] ?? "";
 
       return {
         codeUnit   : row["Code Unit"] ?? row["codeUnit"] ?? row["Kode"] ?? row["Kode Unit"] ?? "-",
         date       : formatDate(dateVal),
         hourMeter  : hmVal,
         inspectedBy: inspVal,
-        pdf        : pdfVal
+        pdf        : pickPdf(row)
       };
     });
 
-    // Urutkan terbaru di atas (berdasar tanggal yang sudah di-format dd/mm/yyyy)
+    // terbaru di atas
     rowsRaw.sort((a,b) => {
       const ya = toYMDfromDDMMYYYY(a.date);
       const yb = toYMDfromDDMMYYYY(b.date);
-      return yb.localeCompare(ya); // desc
+      return yb.localeCompare(ya);
     });
 
     view = rowsRaw.slice();
     render();
   }
 
-  // ---------- Search ----------
   function onSearch(){
     const q = (searchBox?.value || "").trim().toLowerCase();
     if (!q){ view = rowsRaw.slice(); render(); return; }
-
     view = rowsRaw.filter(r =>
       String(r.codeUnit).toLowerCase().includes(q) ||
       String(r.inspectedBy).toLowerCase().includes(q) ||
@@ -163,11 +157,10 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // waji
     render();
   }
 
-  // ---------- Events ----------
   searchBox?.addEventListener("input", onSearch);
   refreshBtn?.addEventListener("click", load);
 
-  // Event delegation untuk tombol PDF
+  // Open PDF in a new tab
   table.addEventListener("click", (ev) => {
     const btn = ev.target.closest(".btn-pdf");
     if (!btn) return;
@@ -175,7 +168,6 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // waji
     if (url) window.open(url, "_blank", "noopener");
   });
 
-  // init
   document.addEventListener("DOMContentLoaded", load);
   load();
 })();
