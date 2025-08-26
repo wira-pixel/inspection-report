@@ -70,3 +70,11 @@ input[type="text"], input[type="date"]{
 #toast{ position:fixed; right:16px; bottom:16px; background:#0f172a; color:#dbeeff; padding:10px 12px; border-radius:10px; border:1px solid var(--border); opacity:0; transform:translateY(10px); transition:.25s; z-index:9999; }
 #toast.show{ opacity:1; transform:translateY(0); }
 #toast.error{ border-color:#ff6b6b; color:#ffdede; }
+
+/* … semua aturan lain … */
+.overlay { /* … */ display:flex; }
+
+/* Letakkan paling bawah supaya menang */
+.hidden { display:none !important; }
+
+
