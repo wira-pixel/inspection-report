@@ -96,25 +96,22 @@ body {
   background: #334155;
 }
 
-/* Brand (logo + title) di sidebar */
-.sidebar .brand{
+/* --- Brand (logo + judul) di sidebar --- */
+.brand{
   display:flex;
   align-items:center;
-  gap:10px;           /* jarak antara logo & tulisan */
-  margin:0 0 6px 0;   /* jarak bawah kecil sebelum versi */
+  gap:10px;
+  margin-bottom:8px;
 }
-
-.sidebar .brand-logo{
-  width:28px;         /* atur ukuran logo */
+.brand-logo{
+  width:28px;
   height:28px;
-  object-fit:contain; /* jaga proporsi */
-  display:block;
+  object-fit:cover;
+  border-radius:6px;
 }
+/* (opsional, biar judul rapih) */
+.brand h2{ margin:0; }
 
-/* pastikan h2 rapi saat di dalam brand */
-.sidebar .brand h2{
-  margin:0;
-  line-height:1.1;
-}
+
 
 
