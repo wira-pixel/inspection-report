@@ -71,10 +71,17 @@ input[type="text"], input[type="date"]{
 #toast.show{ opacity:1; transform:translateY(0); }
 #toast.error{ border-color:#ff6b6b; color:#ffdede; }
 
-/* … semua aturan lain … */
-.overlay { /* … */ display:flex; }
+/* aturan overlay kamu */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.6);
+  display: flex;                 /* <- ini di-override */
+  align-items: center; justify-content: center;
+  z-index: 9999;
+}
 
 /* Letakkan paling bawah supaya menang */
 .hidden { display:none !important; }
+
 
 
