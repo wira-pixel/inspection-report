@@ -115,3 +115,18 @@ tbody tr:nth-child(even){ background: var(--row-alt); }
   thead th, tbody td{ padding: 10px 6px; font-size: 14px; }
   .toolbar input{ width: 100%; }
 }
+
+/* Tombol PDF biar match dengan tema gelap */
+.btn-pdf{
+  padding:6px 10px;
+  border-radius:8px;
+  border:1px solid #0fb8ff;
+  background:#10263a;
+  color:#bfeaff;
+  cursor:pointer;
+}
+.btn-pdf:hover{ filter:brightness(1.08); }
+
+/* Pesan atas/bawah (opsional) */
+.hidden{ display:none; }
+
