@@ -107,3 +107,15 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 
 /* Utility: sembunyikan kuat (untuk overlay/toast/info dari JS) */
 .hidden{ display:none !important; }
+
+/* Tombol hapus (merah) di tabel draft */
+.btn-row.btn-del{
+  border-color:#ff6b6b;
+  color:#ffdede;
+  background:#3a1120;
+}
+.btn-row.btn-del:hover{
+  filter:brightness(1.08);
+}
+
+
