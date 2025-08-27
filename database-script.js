@@ -1,5 +1,5 @@
 // ==========================
-// DATABASE — robust header mapping + dedupe
+// DATABASE — robust mapping (object/array) + dedupe
 // ==========================
 const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
 
@@ -12,7 +12,6 @@ let MASTER_ROWS = [];
 
 // ---------- utils ----------
 const pad2 = n => String(n).padStart(2, "0");
-
 function normText(x, {lower=true} = {}){
   let s = (x ?? "").toString()
     .normalize("NFKC")
@@ -59,15 +58,7 @@ async function fetchInspeksi(){
   return [];
 }
 
-// ---------- header mapping ----------
-function keyLowerMap(obj){
-  const m = {};
-  for (const k in obj) if (Object.prototype.hasOwnProperty.call(obj,k)){
-    m[k] = obj[k];
-  }
-  return m;
-}
-// convert key to tokens (letters only)
+// ---------- header token matcher (untuk object) ----------
 function keyTokens(k){
   return normText(k).replace(/[^a-z]+/g," ").trim().split(/\s+/);
 }
@@ -75,7 +66,6 @@ function includesAllTokens(key, mustTokens){
   const t = keyTokens(key);
   return mustTokens.every(tok => t.includes(tok));
 }
-// find original key by token sets
 function findKeyByTokenSets(obj, tokenSets){
   const keys = Object.keys(obj);
   for (const set of tokenSets){
@@ -85,10 +75,31 @@ function findKeyByTokenSets(obj, tokenSets){
   return null;
 }
 
+// ---------- NORMALIZER: dukung object & array ----------
 function normalizeRow(raw){
-  // keep original keys; matching is token-based
-  const L = keyLowerMap(raw);
+  // CASE A: data = ARRAY (index based)
+  if (Array.isArray(raw) || Object.keys(raw).every(k => /^\d+$/.test(k))) {
+    const row = Array.isArray(raw) ? raw : Object.keys(raw).sort((a,b)=>a-b).map(k=>raw[k]);
+    // Urutan sheet "Data" umum:
+    // 0: Date, 1: Site, 2: Code Unit, 3: Hour Meter, 4: Inspected By, ..., last: PDF
+    const date      = row[0];
+    const codeUnit  = row[2];
+    const hm        = row[3];
+    const inspector = row[4];
+    const pdfGuess  = row[row.length - 1];      // PDF biasanya di kolom terakhir
+    const pdf       = /^\s*https?:\/\//i.test(String(pdfGuess||"")) ? String(pdfGuess) : "";
 
+    return {
+      kode: normText(codeUnit),
+      tanggalYMD: toYMD(date),
+      hm: normHM(hm),
+      inspector: normText(inspector),
+      pdf: pdf.trim()
+    };
+  }
+
+  // CASE B: data = OBJECT (header based) -> token matching
+  const L = raw; // pakai key apa adanya
   const kodeKey = findKeyByTokenSets(L, [
     ["kode","unit"], ["code","unit"], ["kodeunit"], ["codeunit"], ["unit","code"]
   ]);
@@ -96,10 +107,10 @@ function normalizeRow(raw){
     ["tanggal","inspeksi"], ["tanggal"], ["inspection","date"], ["date"], ["tgl"]
   ]);
   const hmKey   = findKeyByTokenSets(L, [
-    ["hour","meter"], ["hm"], ["hourmeter"], ["hour","meter","unit"]
+    ["hour","meter"], ["hm"], ["hourmeter"]
   ]);
   const inspKey = findKeyByTokenSets(L, [
-    ["inspektor"], ["inspector"], ["inspected","by"], ["inspectedby"], ["inspected","_","by"]
+    ["inspektor"], ["inspector"], ["inspected","by"], ["inspectedby"]
   ]);
   const pdfKey  = findKeyByTokenSets(L, [
     ["pdf"]
@@ -112,21 +123,23 @@ function normalizeRow(raw){
   const pdf  = pdfKey  ? L[pdfKey]  : "";
 
   return {
-    kode: normText(kode),                  // required
-    tanggalYMD: toYMD(tgl),                // optional
-    hm: normHM(hm),                        // used for secondary dedupe
-    inspector: normText(insp),             // used for secondary dedupe
+    kode: normText(kode),
+    tanggalYMD: toYMD(tgl),
+    hm: normHM(hm),
+    inspector: normText(insp),
     pdf: (pdf ?? "").toString().trim()
   };
 }
 
-// strong de-duplication
+// ---------- DEDUPE ----------
 function dedupe(rows){
   const map = new Map();
   const out = [];
-
   for (const r of rows){
-    // prefer (kode+tgl). If no date, use (kode+hm+inspector). If still empty, just kode.
+    // skip jika benar2 kosong
+    if (!r.kode && !r.tanggalYMD && !r.hm && !r.inspector && !r.pdf) continue;
+
+    // kunci utama: (kode+tgl) bila ada tgl; kalau tidak, (kode+hm+inspector); terakhir, (kode)
     let key = "";
     if (r.tanggalYMD) key = `${r.kode}|${r.tanggalYMD}`;
     else if (r.hm || r.inspector) key = `${r.kode}|${r.hm}|${r.inspector}`;
@@ -199,12 +212,14 @@ refreshBtn?.addEventListener("click", load);
 // ---------- init ----------
 async function load(){
   try{
-    msg?.classList.remove("hidden");
-    if (msg) msg.textContent = "Memuat data…";
+    if (msg){ msg.textContent = "Memuat data…"; msg.classList.remove("hidden"); }
 
     const raw = await fetchInspeksi();
-    const normalized = raw.map(normalizeRow).filter(r => r.kode); // hanya butuh kode
 
+    // DEBUG ringan (tidak error bila kosong)
+    // console.log("Sampel raw:", raw[0]);
+
+    const normalized = raw.map(normalizeRow);
     MASTER_ROWS = dedupe(normalized);
     applyFilter();
 
@@ -215,5 +230,4 @@ async function load(){
     msg?.classList.add("hidden");
   }
 }
-
 document.addEventListener("DOMContentLoaded", load);
