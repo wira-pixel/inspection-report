@@ -1,173 +1,168 @@
 // ==========================
-// DATABASE.JS — ambil & tampilkan data inspeksi + tombol PDF
+// DATABASE — fetch, dedupe, render
 // ==========================
-const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // wajib trailing slash
+const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
 
-(() => {
-  const table      = document.getElementById("data-table");
-  if (!table) return;
+const tbody      = document.querySelector("#data-table tbody");
+const searchBox  = document.getElementById("searchBox");
+const refreshBtn = document.getElementById("refreshBtn");
+const msg        = document.getElementById("dbMessage");
 
-  const tbody      = table.querySelector("tbody");
-  const searchBox  = document.getElementById("searchBox");
-  const refreshBtn = document.getElementById("refreshBtn");
-  const msgEl      = document.getElementById("dbMessage");
+let MASTER_ROWS = []; // hasil dedupe, jadi sumber untuk pencarian
 
-  let rowsRaw = [];
-  let view    = [];
-
-  // ---------- Utils ----------
-  const pad2 = n => String(n).padStart(2,"0");
-
-  function formatDate(val){
-    if (val == null || val === "") return "-";
-
-    if (typeof val === "number") {
-      const epoch = new Date(Date.UTC(1899, 11, 30)); // Excel serial
-      const ms    = epoch.getTime() + val * 86400000;
-      const d = new Date(ms);
-      return isNaN(d) ? "-" : toDDMMYYYY(d);
-    }
-    if (typeof val === "string") {
-      const ymd = /^(\d{4})-(\d{2})-(\d{2})$/.exec(val);
-      if (ymd) return toDDMMYYYY(new Date(+ymd[1], +ymd[2]-1, +ymd[3]));
-      const d = new Date(val);
-      if (!isNaN(d)) return toDDMMYYYY(d);
-    }
-    return String(val);
+// ---------- util ----------
+const pad2 = n => String(n).padStart(2,"0");
+function toYMD(v){
+  if (v == null || v === "") return "";
+  if (Object.prototype.toString.call(v) === "[object Date]" && !isNaN(v)) {
+    return `${v.getFullYear()}-${pad2(v.getMonth()+1)}-${pad2(v.getDate())}`;
   }
-  function toDDMMYYYY(d){ return `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()}`; }
-  function toYMDfromDDMMYYYY(ddmmyyyy){
-    if (!ddmmyyyy || ddmmyyyy === "-") return "";
-    const [dd,mm,yy] = ddmmyyyy.split("/");
-    return `${yy}-${mm}-${dd}`;
-  }
-  function esc(s){
-    return String(s ?? "")
-      .replace(/&/g,"&amp;").replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
-      .replace(/'/g,"&#39;");
-  }
+  const s = String(v).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;                 // yyyy-mm-dd
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);             // dd/mm/yyyy
+  if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+  const d = new Date(s);
+  if (!isNaN(d)) return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  return "";
+}
+function dispID(ymd){
+  if (!ymd) return "-";
+  const [y,m,d] = ymd.split("-");
+  return `${d}/${m}/${y}`;
+}
 
-  // Deteksi kolom PDF yang fleksibel
-  function pickPdf(row){
-    // coba kandidat umum dulu
-    const exact = row["PDF"] ?? row["PDF Url"] ?? row["PDF URL"] ??
-                  row["pdfUrl"] ?? row["Pdf"] ?? row["pdf"];
-    if (exact) return exact;
-
-    // fallback: cari key yang mengandung 'pdf'
-    const k = Object.keys(row).find(key => /pdf/i.test(key));
-    return k ? row[k] : "";
-  }
-
-  // ---------- Fetch ----------
-  async function postJSON(payload){
-    const r = await fetch(WORKER_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    return await r.json();
-  }
-
-  async function fetchInspeksi(){
-    try{
-      const u = new URL(WORKER_URL);
-      u.searchParams.set("action","getInspeksi");
-      u.searchParams.set("ts", Date.now());
-      const r = await fetch(u.toString());
-      const d = await r.json();
-      if (d?.success && Array.isArray(d.data)) return d;
-    }catch(e){
-      console.warn("[DB] GET error, mencoba POST …", e);
-    }
-    return await postJSON({ action:"getInspeksi" });
-  }
-
-  // ---------- Render ----------
-  function render(){
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    for (const r of view){
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${esc(r.codeUnit)}</td>
-        <td>${esc(r.date)}</td>
-        <td>${esc(r.hourMeter)}</td>
-        <td>${esc(r.inspectedBy)}</td>
-        <td>
-          ${ r.pdf
-              ? `<button class="btn-pdf" data-url="${esc(r.pdf)}">Lihat PDF</button>`
-              : "-"
-            }
-        </td>
-      `;
-      tbody.appendChild(tr);
-    }
-  }
-
-  function showMessage(text){ if (msgEl){ msgEl.textContent=text; msgEl.classList.remove("hidden"); } }
-  function hideMessage(){ msgEl?.classList.add("hidden"); }
-
-  async function load(){
-    showMessage("Memuat data…");
-    const payload = await fetchInspeksi();
-    if (!payload?.success || !Array.isArray(payload.data)){
-      showMessage(payload?.message || "Gagal memuat data.");
-      console.error("Data database tidak valid:", payload);
-      return;
-    }
-    hideMessage();
-
-    rowsRaw = payload.data.map(row => {
-      const dateVal = row["Date"] ?? row["date"] ?? row["Tanggal"] ?? row["Tanggal Inspeksi"] ?? "";
-      const hmVal   = row["Hour Meter"] ?? row["hourMeter"] ?? row["HM"] ?? "";
-      const inspVal = row["Inspected By"] ?? row["inspectedBy"] ?? row["Inspektor"] ?? row["Inspector"] ?? "-";
-
-      return {
-        codeUnit   : row["Code Unit"] ?? row["codeUnit"] ?? row["Kode"] ?? row["Kode Unit"] ?? "-",
-        date       : formatDate(dateVal),
-        hourMeter  : hmVal,
-        inspectedBy: inspVal,
-        pdf        : pickPdf(row)
-      };
-    });
-
-    // terbaru di atas
-    rowsRaw.sort((a,b) => {
-      const ya = toYMDfromDDMMYYYY(a.date);
-      const yb = toYMDfromDDMMYYYY(b.date);
-      return yb.localeCompare(ya);
-    });
-
-    view = rowsRaw.slice();
-    render();
-  }
-
-  function onSearch(){
-    const q = (searchBox?.value || "").trim().toLowerCase();
-    if (!q){ view = rowsRaw.slice(); render(); return; }
-    view = rowsRaw.filter(r =>
-      String(r.codeUnit).toLowerCase().includes(q) ||
-      String(r.inspectedBy).toLowerCase().includes(q) ||
-      String(r.date).toLowerCase().includes(q) ||
-      String(r.hourMeter).toString().toLowerCase().includes(q)
-    );
-    render();
-  }
-
-  searchBox?.addEventListener("input", onSearch);
-  refreshBtn?.addEventListener("click", load);
-
-  // Open PDF in a new tab
-  table.addEventListener("click", (ev) => {
-    const btn = ev.target.closest(".btn-pdf");
-    if (!btn) return;
-    const url = btn.dataset.url;
-    if (url) window.open(url, "_blank", "noopener");
+// ---------- fetch ----------
+async function postWorker(payload){
+  const r = await fetch(WORKER_URL, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(payload)
   });
+  return await r.json();
+}
 
-  document.addEventListener("DOMContentLoaded", load);
-  load();
-})();
+async function fetchInspeksi(){
+  // ambil dari Apps Script via worker
+  const res = await postWorker({action:"getInspeksi"});
+  if (res?.success && Array.isArray(res.data)) return res.data;
+  return [];
+}
+
+// ---------- normalisasi & dedupe ----------
+function normalizeRow(r){
+  // sinkronkan berbagai nama header yang mungkin berbeda
+  const kode = r["kode unit"] ?? r["code unit"] ?? r["kode"] ?? r["unit"] ?? r.codeUnit ?? r.kode ?? "";
+  const tgl  = r["tanggal inspeksi"] ?? r["tanggal"] ?? r["date"] ?? r.Date ?? "";
+  const hm   = r["hour meter"] ?? r.hourMeter ?? r.hm ?? "";
+  const insp = r["inspektor"] ?? r["inspected by"] ?? r.inspectedBy ?? r.inspektor ?? "";
+
+  // kolom PDF bisa bernama "PDF", "pdf", dll.
+  const pdf  = r["PDF"] ?? r["pdf"] ?? r.pdf ?? "";
+
+  return {
+    kode: String(kode || "").trim(),
+    tanggalYMD: toYMD(tgl),
+    hm: String(hm || "").trim(),
+    inspector: String(insp || "").trim(),
+    pdf: String(pdf || "").trim()
+  };
+}
+
+function dedupe(rows){
+  // kunci unik = kode|tgl|hm|inspektor (semua dinormalisasi)
+  const map = new Map();
+  const out = [];
+  for (const row of rows){
+    const key = [
+      row.kode.toLowerCase(),
+      row.tanggalYMD,
+      row.hm,
+      row.inspector.toLowerCase()
+    ].join("|");
+
+    if (!map.has(key)){
+      map.set(key, row);
+      out.push(row);
+    } else {
+      // jika duplikat, pertahankan PDF yang terisi
+      const exist = map.get(key);
+      if ((!exist.pdf || exist.pdf === "-") && row.pdf) {
+        exist.pdf = row.pdf;
+      }
+    }
+  }
+  return out;
+}
+
+// ---------- render ----------
+function render(rows){
+  if (!rows.length){
+    tbody.innerHTML = `<tr><td colspan="5" class="muted">Tidak ada data.</td></tr>`;
+    return;
+  }
+  // urutkan by tanggal desc (opsional)
+  rows.sort((a,b) => (a.tanggalYMD < b.tanggalYMD ? 1 : -1));
+
+  tbody.innerHTML = rows.map(r => {
+    const btn = r.pdf
+      ? `<button class="btn btn-row btn-pdf" data-pdf="${encodeURI(r.pdf)}">Lihat PDF</button>`
+      : `<span class="muted">-</span>`;
+    return `
+      <tr>
+        <td>${r.kode || "-"}</td>
+        <td>${dispID(r.tanggalYMD)}</td>
+        <td>${r.hm || "-"}</td>
+        <td>${r.inspector || "-"}</td>
+        <td>${btn}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+// ---------- filter pencarian ----------
+function applyFilter(){
+  const q = (searchBox?.value || "").trim().toLowerCase();
+  if (!q){
+    render(MASTER_ROWS);
+    return;
+  }
+  const f = MASTER_ROWS.filter(r => {
+    return (
+      r.kode.toLowerCase().includes(q) ||
+      r.inspector.toLowerCase().includes(q) ||
+      r.hm.toLowerCase().includes(q) ||
+      dispID(r.tanggalYMD).includes(q) ||   // cari dd/mm/yyyy
+      r.tanggalYMD.includes(q)              // cari yyyy-mm-dd
+    );
+  });
+  render(f);
+}
+
+// ---------- events ----------
+tbody.addEventListener("click", (ev) => {
+  const btn = ev.target.closest(".btn-pdf");
+  if (!btn) return;
+  const url = btn.dataset.pdf;
+  if (url) window.open(url, "_blank");
+});
+
+searchBox?.addEventListener("input", applyFilter);
+refreshBtn?.addEventListener("click", load);
+
+// ---------- init ----------
+async function load(){
+  try{
+    if (msg){ msg.textContent = "Memuat data…"; msg.classList.remove("hidden"); }
+    const raw = await fetchInspeksi();
+    const normalized = raw.map(normalizeRow).filter(r => r.kode && r.tanggalYMD);
+    MASTER_ROWS = dedupe(normalized);
+    applyFilter();
+  } catch(err){
+    console.error("[DB] load error:", err);
+    tbody.innerHTML = `<tr><td colspan="5" class="muted">Gagal memuat data.</td></tr>`;
+  } finally {
+    msg?.classList.add("hidden");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", load);
