@@ -76,7 +76,7 @@ document.getElementById("jadwalForm")?.addEventListener("submit", async (e) => {
 });
 
 // --------- DRAFT (hari ini, status kosong/Belum) ---------
-const STATUS_LIST = ["Belum","Proses","Selesai","Ditunda","Cancel"];
+const STATUS_LIST = ["Selesai","Ditunda","Cancel"];
 const tbody = document.getElementById("draftTbody");
 const btnRefresh = document.getElementById("btnRefresh");
 const btnSubmitAll = document.getElementById("btnSubmitAll");
