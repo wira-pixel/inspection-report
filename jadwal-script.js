@@ -1,7 +1,8 @@
+<script>
 // ==========================
 // JADWAL — Form + Draft server-based (hari ini)
 // ==========================
-const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
+const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // trailing slash penting
 
 // Util
 const pad2 = n => String(n).padStart(2, "0");
@@ -44,7 +45,7 @@ function hideOverlay(){ document.getElementById("loadingOverlay")?.classList.add
 function showInfo(msg){ const i=document.getElementById("infoMsg"); if(i){ i.textContent=msg; i.classList.remove("hidden"); } }
 function hideInfo(){ const i=document.getElementById("infoMsg"); if(i){ i.classList.add("hidden"); } }
 
-// --------- FORM ---------
+// --------- FORM (tetap) ---------
 document.getElementById("jadwalForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const tanggal = document.getElementById("tanggal")?.value.trim();
@@ -76,7 +77,7 @@ document.getElementById("jadwalForm")?.addEventListener("submit", async (e) => {
 });
 
 // --------- DRAFT (hari ini, status kosong/Belum) ---------
-const STATUS_LIST = ["Selesai","Ditunda","Cancel"];
+const STATUS_LIST = ["Selesai","Ditunda"];
 const tbody = document.getElementById("draftTbody");
 const btnRefresh = document.getElementById("btnRefresh");
 const btnSubmitAll = document.getElementById("btnSubmitAll");
@@ -115,7 +116,8 @@ async function loadDraft(){
           <select class="select-status">${options}</select>
         </td>
         <td>
-          <button class="btn-row js-submit">Kirim</button>
+          <button class="btn btn-row js-submit">Kirim</button>
+          <button class="btn btn-row btn-del js-delete">Hapus</button>
         </td>
       </tr>
     `).join("");
@@ -128,34 +130,60 @@ async function loadDraft(){
 
 // Kirim satu baris
 tbody?.addEventListener("click", async (ev) => {
-  if (!ev.target.classList.contains("js-submit")) return;
-  const tr = ev.target.closest("tr[data-idx]");
+  const target = ev.target;
+  if (!(target instanceof HTMLElement)) return;
+  const tr = target.closest("tr[data-idx]");
   if (!tr) return;
   const idx = Number(tr.dataset.idx);
   const rows = JSON.parse(tbody.dataset.rows || "[]");
   const row = rows[idx]; if (!row) return;
-  const status = tr.querySelector(".select-status")?.value || "Belum";
 
-  try {
-    showOverlay();
-    const res = await postWorker({
-      action : "updateJadwalStatus",
-      kode   : row.kode,
-      tanggal: row.tanggalYMD,
-      lokasi : row.lokasi || "",
-      status
-    });
-    if (!res?.success) throw new Error(res?.message || "Gagal kirim status");
-    showToast("✅ Status terkirim");
-    await loadDraft();
-  } catch (err){
-    showToast("❌ " + err.message, "error");
-  } finally {
-    hideOverlay();
+  // A) Kirim (update status)
+  if (target.classList.contains("js-submit")){
+    const status = tr.querySelector(".select-status")?.value || "Belum";
+    try {
+      showOverlay();
+      const res = await postWorker({
+        action : "updateJadwalStatus",
+        kode   : row.kode,
+        tanggal: row.tanggalYMD,
+        lokasi : row.lokasi || "",
+        status
+      });
+      if (!res?.success) throw new Error(res?.message || "Gagal kirim status");
+      showToast("✅ Status terkirim");
+      await loadDraft();
+    } catch (err){
+      showToast("❌ " + err.message, "error");
+    } finally {
+      hideOverlay();
+    }
+  }
+
+  // B) Hapus (delete jadwal)
+  if (target.classList.contains("js-delete")){
+    const ok = confirm(`Hapus jadwal:\n• Kode: ${row.kode}\n• Tanggal: ${toDDMMYYYY(new Date(row.tanggalYMD))}\n• Lokasi: ${row.lokasi || "-"} ?`);
+    if (!ok) return;
+    try {
+      showOverlay();
+      const res = await postWorker({
+        action : "deleteJadwal",
+        kode   : row.kode,
+        tanggal: row.tanggalYMD,
+        lokasi : row.lokasi || ""
+      });
+      if (!res?.success) throw new Error(res?.message || "Gagal menghapus");
+      showToast("🗑️ Jadwal dihapus");
+      await loadDraft();
+    } catch (err){
+      showToast("❌ " + err.message, "error");
+    } finally {
+      hideOverlay();
+    }
   }
 });
 
-// Kirim semua
+// Kirim semua (pakai pilihan status masing-masing baris)
 btnSubmitAll?.addEventListener("click", async () => {
   const rows = JSON.parse(tbody.dataset.rows || "[]");
   const trs = Array.from(tbody.querySelectorAll("tr[data-idx]"));
@@ -189,3 +217,4 @@ btnRefresh?.addEventListener("click", loadDraft);
 
 // init
 document.addEventListener("DOMContentLoaded", loadDraft);
+</script>
