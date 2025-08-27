@@ -1,5 +1,5 @@
 // ==========================
-// DATABASE — fetch, dedupe, render
+// DATABASE — fetch, strong-dedupe, render
 // ==========================
 const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
 
@@ -8,10 +8,29 @@ const searchBox  = document.getElementById("searchBox");
 const refreshBtn = document.getElementById("refreshBtn");
 const msg        = document.getElementById("dbMessage");
 
-let MASTER_ROWS = []; // hasil dedupe, jadi sumber untuk pencarian
+let MASTER_ROWS = [];
 
 // ---------- util ----------
 const pad2 = n => String(n).padStart(2,"0");
+
+// hapus karakter zero-width & rapikan spasi
+function normText(x, {lower=true} = {}){
+  let s = (x ?? "").toString()
+    .normalize("NFKC")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")  // zero-width
+    .trim()
+    .replace(/\s+/g, " ");                  // collapse spasi
+  if (lower) s = s.toLowerCase();
+  return s;
+}
+
+// norm HM: ambil digit saja
+function normHM(x){
+  const s = (x ?? "").toString();
+  const digits = s.replace(/[^\d]/g, "");   // hapus titik/koma/space
+  return digits || "";
+}
+
 function toYMD(v){
   if (v == null || v === "") return "";
   if (Object.prototype.toString.call(v) === "[object Date]" && !isNaN(v)) {
@@ -25,6 +44,7 @@ function toYMD(v){
   if (!isNaN(d)) return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
   return "";
 }
+
 function dispID(ymd){
   if (!ymd) return "-";
   const [y,m,d] = ymd.split("-");
@@ -40,9 +60,7 @@ async function postWorker(payload){
   });
   return await r.json();
 }
-
 async function fetchInspeksi(){
-  // ambil dari Apps Script via worker
   const res = await postWorker({action:"getInspeksi"});
   if (res?.success && Array.isArray(res.data)) return res.data;
   return [];
@@ -50,42 +68,40 @@ async function fetchInspeksi(){
 
 // ---------- normalisasi & dedupe ----------
 function normalizeRow(r){
-  // sinkronkan berbagai nama header yang mungkin berbeda
   const kode = r["kode unit"] ?? r["code unit"] ?? r["kode"] ?? r["unit"] ?? r.codeUnit ?? r.kode ?? "";
   const tgl  = r["tanggal inspeksi"] ?? r["tanggal"] ?? r["date"] ?? r.Date ?? "";
   const hm   = r["hour meter"] ?? r.hourMeter ?? r.hm ?? "";
   const insp = r["inspektor"] ?? r["inspected by"] ?? r.inspectedBy ?? r.inspektor ?? "";
 
-  // kolom PDF bisa bernama "PDF", "pdf", dll.
   const pdf  = r["PDF"] ?? r["pdf"] ?? r.pdf ?? "";
 
   return {
-    kode: String(kode || "").trim(),
+    kode: normText(kode),
     tanggalYMD: toYMD(tgl),
-    hm: String(hm || "").trim(),
-    inspector: String(insp || "").trim(),
-    pdf: String(pdf || "").trim()
+    hm: normHM(hm),
+    inspector: normText(insp),
+    pdf: (pdf ?? "").toString().trim()
   };
 }
 
 function dedupe(rows){
-  // kunci unik = kode|tgl|hm|inspektor (semua dinormalisasi)
   const map = new Map();
   const out = [];
+
   for (const row of rows){
-    const key = [
-      row.kode.toLowerCase(),
-      row.tanggalYMD,
-      row.hm,
-      row.inspector.toLowerCase()
-    ].join("|");
+    // kunci normal: kode|tgl|hm|insp (setelah normalisasi)
+    // fallback: kalau hm atau inspector kosong → pakai kode|tgl saja
+    const base = `${row.kode}|${row.tanggalYMD}`;
+    const detailed = (row.hm && row.inspector) ? `${base}|${row.hm}|${row.inspector}` : base;
+
+    const key = detailed;
 
     if (!map.has(key)){
       map.set(key, row);
       out.push(row);
     } else {
-      // jika duplikat, pertahankan PDF yang terisi
       const exist = map.get(key);
+      // perbarui PDF jika sebelumnya kosong dan yang baru ada
       if ((!exist.pdf || exist.pdf === "-") && row.pdf) {
         exist.pdf = row.pdf;
       }
@@ -100,8 +116,10 @@ function render(rows){
     tbody.innerHTML = `<tr><td colspan="5" class="muted">Tidak ada data.</td></tr>`;
     return;
   }
-  // urutkan by tanggal desc (opsional)
-  rows.sort((a,b) => (a.tanggalYMD < b.tanggalYMD ? 1 : -1));
+  // urutkan by tanggal desc, lalu kode
+  rows.sort((a,b) => a.tanggalYMD === b.tanggalYMD
+    ? a.kode.localeCompare(b.kode)
+    : (a.tanggalYMD < b.tanggalYMD ? 1 : -1));
 
   tbody.innerHTML = rows.map(r => {
     const btn = r.pdf
@@ -119,22 +137,17 @@ function render(rows){
   }).join("");
 }
 
-// ---------- filter pencarian ----------
+// ---------- filter ----------
 function applyFilter(){
   const q = (searchBox?.value || "").trim().toLowerCase();
-  if (!q){
-    render(MASTER_ROWS);
-    return;
-  }
-  const f = MASTER_ROWS.filter(r => {
-    return (
-      r.kode.toLowerCase().includes(q) ||
-      r.inspector.toLowerCase().includes(q) ||
-      r.hm.toLowerCase().includes(q) ||
-      dispID(r.tanggalYMD).includes(q) ||   // cari dd/mm/yyyy
-      r.tanggalYMD.includes(q)              // cari yyyy-mm-dd
-    );
-  });
+  if (!q){ render(MASTER_ROWS); return; }
+  const f = MASTER_ROWS.filter(r =>
+    r.kode.includes(q) ||
+    r.inspector.includes(q) ||
+    r.hm.includes(q) ||
+    dispID(r.tanggalYMD).includes(q) ||
+    r.tanggalYMD.includes(q)
+  );
   render(f);
 }
 
@@ -145,18 +158,22 @@ tbody.addEventListener("click", (ev) => {
   const url = btn.dataset.pdf;
   if (url) window.open(url, "_blank");
 });
-
 searchBox?.addEventListener("input", applyFilter);
 refreshBtn?.addEventListener("click", load);
 
 // ---------- init ----------
 async function load(){
   try{
-    if (msg){ msg.textContent = "Memuat data…"; msg.classList.remove("hidden"); }
+    msg?.classList.remove("hidden");
+    msg && (msg.textContent = "Memuat data…");
+
     const raw = await fetchInspeksi();
-    const normalized = raw.map(normalizeRow).filter(r => r.kode && r.tanggalYMD);
+    const normalized = raw.map(normalizeRow)
+      .filter(r => r.kode && r.tanggalYMD); // wajib ada kode & tanggal
+
     MASTER_ROWS = dedupe(normalized);
     applyFilter();
+
   } catch(err){
     console.error("[DB] load error:", err);
     tbody.innerHTML = `<tr><td colspan="5" class="muted">Gagal memuat data.</td></tr>`;
