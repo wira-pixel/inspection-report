@@ -1,7 +1,7 @@
 // ==========================
 // JADWAL — Form + Draft server-based (semua tanggal draft)
 // ==========================
-const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // trailing slash penting
+const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
 
 // Util
 const pad2 = n => String(n).padStart(2, "0");
@@ -32,6 +32,7 @@ async function postWorker(payload){
 
 async function getJadwal(){ return await postWorker({ action: "getJadwal" }); }
 
+// UI helpers
 function showToast(msg, type="success"){
   const el = document.getElementById("toast");
   if (!el) return;
@@ -45,70 +46,68 @@ function showInfo(msg){ const i=document.getElementById("infoMsg"); if(i){ i.tex
 function hideInfo(){ const i=document.getElementById("infoMsg"); if(i){ i.classList.add("hidden"); } }
 
 // --------- FORM (tetap) ---------
-document.getElementById("jadwalForm")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const tanggal = document.getElementById("tanggal")?.value.trim();
-  const kode    = document.getElementById("kode")?.value.trim();
-  const lokasi  = document.getElementById("lokasi")?.value.trim();
+const formEl = document.getElementById("jadwalForm");
+if (formEl){
+  formEl.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const tanggal = document.getElementById("tanggal")?.value.trim();
+    const kode    = document.getElementById("kode")?.value.trim();
+    const lokasi  = document.getElementById("lokasi")?.value.trim();
 
-  if (!tanggal || !kode || !lokasi){
-    showToast("Mohon lengkapi semua field!", "error");
-    return;
-  }
+    if (!tanggal || !kode || !lokasi){
+      showToast("Mohon lengkapi semua field!", "error");
+      return;
+    }
 
-  showOverlay();
-  try {
-    const res = await postWorker({
-      action : "submitJadwal",
-      tanggal,
-      kode,
-      lokasi
-    });
-    if (!res?.success) throw new Error(res?.message || "Gagal simpan");
-    showToast(res?.message || "✅ Jadwal tersimpan");
-    e.target.reset();
-    await loadDraft();
-  } catch (err){
-    showToast("❌ " + err.message, "error");
-  } finally {
-    hideOverlay();
-  }
-});
+    showOverlay();
+    try {
+      const res = await postWorker({ action:"submitJadwal", tanggal, kode, lokasi });
+      if (!res?.success) throw new Error(res?.message || "Gagal simpan");
+      showToast(res?.message || "✅ Jadwal tersimpan");
+      e.target.reset();
+      await loadDraft();
+    } catch (err){
+      showToast("❌ " + err.message, "error");
+    } finally {
+      hideOverlay();
+    }
+  });
+}
 
 // --------- DRAFT (SEMUA tanggal, status kosong/Belum) ---------
 const STATUS_LIST = ["Selesai","Ditunda"];
-const tbody = document.getElementById("draftTbody");
-const btnRefresh = document.getElementById("btnRefresh");
-const btnSubmitAll = document.getElementById("btnSubmitAll");
+const tbody       = document.getElementById("draftTbody");
+const btnRefresh  = document.getElementById("btnRefresh");
+const btnSubmitAll= document.getElementById("btnSubmitAll");
 
 async function loadDraft(){
+  if (!tbody) return;
   showInfo("Memuat data…");
   try {
     const res = await getJadwal();
     if (!res?.success || !Array.isArray(res.data)){
-      if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="muted">${res?.message || "Gagal memuat"}</td></tr>`;
-      if (tbody) tbody.dataset.rows = "[]";
+      tbody.innerHTML = `<tr><td colspan="5" class="muted">${res?.message || "Gagal memuat"}</td></tr>`;
+      tbody.dataset.rows = "[]";
       return;
     }
 
     const rows = res.data.map(r => ({
-      kode: r.kode ?? r["kode"] ?? r["kode unit"] ?? "",
-      lokasi: r.lokasi ?? r["lokasi"] ?? "",
-      status: (r.status ?? r["status"] ?? "").toString(),
-      tanggalYMD: anyToYMD(r.tanggal ?? r["tanggal"] ?? "")
-    }))
-    // ✅ tampilkan semua draft (status kosong/“belum”), TANPA filter tanggal
-    .filter(r => {
-      const s = (r.status || "").trim().toLowerCase();
-      return s === "" || s === "belum";
-    })
-    // urutkan: tanggal (asc) lalu kode
-    .sort((a,b) => {
-      if (a.tanggalYMD !== b.tanggalYMD) return a.tanggalYMD.localeCompare(b.tanggalYMD);
-      return String(a.kode).localeCompare(String(b.kode));
-    });
+        kode: (r.kode ?? r["kode"] ?? r["kode unit"] ?? "").toString().trim(),
+        lokasi: (r.lokasi ?? r["lokasi"] ?? r["site"] ?? r["location"] ?? "").toString().trim(),
+        status: (r.status ?? r["status"] ?? "").toString().trim(),
+        tanggalYMD: anyToYMD(r.tanggal ?? r["tanggal"] ?? r["date"] ?? "")
+      }))
+      // tampilkan SEMUA dgn status kosong / "belum"
+      .filter(r => {
+        const s = (r.status || "").toLowerCase();
+        return s === "" || s === "belum";
+      })
+      // urut: tanggal asc, lalu kode
+      .sort((a,b) => {
+        if (a.tanggalYMD !== b.tanggalYMD) return a.tanggalYMD.localeCompare(b.tanggalYMD);
+        return a.kode.localeCompare(b.kode);
+      });
 
-    if (!tbody) return;
     if (!rows.length){
       tbody.innerHTML = `<tr><td colspan="5" class="muted">Tidak ada draft.</td></tr>`;
       tbody.dataset.rows = "[]";
@@ -118,12 +117,10 @@ async function loadDraft(){
     const options = STATUS_LIST.map(s => `<option value="${s}">${s}</option>`).join("");
     tbody.innerHTML = rows.map((r, i) => `
       <tr data-idx="${i}">
-        <td>${r.kode}</td>
+        <td>${r.kode || "-"}</td>
         <td>${r.tanggalYMD ? toDDMMYYYY(new Date(r.tanggalYMD)) : "-"}</td>
         <td>${r.lokasi || "-"}</td>
-        <td>
-          <select class="select-status">${options}</select>
-        </td>
+        <td><select class="select-status">${options}</select></td>
         <td>
           <button class="btn btn-row js-submit">Kirim</button>
           <button class="btn btn-row btn-del js-delete">Hapus</button>
@@ -132,98 +129,106 @@ async function loadDraft(){
     `).join("");
 
     tbody.dataset.rows = JSON.stringify(rows);
+  } catch(err){
+    tbody.innerHTML = `<tr><td colspan="5" class="muted">Gagal memuat: ${err.message}</td></tr>`;
+    tbody.dataset.rows = "[]";
   } finally {
     hideInfo();
   }
 }
 
 // Kirim satu baris / Hapus baris
-tbody?.addEventListener("click", async (ev) => {
-  const target = ev.target;
-  if (!(target instanceof HTMLElement)) return;
-  const tr = target.closest("tr[data-idx]");
-  if (!tr) return;
-  const idx = Number(tr.dataset.idx);
-  const rows = JSON.parse(tbody.dataset.rows || "[]");
-  const row = rows[idx]; if (!row) return;
+if (tbody){
+  tbody.addEventListener("click", async (ev) => {
+    const target = ev.target;
+    if (!(target instanceof HTMLElement)) return;
+    const tr = target.closest("tr[data-idx]");
+    if (!tr) return;
+    const idx = Number(tr.dataset.idx);
+    const rows = JSON.parse(tbody.dataset.rows || "[]");
+    const row = rows[idx]; if (!row) return;
 
-  // A) Kirim (update status)
-  if (target.classList.contains("js-submit")){
-    const status = tr.querySelector(".select-status")?.value || "Belum";
-    try {
-      showOverlay();
-      const res = await postWorker({
-        action : "updateJadwalStatus",
-        kode   : row.kode,
-        tanggal: row.tanggalYMD,
-        lokasi : row.lokasi || "",
-        status
-      });
-      if (!res?.success) throw new Error(res?.message || "Gagal kirim status");
-      showToast("✅ Status terkirim");
-      await loadDraft();
-    } catch (err){
-      showToast("❌ " + err.message, "error");
-    } finally {
-      hideOverlay();
+    // A) Kirim (update status)
+    if (target.classList.contains("js-submit")){
+      const status = tr.querySelector(".select-status")?.value || "Belum";
+      try {
+        showOverlay();
+        const res = await postWorker({
+          action : "updateJadwalStatus",
+          kode   : row.kode,
+          tanggal: row.tanggalYMD,
+          lokasi : row.lokasi || "",
+          status
+        });
+        if (!res?.success) throw new Error(res?.message || "Gagal kirim status");
+        showToast("✅ Status terkirim");
+        await loadDraft();
+      } catch (err){
+        showToast("❌ " + err.message, "error");
+      } finally {
+        hideOverlay();
+      }
     }
-  }
 
-  // B) Hapus (delete jadwal)
-  if (target.classList.contains("js-delete")){
-    const ok = confirm(`Hapus jadwal:\n• Kode: ${row.kode}\n• Tanggal: ${row.tanggalYMD ? toDDMMYYYY(new Date(row.tanggalYMD)) : "-"}\n• Lokasi: ${row.lokasi || "-"} ?`);
-    if (!ok) return;
-    try {
-      showOverlay();
-      const res = await postWorker({
-        action : "deleteJadwal",
-        kode   : row.kode,
-        tanggal: row.tanggalYMD,
-        lokasi : row.lokasi || ""
-      });
-      if (!res?.success) throw new Error(res?.message || "Gagal menghapus");
-      showToast("🗑️ Jadwal dihapus");
-      await loadDraft();
-    } catch (err){
-      showToast("❌ " + err.message, "error");
-    } finally {
-      hideOverlay();
+    // B) Hapus (delete jadwal)
+    if (target.classList.contains("js-delete")){
+      const ok = confirm(`Hapus jadwal:\n• Kode: ${row.kode}\n• Tanggal: ${row.tanggalYMD ? toDDMMYYYY(new Date(row.tanggalYMD)) : "-"}\n• Lokasi: ${row.lokasi || "-"} ?`);
+      if (!ok) return;
+      try {
+        showOverlay();
+        const res = await postWorker({
+          action : "deleteJadwal",
+          kode   : row.kode,
+          tanggal: row.tanggalYMD,
+          lokasi : row.lokasi || ""
+        });
+        if (!res?.success) throw new Error(res?.message || "Gagal menghapus");
+        showToast("🗑️ Jadwal dihapus");
+        await loadDraft();
+      } catch (err){
+        showToast("❌ " + err.message, "error");
+      } finally {
+        hideOverlay();
+      }
     }
-  }
-});
+  });
+}
 
 // Kirim semua
-btnSubmitAll?.addEventListener("click", async () => {
-  const rows = JSON.parse(tbody.dataset.rows || "[]");
-  const trs = Array.from(tbody.querySelectorAll("tr[data-idx]"));
-  if (!rows.length || !trs.length) return;
+if (btnSubmitAll){
+  btnSubmitAll.addEventListener("click", async () => {
+    if (!tbody) return;
+    const rows = JSON.parse(tbody.dataset.rows || "[]");
+    const trs = Array.from(tbody.querySelectorAll("tr[data-idx]"));
+    if (!rows.length || !trs.length) return;
 
-  try {
-    showOverlay();
-    for (const tr of trs){
-      const idx = Number(tr.dataset.idx);
-      const row = rows[idx]; if (!row) continue;
-      const status = tr.querySelector(".select-status")?.value || "Belum";
-      const res = await postWorker({
-        action : "updateJadwalStatus",
-        kode   : row.kode,
-        tanggal: row.tanggalYMD,
-        lokasi : row.lokasi || "",
-        status
-      });
-      if (!res?.success) throw new Error(res?.message || `Gagal: ${row.kode}`);
+    try {
+      showOverlay();
+      for (const tr of trs){
+        const idx = Number(tr.dataset.idx);
+        const row = rows[idx]; if (!row) continue;
+        const status = tr.querySelector(".select-status")?.value || "Belum";
+        const res = await postWorker({
+          action : "updateJadwalStatus",
+          kode   : row.kode,
+          tanggal: row.tanggalYMD,
+          lokasi : row.lokasi || "",
+          status
+        });
+        if (!res?.success) throw new Error(res?.message || `Gagal: ${row.kode}`);
+      }
+      showToast("✅ Semua status terkirim");
+      await loadDraft();
+    } catch (err){
+      showToast("❌ " + err.message, "error");
+    } finally {
+      hideOverlay();
     }
-    showToast("✅ Semua status terkirim");
-    await loadDraft();
-  } catch (err){
-    showToast("❌ " + err.message, "error");
-  } finally {
-    hideOverlay();
-  }
-});
+  });
+}
 
+// Refresh
 btnRefresh?.addEventListener("click", loadDraft);
 
 // init
 document.addEventListener("DOMContentLoaded", loadDraft);
-</script>
