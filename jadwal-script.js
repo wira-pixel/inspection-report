@@ -1,4 +1,3 @@
-<script>
 // ==========================
 // JADWAL — Form + Draft server-based (semua tanggal draft)
 // ==========================
