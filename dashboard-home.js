@@ -54,8 +54,8 @@
       chartStatus = new Chart(cs, {
         type: "doughnut",
         data: {
-          labels: ["Selesai","Ditunda","Belum"],
-          datasets: [{ data: [0,0,0] }]
+          labels: ["Selesai","Belum"],
+          datasets: [{ data: [0,0] }]
         },
         options: {
           maintainAspectRatio: false,
@@ -93,10 +93,9 @@
     for (const r of todayRows){
       const s = (r.status||"").toLowerCase();
       if (s==="selesai") c.Selesai++;
-      else if (s==="ditunda") c.Ditunda++;
       else c.Belum++;
     }
-    chartStatus.data.datasets[0].data = [c.Selesai,c.Ditunda,c.Belum];
+    chartStatus.data.datasets[0].data = [c.Selesai,c.Belum];
     chartStatus.update();
   }
 
@@ -192,3 +191,4 @@
   loadAll();
   setInterval(loadAll, AUTO_REFRESH_MS);
 })();
+
