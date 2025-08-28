@@ -1,5 +1,6 @@
+<script>
 // ==========================
-// JADWAL — Form + Draft server-based (hari ini)
+// JADWAL — Form + Draft server-based (semua tanggal draft)
 // ==========================
 const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // trailing slash penting
 
@@ -75,7 +76,7 @@ document.getElementById("jadwalForm")?.addEventListener("submit", async (e) => {
   }
 });
 
-// --------- DRAFT (hari ini, status kosong/Belum) ---------
+// --------- DRAFT (SEMUA tanggal, status kosong/Belum) ---------
 const STATUS_LIST = ["Selesai","Ditunda"];
 const tbody = document.getElementById("draftTbody");
 const btnRefresh = document.getElementById("btnRefresh");
@@ -87,17 +88,26 @@ async function loadDraft(){
     const res = await getJadwal();
     if (!res?.success || !Array.isArray(res.data)){
       if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="muted">${res?.message || "Gagal memuat"}</td></tr>`;
+      if (tbody) tbody.dataset.rows = "[]";
       return;
     }
-    const today = todayYMD();
+
     const rows = res.data.map(r => ({
       kode: r.kode ?? r["kode"] ?? r["kode unit"] ?? "",
       lokasi: r.lokasi ?? r["lokasi"] ?? "",
       status: (r.status ?? r["status"] ?? "").toString(),
       tanggalYMD: anyToYMD(r.tanggal ?? r["tanggal"] ?? "")
     }))
-    .filter(r => r.tanggalYMD === today && (r.status.trim() === "" || r.status.trim().toLowerCase() === "belum"))
-    .sort((a,b) => String(a.kode).localeCompare(String(b.kode)));
+    // ✅ tampilkan semua draft (status kosong/“belum”), TANPA filter tanggal
+    .filter(r => {
+      const s = (r.status || "").trim().toLowerCase();
+      return s === "" || s === "belum";
+    })
+    // urutkan: tanggal (asc) lalu kode
+    .sort((a,b) => {
+      if (a.tanggalYMD !== b.tanggalYMD) return a.tanggalYMD.localeCompare(b.tanggalYMD);
+      return String(a.kode).localeCompare(String(b.kode));
+    });
 
     if (!tbody) return;
     if (!rows.length){
@@ -110,7 +120,7 @@ async function loadDraft(){
     tbody.innerHTML = rows.map((r, i) => `
       <tr data-idx="${i}">
         <td>${r.kode}</td>
-        <td>${toDDMMYYYY(new Date(r.tanggalYMD))}</td>
+        <td>${r.tanggalYMD ? toDDMMYYYY(new Date(r.tanggalYMD)) : "-"}</td>
         <td>${r.lokasi || "-"}</td>
         <td>
           <select class="select-status">${options}</select>
@@ -162,7 +172,7 @@ tbody?.addEventListener("click", async (ev) => {
 
   // B) Hapus (delete jadwal)
   if (target.classList.contains("js-delete")){
-    const ok = confirm(`Hapus jadwal:\n• Kode: ${row.kode}\n• Tanggal: ${toDDMMYYYY(new Date(row.tanggalYMD))}\n• Lokasi: ${row.lokasi || "-"} ?`);
+    const ok = confirm(`Hapus jadwal:\n• Kode: ${row.kode}\n• Tanggal: ${row.tanggalYMD ? toDDMMYYYY(new Date(row.tanggalYMD)) : "-"}\n• Lokasi: ${row.lokasi || "-"} ?`);
     if (!ok) return;
     try {
       showOverlay();
@@ -217,3 +227,4 @@ btnRefresh?.addEventListener("click", loadDraft);
 
 // init
 document.addEventListener("DOMContentLoaded", loadDraft);
+</script>
