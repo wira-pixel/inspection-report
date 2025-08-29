@@ -80,20 +80,21 @@
                 <th>Qty</th>
                 <th>Satuan</th>
                 <th>Masuk FPB</th>
+                <label>Bab (Component Group)</label>
+                <select id="babSelect" required></select>
+                <label>Sub Bab (Sub Component)</label>
+                <select id="subbabSelect" required></select>
+
+                <!-- (opsional) kalau mau mengetahui CODE sub-bab yang dipilih -->
+                <input type="hidden" id="subCode" name="subCode">
+
                 <th>Aksi</th>
               </tr>
             </thead>
             <tbody></tbody>
           </table>
         </div>
-        <label>Bab (Component Group)</label>
-<select id="babSelect" required></select>
-
-<label>Sub Bab (Sub Component)</label>
-<select id="subbabSelect" required></select>
-
-<!-- (opsional) kalau mau mengetahui CODE sub-bab yang dipilih -->
-<input type="hidden" id="subCode" name="subCode">
+  
 
 
         <div class="text-end mt-3">
@@ -113,4 +114,5 @@
   <script src="script.js"></script>
 </body>
 </html>
+
 
