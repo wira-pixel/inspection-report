@@ -20,7 +20,7 @@
 <body>
   
   <!-- FORM INSPEKSI -->
-  <div id="formContainer"><!-- d-none dihapus agar muncul -->
+  <div id="formContainer">
     <div class="form-container glass-card p-4">
       <div class="text-center mb-4 header-gradient p-3 rounded-3 shadow-neon">
         <h3 class="fw-bold text-white"><i class="bi bi-card-checklist"></i> Form Inspection Report</h3>
@@ -79,23 +79,15 @@
                 <th>Nama Barang</th>
                 <th>Qty</th>
                 <th>Satuan</th>
+                <th>Bab (Component Group)</th>
+                <th>Sub Bab (Sub Component)</th>
                 <th>Masuk FPB</th>
-                <label>Bab (Component Group)</label>
-                <select id="babSelect" required></select>
-                <label>Sub Bab (Sub Component)</label>
-                <select id="subbabSelect" required></select>
-
-                <!-- (opsional) kalau mau mengetahui CODE sub-bab yang dipilih -->
-                <input type="hidden" id="subCode" name="subCode">
-
                 <th>Aksi</th>
               </tr>
             </thead>
             <tbody></tbody>
           </table>
         </div>
-  
-
 
         <div class="text-end mt-3">
           <button type="submit" class="btn btn-gradient btn-lg fw-semibold btn-pop"><i class="bi bi-send-fill"></i> Kirim</button>
@@ -114,5 +106,3 @@
   <script src="script.js"></script>
 </body>
 </html>
-
-
