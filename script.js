@@ -101,63 +101,66 @@ function escapeHtml(s) {
 
   // -------- Tambah Baris (main) --------
   function addRow(){
-    if (!itemsTableBody) return;
-    const row = document.createElement('tr');
-    row.className='main-row';
-    row.innerHTML=`
-      <td>
-        <select name="bab[]" class="form-control babSelect"></select>
-      </td>
-      <td>
-        <select name="subBab[]" class="form-control subSelect" disabled></select>
-      </td>
-      <td><input type="text" name="description[]" class="form-control" required></td>
-      <td><input type="text" name="condition[]" class="form-control" required></td>
-      <td>
-        <input type="file" name="file[]" accept="image/*" class="form-control fileInput">
-        <img class="img-preview" style="display:none;width:50px;">
-      </td>
-      <td><input type="text" name="partNumber[]" class="form-control"></td>
-      <td><input type="text" name="namaBarang[]" class="form-control"></td>
-      <td><input type="number" name="qty[]" class="form-control" min="0"></td>
-      <td><input type="text" name="satuan[]" class="form-control"></td>
-      <td class="text-center"><input type="checkbox" name="masukFPB[]"></td>
-      <td class="text-center"><button type="button" class="btn btn-danger btn-sm removeRowBtn">Hapus</button></td>
-    `;
-    setupRow(row);
-    itemsTableBody.appendChild(row);
-    currentMainRow=row;
-  }
+  if (!itemsTableBody) return;
+  const row = document.createElement('tr');
+  row.className='main-row';
+  row.innerHTML=`
+    <td><input type="text" name="description[]" class="form-control" required></td>
+    <td><input type="text" name="condition[]" class="form-control" required></td>
+    <td>
+      <input type="file" name="file[]" accept="image/*" class="form-control fileInput">
+      <img class="img-preview" style="display:none;width:50px;">
+    </td>
+    <td><input type="text" name="partNumber[]" class="form-control"></td>
+    <td><input type="text" name="namaBarang[]" class="form-control"></td>
+    <td><input type="number" name="qty[]" class="form-control" min="0"></td>
+    <td><input type="text" name="satuan[]" class="form-control"></td>
+    <td>
+      <select name="bab[]" class="form-control babSelect"></select>
+    </td>
+    <td>
+      <select name="subBab[]" class="form-control subSelect" disabled></select>
+    </td>
+    <td class="text-center"><input type="checkbox" name="masukFPB[]"></td>
+    <td class="text-center"><button type="button" class="btn btn-danger btn-sm removeRowBtn">Hapus</button></td>
+  `;
+  setupRow(row);
+  itemsTableBody.appendChild(row);
+  currentMainRow=row;
+}
+
 
   // -------- Tambah Baris (sub) --------
-  function addSubRow(){
-    if (!itemsTableBody) return;
-    if(!currentMainRow){ alert('Tambahkan baris utama terlebih dahulu!'); return; }
-    const row = document.createElement('tr');
-    row.className='sub-row';
-    row.innerHTML=`
-      <td class="no-border-left"></td>
-      <td class="no-border-left"></td>
-      <td class="no-border-left"></td>
-      <td class="no-border-left"></td>
-      <td class="no-border-left"></td>
-      <td><input type="text" name="partNumber[]" class="form-control"></td>
-      <td><input type="text" name="namaBarang[]" class="form-control"></td>
-      <td><input type="number" name="qty[]" class="form-control" min="0"></td>
-      <td><input type="text" name="satuan[]" class="form-control"></td>
-      <td class="text-center"><input type="checkbox" name="masukFPB[]"></td>
-      <td class="text-center"><button type="button" class="btn btn-danger btn-sm removeRowBtn">Hapus</button></td>
-    `;
-    setupRow(row);
-    // sisipkan setelah rangkaian sub-row terakhir dari currentMainRow
-    let insertAfter = currentMainRow;
-    let index = Array.from(itemsTableBody.children).indexOf(currentMainRow);
-    for(let i=index+1;i<itemsTableBody.children.length;i++){
-      if(itemsTableBody.children[i].classList.contains('sub-row')) insertAfter=itemsTableBody.children[i];
-      else break;
-    }
-    insertAfter.after(row);
+ function addSubRow(){
+  if (!itemsTableBody) return;
+  if(!currentMainRow){ alert('Tambahkan baris utama terlebih dahulu!'); return; }
+  const row = document.createElement('tr');
+  row.className='sub-row';
+  row.innerHTML=`
+    <td class="no-border-left"></td>   <!-- Description (kosong) -->
+    <td class="no-border-left"></td>   <!-- Condition (kosong) -->
+    <td class="no-border-left"></td>   <!-- Gambar (kosong) -->
+    <td><input type="text" name="partNumber[]" class="form-control"></td>
+    <td><input type="text" name="namaBarang[]" class="form-control"></td>
+    <td><input type="number" name="qty[]" class="form-control" min="0"></td>
+    <td><input type="text" name="satuan[]" class="form-control"></td>
+    <td class="no-border-left"></td>   <!-- Bab (kosong) -->
+    <td class="no-border-left"></td>   <!-- Sub Bab (kosong) -->
+    <td class="text-center"><input type="checkbox" name="masukFPB[]"></td>
+    <td class="text-center"><button type="button" class="btn btn-danger btn-sm removeRowBtn">Hapus</button></td>
+  `;
+  setupRow(row);
+
+  // sisipkan setelah sub-row terakhir dari main-row aktif
+  let insertAfter = currentMainRow;
+  let index = Array.from(itemsTableBody.children).indexOf(currentMainRow);
+  for(let i=index+1;i<itemsTableBody.children.length;i++){
+    if(itemsTableBody.children[i].classList.contains('sub-row')) insertAfter=itemsTableBody.children[i];
+    else break;
   }
+  insertAfter.after(row);
+}
+
 
   // -------- Setup row: remove, file preview, dependent select --------
   function setupRow(row){
@@ -317,3 +320,4 @@ function escapeHtml(s) {
 
   document.addEventListener("DOMContentLoaded", initForm);
 })();
+
