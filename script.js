@@ -3,6 +3,79 @@
 // ==========================
 const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // konsisten pakai trailing slash
 
+// --------------------------
+// Lookup Bab/SubBab (global)
+// --------------------------
+let COMPONENT_LOOKUP = {
+  groups: [], // ["ENGINE & RELATED PARTS", ...]
+  subs:   []  // [{group:"ENGINE & RELATED PARTS", code:"111", name:"CYLINDER BLOCK"}, ...]
+};
+
+// Coba beberapa nama action agar kompatibel dengan Apps Script kamu
+const LOOKUP_ACTIONS = ["getComponentMap", "getComponents", "getLookup"];
+
+// Muat lookup dari Worker (Apps Script) — aman jika gagal
+async function loadComponentLookup() {
+  for (const action of LOOKUP_ACTIONS) {
+    try {
+      const res = await postToSheet({ action });
+      if (res?.success && res?.data) {
+        // Normalisasi minimal
+        const groups = Array.isArray(res.data.groups) ? res.data.groups : [];
+        const subs   = Array.isArray(res.data.subs)   ? res.data.subs   : [];
+
+        // sort opsional agar rapi
+        groups.sort((a,b)=>String(a).localeCompare(String(b)));
+        subs.sort((a,b)=> String(a.group||"").localeCompare(String(b.group||"")) ||
+                          String(a.name||"").localeCompare(String(b.name||"")));
+
+        COMPONENT_LOOKUP.groups = groups;
+        COMPONENT_LOOKUP.subs   = subs;
+        return true;
+      }
+    } catch (e) {
+      // lanjut coba action berikutnya
+    }
+  }
+  // jika semua gagal
+  COMPONENT_LOOKUP.groups = [];
+  COMPONENT_LOOKUP.subs   = [];
+  return false;
+}
+
+// Helper render opsi Bab
+function fillBabOptions(selectEl) {
+  if (!selectEl) return;
+  const opts = ['<option value="">Pilih Bab…</option>']
+    .concat(COMPONENT_LOOKUP.groups.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`));
+  selectEl.innerHTML = opts.join("");
+}
+
+// Helper render opsi Sub Bab sesuai Bab
+function fillSubOptions(selectEl, babValue) {
+  if (!selectEl) return;
+  const list = COMPONENT_LOOKUP.subs.filter(s => String(s.group||"") === String(babValue||""));
+  const opts = ['<option value="">Pilih Sub Bab…</option>']
+    .concat(list.map(s => {
+      // simpan gabungan code + name supaya mudah dipakai nanti, atau name saja jika mau
+      const label = s.code ? `${s.code} — ${s.name}` : s.name;
+      const val   = s.name; // kirim nama sub saja (ubah ke s.code jika mau code)
+      return `<option value="${escapeHtml(val)}" data-code="${escapeHtml(s.code||'')}">${escapeHtml(label)}</option>`;
+    }));
+  selectEl.innerHTML = opts.join("");
+  selectEl.disabled = (list.length === 0);
+}
+
+// Aman untuk innerHTML (sederhana)
+function escapeHtml(s) {
+  return String(s||"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
 // ==========================
 // FORM INSPEKSI (jalan hanya jika #myForm ada)
 // ==========================
@@ -26,12 +99,18 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
     el.value = `${yyyy}-${mm}-${dd}`;
   }
 
-  // Add row
+  // -------- Tambah Baris (main) --------
   function addRow(){
     if (!itemsTableBody) return;
     const row = document.createElement('tr');
     row.className='main-row';
     row.innerHTML=`
+      <td>
+        <select name="bab[]" class="form-control babSelect"></select>
+      </td>
+      <td>
+        <select name="subBab[]" class="form-control subSelect" disabled></select>
+      </td>
       <td><input type="text" name="description[]" class="form-control" required></td>
       <td><input type="text" name="condition[]" class="form-control" required></td>
       <td>
@@ -50,13 +129,15 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
     currentMainRow=row;
   }
 
-  // Add sub row
+  // -------- Tambah Baris (sub) --------
   function addSubRow(){
     if (!itemsTableBody) return;
     if(!currentMainRow){ alert('Tambahkan baris utama terlebih dahulu!'); return; }
     const row = document.createElement('tr');
     row.className='sub-row';
     row.innerHTML=`
+      <td class="no-border-left"></td>
+      <td class="no-border-left"></td>
       <td class="no-border-left"></td>
       <td class="no-border-left"></td>
       <td class="no-border-left"></td>
@@ -68,6 +149,7 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
       <td class="text-center"><button type="button" class="btn btn-danger btn-sm removeRowBtn">Hapus</button></td>
     `;
     setupRow(row);
+    // sisipkan setelah rangkaian sub-row terakhir dari currentMainRow
     let insertAfter = currentMainRow;
     let index = Array.from(itemsTableBody.children).indexOf(currentMainRow);
     for(let i=index+1;i<itemsTableBody.children.length;i++){
@@ -77,8 +159,9 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
     insertAfter.after(row);
   }
 
-  // Setup row: remove & file preview
+  // -------- Setup row: remove, file preview, dependent select --------
   function setupRow(row){
+    // File preview
     const fileInput = row.querySelector('.fileInput');
     const imgPreview = row.querySelector('.img-preview');
     if(fileInput && imgPreview){
@@ -94,6 +177,8 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
         } else { imgPreview.src=''; imgPreview.style.display='none'; }
       });
     }
+
+    // Hapus baris
     row.querySelector('.removeRowBtn')?.addEventListener('click', ()=>{
       if (!itemsTableBody) return;
       if(row.classList.contains('main-row')){
@@ -105,6 +190,8 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
       row.remove();
       if(itemsTableBody.children.length===0) addRow();
     });
+
+    // Track main-row aktif
     row.addEventListener('click', ()=>{
       if(row.classList.contains('main-row')) currentMainRow=row;
       else{
@@ -113,16 +200,28 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
         currentMainRow=mainRow;
       }
     });
+
+    // Dependent select (hanya untuk main-row)
+    if (row.classList.contains('main-row')) {
+      const babSel = row.querySelector('.babSelect');
+      const subSel = row.querySelector('.subSelect');
+      if (babSel) fillBabOptions(babSel);
+      if (subSel) { subSel.innerHTML = '<option value="">Pilih Sub Bab…</option>'; subSel.disabled = true; }
+
+      babSel?.addEventListener('change', ()=>{
+        const v = babSel.value || "";
+        fillSubOptions(subSel, v);
+      });
+    }
   }
 
   // Tombol tambah row/sub-row
   document.getElementById('addRowBtn')?.addEventListener('click', addRow);
   document.getElementById('addSubRowBtn')?.addEventListener('click', addSubRow);
 
-  // Baris awal
-  addRow();
-
-  // Kirim data ke Cloudflare (POST -> diteruskan ke Apps Script doPost)
+  // -------------------------
+  // Kirim data ke Cloudflare
+  // -------------------------
   async function postToSheet(payload){
     try {
       const response = await fetch(WORKER_URL, {
@@ -137,7 +236,9 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
     }
   }
 
+  // -------------------------
   // Submit form
+  // -------------------------
   form.addEventListener('submit', async e=>{
     e.preventDefault();
     overlay?.classList.remove('d-none');
@@ -146,12 +247,18 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
     const items=[];
     for(let row of rows){
       const description = row.querySelector('input[name="description[]"]')?.value||'';
-      const condition = row.querySelector('input[name="condition[]"]')?.value||'';
-      const partNumber = row.querySelector('input[name="partNumber[]"]')?.value||'';
-      const namaBarang = row.querySelector('input[name="namaBarang[]"]')?.value||'';
-      const qty = row.querySelector('input[name="qty[]"]')?.value||0;
-      const satuan = row.querySelector('input[name="satuan[]"]')?.value||'';
-      const masukFPB = row.querySelector('input[name="masukFPB[]"]')?.checked||false;
+      const condition   = row.querySelector('input[name="condition[]"]')?.value||'';
+      const partNumber  = row.querySelector('input[name="partNumber[]"]')?.value||'';
+      const namaBarang  = row.querySelector('input[name="namaBarang[]"]')?.value||'';
+      const qty         = row.querySelector('input[name="qty[]"]')?.value||0;
+      const satuan      = row.querySelector('input[name="satuan[]"]')?.value||'';
+      const masukFPB    = row.querySelector('input[name="masukFPB[]"]')?.checked||false;
+
+      // Tambahan: bab & subBab (untuk baris utama; sub-row akan kosong)
+      const bab    = row.querySelector('select[name="bab[]"]')?.value || '';
+      const subBab = row.querySelector('select[name="subBab[]"]')?.value || '';
+
+      // File (opsional)
       const fileInput = row.querySelector('input[type="file"]');
       let fileData = null;
       if(fileInput && fileInput.files[0]){
@@ -161,8 +268,10 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
           reader.readAsDataURL(fileInput.files[0]);
         });
       }
+
       items.push({
         description, condition, partNumber, namaBarang, qty, satuan, masukFPB,
+        bab, subBab,                                       // <— ikut dikirim
         file:fileData, fileName:fileInput?.files[0]?.name,
         isSubRow:row.classList.contains('sub-row')
       });
@@ -195,7 +304,16 @@ const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // kons
     setToday();
   });
 
-  // Init form
-  document.addEventListener("DOMContentLoaded", setToday);
-  setToday();
+  // -------------------------
+  // Init form (async: load lookup dulu)
+  // -------------------------
+  async function initForm() {
+    setToday();
+    await loadComponentLookup();     // muat data Bab/SubBab (aman jika gagal)
+    if (itemsTableBody && itemsTableBody.children.length===0) {
+      addRow();                      // buat baris awal setelah lookup masuk
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", initForm);
 })();
