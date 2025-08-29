@@ -3,77 +3,58 @@
 // ==========================
 const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // konsisten pakai trailing slash
 
-// --------------------------
-// Lookup Bab/SubBab (global)
-// --------------------------
-let COMPONENT_LOOKUP = {
-  groups: [], // ["ENGINE & RELATED PARTS", ...]
-  subs:   []  // [{group:"ENGINE & RELATED PARTS", code:"111", name:"CYLINDER BLOCK"}, ...]
-};
+// ==========================
+// CACHE DATA KOMPONEN (Bab/Sub Bab)
+// ==========================
+let KOM_DATA = { groups: [], byGroup: {} }; // { groups: ["ENGINE & RELATED PARTS", ...], byGroup: { "ENGINE & RELATED PARTS":[{name, code}, ...] } }
 
-// Coba beberapa nama action agar kompatibel dengan Apps Script kamu
-const LOOKUP_ACTIONS = ["getComponentMap", "getComponents", "getLookup"];
+async function fetchKomponen() {
+  try {
+    const res = await fetch(WORKER_URL, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ action: "getKomponen" })
+    });
+    const j = await res.json();
+    if (!j?.success || !Array.isArray(j.data)) throw new Error(j?.message || "Gagal memuat data komponen");
 
-// Muat lookup dari Worker (Apps Script) — aman jika gagal
-async function loadComponentLookup() {
-  for (const action of LOOKUP_ACTIONS) {
-    try {
-      const res = await postToSheet({ action });
-      if (res?.success && res?.data) {
-        // Normalisasi minimal
-        const groups = Array.isArray(res.data.groups) ? res.data.groups : [];
-        const subs   = Array.isArray(res.data.subs)   ? res.data.subs   : [];
-
-        // sort opsional agar rapi
-        groups.sort((a,b)=>String(a).localeCompare(String(b)));
-        subs.sort((a,b)=> String(a.group||"").localeCompare(String(b.group||"")) ||
-                          String(a.name||"").localeCompare(String(b.name||"")));
-
-        COMPONENT_LOOKUP.groups = groups;
-        COMPONENT_LOOKUP.subs   = subs;
-        return true;
-      }
-    } catch (e) {
-      // lanjut coba action berikutnya
+    // Normalisasi
+    const byGroup = {};
+    for (const r of j.data) {
+      const group =
+        (r["Component Group"] ?? r["component group"] ?? r.componentGroup ?? r.group ?? "").toString().trim();
+      const sub =
+        (r["Sub Component"] ?? r["sub component"] ?? r.subComponent ?? r.sub ?? "").toString().trim();
+      const code = (r["Code"] ?? r["code"] ?? r.kode ?? "").toString().trim();
+      if (!group || !sub) continue;
+      if (!byGroup[group]) byGroup[group] = [];
+      byGroup[group].push({ name: sub, code });
     }
+    const groups = Object.keys(byGroup).sort((a,b)=>a.localeCompare(b));
+    KOM_DATA = { groups, byGroup };
+  } catch (e) {
+    console.error("[Komponen] load error:", e);
+    KOM_DATA = { groups: [], byGroup: {} };
   }
-  // jika semua gagal
-  COMPONENT_LOOKUP.groups = [];
-  COMPONENT_LOOKUP.subs   = [];
-  return false;
 }
 
-// Helper render opsi Bab
 function fillBabOptions(selectEl) {
   if (!selectEl) return;
-  const opts = ['<option value="">Pilih Bab…</option>']
-    .concat(COMPONENT_LOOKUP.groups.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`));
-  selectEl.innerHTML = opts.join("");
+  const opts = ['<option value="">Pilih Bab…</option>'].concat(
+    KOM_DATA.groups.map(g => `<option value="${g}">${g}</option>`)
+  ).join("");
+  selectEl.innerHTML = opts;
+  selectEl.disabled = KOM_DATA.groups.length === 0;
 }
 
-// Helper render opsi Sub Bab sesuai Bab
-function fillSubOptions(selectEl, babValue) {
+function fillSubOptions(selectEl, group) {
   if (!selectEl) return;
-  const list = COMPONENT_LOOKUP.subs.filter(s => String(s.group||"") === String(babValue||""));
-  const opts = ['<option value="">Pilih Sub Bab…</option>']
-    .concat(list.map(s => {
-      // simpan gabungan code + name supaya mudah dipakai nanti, atau name saja jika mau
-      const label = s.code ? `${s.code} — ${s.name}` : s.name;
-      const val   = s.name; // kirim nama sub saja (ubah ke s.code jika mau code)
-      return `<option value="${escapeHtml(val)}" data-code="${escapeHtml(s.code||'')}">${escapeHtml(label)}</option>`;
-    }));
-  selectEl.innerHTML = opts.join("");
-  selectEl.disabled = (list.length === 0);
-}
-
-// Aman untuk innerHTML (sederhana)
-function escapeHtml(s) {
-  return String(s||"")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#39;");
+  const subs = KOM_DATA.byGroup[group] || [];
+  const opts = ['<option value="">Pilih Sub…</option>'].concat(
+    subs.map(s => `<option value="${s.name}" data-code="${s.code}">${s.name}</option>`)
+  ).join("");
+  selectEl.innerHTML = opts;
+  selectEl.disabled = subs.length === 0;
 }
 
 // ==========================
@@ -99,72 +80,95 @@ function escapeHtml(s) {
     el.value = `${yyyy}-${mm}-${dd}`;
   }
 
-  // -------- Tambah Baris (main) --------
-  function addRow(){
-  if (!itemsTableBody) return;
-  const row = document.createElement('tr');
-  row.className='main-row';
-  row.innerHTML=`
-    <td><input type="text" name="description[]" class="form-control" required></td>
-    <td><input type="text" name="condition[]" class="form-control" required></td>
-    <td>
-      <input type="file" name="file[]" accept="image/*" class="form-control fileInput">
-      <img class="img-preview" style="display:none;width:50px;">
-    </td>
-    <td><input type="text" name="partNumber[]" class="form-control"></td>
-    <td><input type="text" name="namaBarang[]" class="form-control"></td>
-    <td><input type="number" name="qty[]" class="form-control" min="0"></td>
-    <td><input type="text" name="satuan[]" class="form-control"></td>
-    <td>
-      <select name="bab[]" class="form-control babSelect"></select>
-    </td>
-    <td>
-      <select name="subBab[]" class="form-control subSelect" disabled></select>
-    </td>
-    <td class="text-center"><input type="checkbox" name="masukFPB[]"></td>
-    <td class="text-center"><button type="button" class="btn btn-danger btn-sm removeRowBtn">Hapus</button></td>
-  `;
-  setupRow(row);
-  itemsTableBody.appendChild(row);
-  currentMainRow=row;
-}
+  // === helper: kaitkan dropdown Bab/SubBab pada 1 baris ===
+  function wireBabSubForRow(row){
+    const babSel = row.querySelector('.babSelect');
+    const subSel = row.querySelector('.subSelect');
+    if (!babSel || !subSel) return;
 
+    // isi Bab
+    fillBabOptions(babSel);
+    // kosongkan Sub
+    fillSubOptions(subSel, "");
 
-  // -------- Tambah Baris (sub) --------
- function addSubRow(){
-  if (!itemsTableBody) return;
-  if(!currentMainRow){ alert('Tambahkan baris utama terlebih dahulu!'); return; }
-  const row = document.createElement('tr');
-  row.className='sub-row';
-  row.innerHTML=`
-    <td class="no-border-left"></td>   <!-- Description (kosong) -->
-    <td class="no-border-left"></td>   <!-- Condition (kosong) -->
-    <td class="no-border-left"></td>   <!-- Gambar (kosong) -->
-    <td><input type="text" name="partNumber[]" class="form-control"></td>
-    <td><input type="text" name="namaBarang[]" class="form-control"></td>
-    <td><input type="number" name="qty[]" class="form-control" min="0"></td>
-    <td><input type="text" name="satuan[]" class="form-control"></td>
-    <td class="no-border-left"></td>   <!-- Bab (kosong) -->
-    <td class="no-border-left"></td>   <!-- Sub Bab (kosong) -->
-    <td class="text-center"><input type="checkbox" name="masukFPB[]"></td>
-    <td class="text-center"><button type="button" class="btn btn-danger btn-sm removeRowBtn">Hapus</button></td>
-  `;
-  setupRow(row);
+    babSel.addEventListener('change', () => {
+      fillSubOptions(subSel, babSel.value);
+    });
 
-  // sisipkan setelah sub-row terakhir dari main-row aktif
-  let insertAfter = currentMainRow;
-  let index = Array.from(itemsTableBody.children).indexOf(currentMainRow);
-  for(let i=index+1;i<itemsTableBody.children.length;i++){
-    if(itemsTableBody.children[i].classList.contains('sub-row')) insertAfter=itemsTableBody.children[i];
-    else break;
+    // simpan subCode terpilih di data-bariss (opsional)
+    subSel.addEventListener('change', () => {
+      const opt = subSel.options[subSel.selectedIndex];
+      row.dataset.subCode = opt?.dataset?.code || "";
+    });
   }
-  insertAfter.after(row);
-}
 
+  // Add row
+  function addRow(){
+    if (!itemsTableBody) return;
+    const row = document.createElement('tr');
+    row.className='main-row';
+    row.innerHTML=`
+      <td><input type="text" name="description[]" class="form-control" required></td>
+      <td><input type="text" name="condition[]" class="form-control" required></td>
+      <td>
+        <input type="file" name="file[]" accept="image/*" class="form-control fileInput">
+        <img class="img-preview" style="display:none;width:50px;">
+      </td>
+      <td><input type="text" name="partNumber[]" class="form-control"></td>
+      <td><input type="text" name="namaBarang[]" class="form-control"></td>
+      <td><input type="number" name="qty[]" class="form-control" min="0"></td>
+      <td><input type="text" name="satuan[]" class="form-control"></td>
 
-  // -------- Setup row: remove, file preview, dependent select --------
+      <!-- Bab & Sub Bab di sini (setelah Satuan) -->
+      <td><select name="bab[]" class="form-control babSelect" disabled></select></td>
+      <td><select name="subBab[]" class="form-control subSelect" disabled></select></td>
+
+      <td class="text-center"><input type="checkbox" name="masukFPB[]"></td>
+      <td class="text-center"><button type="button" class="btn btn-danger btn-sm removeRowBtn">Hapus</button></td>
+    `;
+    setupRow(row);
+    itemsTableBody.appendChild(row);
+    currentMainRow=row;
+
+    // kaitkan dropdown untuk baris baru
+    wireBabSubForRow(row);
+  }
+
+  // Add sub row
+  function addSubRow(){
+    if (!itemsTableBody) return;
+    if(!currentMainRow){ alert('Tambahkan baris utama terlebih dahulu!'); return; }
+    const row = document.createElement('tr');
+    row.className='sub-row';
+    row.innerHTML=`
+      <td class="no-border-left"></td>
+      <td class="no-border-left"></td>
+      <td class="no-border-left"></td>
+      <td><input type="text" name="partNumber[]" class="form-control"></td>
+      <td><input type="text" name="namaBarang[]" class="form-control"></td>
+      <td><input type="number" name="qty[]" class="form-control" min="0"></td>
+      <td><input type="text" name="satuan[]" class="form-control"></td>
+
+      <!-- kolom Bab & Sub Bab dikosongkan agar alignment tabel tetap -->
+      <td class="no-border-left"></td>
+      <td class="no-border-left"></td>
+
+      <td class="text-center"><input type="checkbox" name="masukFPB[]"></td>
+      <td class="text-center"><button type="button" class="btn btn-danger btn-sm removeRowBtn">Hapus</button></td>
+    `;
+    setupRow(row);
+
+    let insertAfter = currentMainRow;
+    let index = Array.from(itemsTableBody.children).indexOf(currentMainRow);
+    for(let i=index+1;i<itemsTableBody.children.length;i++){
+      if(itemsTableBody.children[i].classList.contains('sub-row')) insertAfter=itemsTableBody.children[i];
+      else break;
+    }
+    insertAfter.after(row);
+  }
+
+  // Setup row: remove & file preview (+ pilih Bab/SubBab)
   function setupRow(row){
-    // File preview
     const fileInput = row.querySelector('.fileInput');
     const imgPreview = row.querySelector('.img-preview');
     if(fileInput && imgPreview){
@@ -180,8 +184,6 @@ function escapeHtml(s) {
         } else { imgPreview.src=''; imgPreview.style.display='none'; }
       });
     }
-
-    // Hapus baris
     row.querySelector('.removeRowBtn')?.addEventListener('click', ()=>{
       if (!itemsTableBody) return;
       if(row.classList.contains('main-row')){
@@ -193,8 +195,6 @@ function escapeHtml(s) {
       row.remove();
       if(itemsTableBody.children.length===0) addRow();
     });
-
-    // Track main-row aktif
     row.addEventListener('click', ()=>{
       if(row.classList.contains('main-row')) currentMainRow=row;
       else{
@@ -203,28 +203,16 @@ function escapeHtml(s) {
         currentMainRow=mainRow;
       }
     });
-
-    // Dependent select (hanya untuk main-row)
-    if (row.classList.contains('main-row')) {
-      const babSel = row.querySelector('.babSelect');
-      const subSel = row.querySelector('.subSelect');
-      if (babSel) fillBabOptions(babSel);
-      if (subSel) { subSel.innerHTML = '<option value="">Pilih Sub Bab…</option>'; subSel.disabled = true; }
-
-      babSel?.addEventListener('change', ()=>{
-        const v = babSel.value || "";
-        fillSubOptions(subSel, v);
-      });
-    }
   }
 
   // Tombol tambah row/sub-row
   document.getElementById('addRowBtn')?.addEventListener('click', addRow);
   document.getElementById('addSubRowBtn')?.addEventListener('click', addSubRow);
 
-  // -------------------------
-  // Kirim data ke Cloudflare
-  // -------------------------
+  // Baris awal
+  addRow();
+
+  // Kirim data ke Cloudflare (POST -> diteruskan ke Apps Script doPost)
   async function postToSheet(payload){
     try {
       const response = await fetch(WORKER_URL, {
@@ -239,9 +227,7 @@ function escapeHtml(s) {
     }
   }
 
-  // -------------------------
   // Submit form
-  // -------------------------
   form.addEventListener('submit', async e=>{
     e.preventDefault();
     overlay?.classList.remove('d-none');
@@ -257,11 +243,13 @@ function escapeHtml(s) {
       const satuan      = row.querySelector('input[name="satuan[]"]')?.value||'';
       const masukFPB    = row.querySelector('input[name="masukFPB[]"]')?.checked||false;
 
-      // Tambahan: bab & subBab (untuk baris utama; sub-row akan kosong)
-      const bab    = row.querySelector('select[name="bab[]"]')?.value || '';
-      const subBab = row.querySelector('select[name="subBab[]"]')?.value || '';
+      // Bab & Sub Bab
+      const babSel      = row.querySelector('select[name="bab[]"]');
+      const subSel      = row.querySelector('select[name="subBab[]"]');
+      const bab         = babSel?.value || '';
+      const subBab      = subSel?.value || '';
+      const subCode     = subSel?.selectedOptions?.[0]?.dataset?.code || '';
 
-      // File (opsional)
       const fileInput = row.querySelector('input[type="file"]');
       let fileData = null;
       if(fileInput && fileInput.files[0]){
@@ -271,10 +259,9 @@ function escapeHtml(s) {
           reader.readAsDataURL(fileInput.files[0]);
         });
       }
-
       items.push({
         description, condition, partNumber, namaBarang, qty, satuan, masukFPB,
-        bab, subBab,                                       // <— ikut dikirim
+        bab, subBab, subCode,                            // <— tambahan
         file:fileData, fileName:fileInput?.files[0]?.name,
         isSubRow:row.classList.contains('sub-row')
       });
@@ -303,21 +290,21 @@ function escapeHtml(s) {
     if (itemsTableBody) {
       itemsTableBody.innerHTML='';
       addRow();
+      // setelah reset, isi lagi Bab/SubBab untuk baris baru (kalau data sudah ada)
+      wireBabSubForRow(itemsTableBody.querySelector('tr'));
     }
     setToday();
   });
 
-  // -------------------------
-  // Init form (async: load lookup dulu)
-  // -------------------------
-  async function initForm() {
-    setToday();
-    await loadComponentLookup();     // muat data Bab/SubBab (aman jika gagal)
-    if (itemsTableBody && itemsTableBody.children.length===0) {
-      addRow();                      // buat baris awal setelah lookup masuk
-    }
-  }
+  // Init form
+  document.addEventListener("DOMContentLoaded", setToday);
+  setToday();
 
-  document.addEventListener("DOMContentLoaded", initForm);
+  // === Load data komponen sekali di awal, lalu isi semua baris yang ada ===
+  (async () => {
+    await fetchKomponen();
+    document.querySelectorAll('.babSelect').forEach(sel => fillBabOptions(sel));
+    document.querySelectorAll('tr').forEach(tr => wireBabSubForRow(tr));
+  })();
+
 })();
-
