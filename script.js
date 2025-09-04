@@ -95,7 +95,7 @@ function fillSubOptions(selectEl, group) {
       fillSubOptions(subSel, babSel.value);
     });
 
-    // simpan subCode terpilih di data-bariss (opsional)
+    // simpan subCode terpilih di data-baris (opsional)
     subSel.addEventListener('change', () => {
       const opt = subSel.options[subSel.selectedIndex];
       row.dataset.subCode = opt?.dataset?.code || "";
@@ -149,9 +149,9 @@ function fillSubOptions(selectEl, group) {
       <td><input type="number" name="qty[]" class="form-control" min="0"></td>
       <td><input type="text" name="satuan[]" class="form-control"></td>
 
-      <!-- kolom Bab & Sub Bab dikosongkan agar alignment tabel tetap -->
-      <td class="no-border-left"></td>
-      <td class="no-border-left"></td>
+      <!-- <<< PATCH >>>: sub-row juga punya Bab & Sub-Bab -->
+      <td><select name="bab[]" class="form-control babSelect" disabled></select></td>   <!-- <<< PATCH -->
+      <td><select name="subBab[]" class="form-control subSelect" disabled></select></td><!-- <<< PATCH -->
 
       <td class="text-center"><input type="checkbox" name="masukFPB[]"></td>
       <td class="text-center"><button type="button" class="btn btn-danger btn-sm removeRowBtn">Hapus</button></td>
@@ -165,6 +165,8 @@ function fillSubOptions(selectEl, group) {
       else break;
     }
     insertAfter.after(row);
+
+    wireBabSubForRow(row); // <<< PATCH: isi & ikat dropdown untuk sub-row baru
   }
 
   // Setup row: remove & file preview (+ pilih Bab/SubBab)
